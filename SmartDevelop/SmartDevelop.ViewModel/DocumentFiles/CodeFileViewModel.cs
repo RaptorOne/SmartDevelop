@@ -73,7 +73,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             var pos = _texteditor.GetPositionFromPoint(e.GetPosition(_texteditor));
 
             if(pos != null) {
-                _toolTip.PlacementTarget = _texteditor; // required for property inheritance
+                //_toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = pos.ToString();
                 _toolTip.IsOpen = true;
                 e.Handled = true;

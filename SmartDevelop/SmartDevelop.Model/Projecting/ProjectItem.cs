@@ -5,9 +5,8 @@ using System.Text;
 
 namespace SmartDevelop.Model.Projecting
 {
-    public class Project
+    public abstract class ProjectItem
     {
-
-
+        public ProjectItem() { }
     }
 }
