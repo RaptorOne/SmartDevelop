@@ -17,14 +17,19 @@
       </RuleSet>
     </Span>
 
+    <!-- reserved keywords -->
     <Keywords fontWeight="bold" foreground="Blue">
       <Word>if</Word>
       <Word>else</Word>
       <Word>is</Word>
       <Word>null</Word>
-      <!-- ... -->
+      
+      <Word>loop</Word>
+      <Word>while</Word>
     </Keywords>
 
+
+    <!-- Build-In Properties -->
     <Keywords fontWeight="bold" foreground="Violet">
       <Word>A_Space</Word>
       <Word>A_Tab</Word>
@@ -147,7 +152,7 @@
       <Word>ClipboardAll</Word>
       <Word>ErrorLevel</Word>
       <Word>A_LastError</Word>
-      <Word>Loop</Word>
+      
       <Word>A_Index</Word>
       
       <Word>A_LoopFileName</Word>

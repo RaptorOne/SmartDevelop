@@ -8,10 +8,13 @@ using ICSharpCode.AvalonEdit.Document;
 
 namespace SmartDevelop.Model.CodeCompleting
 {
+
     public interface ICodeContextService
     {
-        CodeTypeDeclaration GetEnclosingType(ProjectItemCode projectitem, TextLocation location);
+        CodeTypeDeclaration GetEnclosingTypeAt(ProjectItemCode projectitem, TextLocation location);
 
-        IEnumerable<CodeTypeMember> GetAvaiableMembers(ProjectItemCode projectitem, TextLocation location);
+        IEnumerable<CodeTypeMember> GetAvaiableMembersAt(ProjectItemCode projectitem, TextLocation location);
+
+        CodeObject GetCodeObjectAt(ProjectItemCode projectitem, TextLocation location);
     }
 }

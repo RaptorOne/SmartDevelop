@@ -47,6 +47,7 @@
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
     <Compile Include="DocumentFiles\SyntaxHighlighterFinder.cs" />
     <Compile Include="Folding\BraceFoldingStrategy.cs" />
+    <Compile Include="Folding\CommentFoldingStrategy.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
