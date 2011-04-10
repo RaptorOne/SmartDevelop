@@ -9,6 +9,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ServicesCommon;
 using ServicesCommon.WPF.WorkBenchServices;
 using ServicesCommon.WPF.AvalonServices;
+using SmartDevelop.Model.Projecting;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -24,7 +25,7 @@ namespace SmartDevelop.ViewModel.Main
             ServiceLocator.Instance.Resolve<IAvalonService>().PrimaryDockManager = _dockManager;
 
             // debug only
-            var codeVM = new CodeFileViewModel(new TextDocument());
+            var codeVM = new CodeFileViewModel(new ProjectItemCode(CodeItemType.AHK));
             codeVM.DisplayName = "Example Content";
             _workbenchService.ShowDockedDocument(codeVM, codeVM.DisplayName);
         }

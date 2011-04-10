@@ -10,8 +10,8 @@ namespace SmartDevelop.Model.CodeCompleting
 {
     public interface ICodeContextService
     {
-        public CodeTypeDeclaration GetEnclosingType(ProjectItemCode projectitem, TextLocation location);
+        CodeTypeDeclaration GetEnclosingType(ProjectItemCode projectitem, TextLocation location);
 
-        public IEnumerable<CodeTypeMember> GetAvaiableMembers(ProjectItemCode projectitem, TextLocation location);
+        IEnumerable<CodeTypeMember> GetAvaiableMembers(ProjectItemCode projectitem, TextLocation location);
     }
 }

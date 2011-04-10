@@ -8,19 +8,47 @@ using WPFCommon.ViewModels;
 using System.Windows.Input;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.Windows.Controls;
+using SmartDevelop.Model.Projecting;
+using System.Windows.Threading;
+using ICSharpCode.AvalonEdit.Folding;
+using SmartDevelop.ViewModel.Folding;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
     public class CodeFileViewModel : WorkspaceViewModel
     {
+        readonly ProjectItemCode _projectitem;
         readonly TextEditor _texteditor = new TextEditor();
+        FoldingManager foldingManager;
 
-        public CodeFileViewModel(TextDocument doc) {
-            _texteditor.Document = doc;
+        AbstractFoldingStrategy foldingStrategy = new BraceFoldingStrategy();
+
+        public CodeFileViewModel(ProjectItemCode projectitem) {
+
+            if(projectitem == null)
+                throw new ArgumentNullException("projectitem");
+            _projectitem = projectitem;
+
+            _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
+            _texteditor.FontSize = 15;
+
+            _texteditor.Document = _projectitem.Document;
+
+            _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
+
+			if (foldingManager == null)
+                foldingManager = FoldingManager.Install(_texteditor.TextArea);
+            foldingStrategy.UpdateFoldings(foldingManager, _texteditor.Document);
+
 
             _texteditor.MouseHover += TextEditorMouseHover;
             _texteditor.TextArea.TextEntered += OnTextEntered;
             _texteditor.TextArea.TextEntering += OnTextEntering;
+
+            DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
+            foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
+            foldingUpdateTimer.Tick += foldingUpdateTimer_Tick;
+            foldingUpdateTimer.Start();
         }
 
         #region Properties
@@ -32,6 +60,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         #endregion
+
+
+
 
         #region Event Handlers
 
@@ -84,6 +115,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _toolTip.IsOpen = false;
         }
 
+
+        void foldingUpdateTimer_Tick(object sender, EventArgs e) {
+            if(foldingStrategy != null) {
+                foldingStrategy.UpdateFoldings(foldingManager, _texteditor.Document);
+            }
+        }
         #endregion
 
     }

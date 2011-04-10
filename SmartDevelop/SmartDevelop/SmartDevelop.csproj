@@ -91,6 +91,10 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Resource Include="Readme.txt" />
+    <Content Include="Syntax\Autohotkey.xshd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lib\AvalonDock\AvalonDock.Themes\AvalonDock.Themes.csproj">
@@ -129,6 +133,9 @@
       <Project>{F4EDAA4B-E8B9-4520-A76F-C70551197218}</Project>
       <Name>SmartDevelop.View</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

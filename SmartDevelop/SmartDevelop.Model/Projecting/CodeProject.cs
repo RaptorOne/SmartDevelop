@@ -6,6 +6,7 @@ using SmartDevelop.Model.CodeCompleting;
 
 namespace SmartDevelop.Model.Projecting
 {
+
     public abstract class CodeProject
     {
         List<ProjectItem> _items = new List<ProjectItem>();
@@ -28,6 +29,6 @@ namespace SmartDevelop.Model.Projecting
             set { _name = value; }
         }
 
-        public CodeContextService CodeContextService { get; }
+        public abstract ICodeContextService CodeContextService { get; }
     }
 }

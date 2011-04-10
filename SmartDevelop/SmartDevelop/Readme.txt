@@ -1,6 +1,6 @@
-﻿SmartDevelop the thiny but intelligent Script IDE
+SmartDevelop the thiny but intelligent Script IDE
 
-Copyright (c) 2011, Pascal Büttiker
+Copyright (c) 2011, Pascal B�ttiker
 All rights reserved.
 
 

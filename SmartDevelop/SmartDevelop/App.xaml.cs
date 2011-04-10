@@ -11,6 +11,9 @@ using ServicesCommon.WPF.WorkBenchServices;
 using SmartDevelop.ViewModel.DocumentFiles;
 using SmartDevelop.View.DocumentFiles;
 using ServicesCommon.WPF.AvalonServices;
+using ICSharpCode.AvalonEdit.Highlighting;
+using System.Xml;
+using System.IO;
 
 namespace SmartDevelop
 {
@@ -58,16 +61,30 @@ namespace SmartDevelop
             _serviceLocator.RegisterSingleton<IAvalonService, AvalonService>();
 
             SetupViewModelViewMappings();
+            LoadSyntaxHighlighner();
         }
 
         void SetupViewModelViewMappings() {
             var viewmodelMapping = _serviceLocator.Resolve<IWindowViewModelMappings>();
 
             viewmodelMapping.RegisterMapping(typeof(CodeFileViewModel), typeof(CodeDocumentView));
-
         }
 
         #endregion
+
+        void LoadSyntaxHighlighner() {
+            // Load our custom highlighting definition
+            IHighlightingDefinition customHighlighting;
+
+            StreamReader sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\Autohotkey.xshd"));
+            using(XmlReader reader = new XmlTextReader(sr)) {
+                customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
+                    HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            }
+
+            // and register it in the HighlightingManager
+            HighlightingManager.Instance.RegisterHighlighting("AHK", new string[] { ".ahk" }, customHighlighting);
+        }
 
     }
 }

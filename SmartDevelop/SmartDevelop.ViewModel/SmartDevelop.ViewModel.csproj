@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
+    <Compile Include="DocumentFiles\SyntaxHighlighterFinder.cs" />
+    <Compile Include="Folding\BraceFoldingStrategy.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -69,11 +71,10 @@
       <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
       <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Syntax\Autohotkey.xshd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\SmartDevelop.Model\SmartDevelop.Model.csproj">
+      <Project>{9F35A6BC-F9FA-46DD-9D1E-36EC665215EA}</Project>
+      <Name>SmartDevelop.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
