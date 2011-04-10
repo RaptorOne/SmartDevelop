@@ -14,6 +14,8 @@ using ServicesCommon.WPF.AvalonServices;
 using ICSharpCode.AvalonEdit.Highlighting;
 using System.Xml;
 using System.IO;
+using SmartDevelop.Model.Highlighning;
+using System.Windows.Media;
 
 namespace SmartDevelop
 {
@@ -90,11 +92,26 @@ namespace SmartDevelop
 
             #region IA
 
+            Brush b = new SolidColorBrush(Colors.GreenYellow);
+            var brushchen = new HighlightingBrushStaticColor(b);
+
             sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\IronAHK.xshd"));
             using(var reader = new XmlTextReader(sr)) {
                 customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
                     HighlightingLoader.Load(reader, HighlightingManager.Instance);
             }
+
+            //Add custom but static highligning rules
+            // test example -->
+            customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
+            {
+                Color = new HighlightingColor()
+                {
+                    Foreground = brushchen
+                },
+                Regex = new System.Text.RegularExpressions.Regex("SubStr")
+            });
+            //<----
             HighlightingManager.Instance.RegisterHighlighting("IA", new string[] { ".ia" }, customHighlighting);
 
             #endregion

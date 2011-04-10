@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -38,9 +39,11 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeCompleting\ICodeContextService.cs" />
+    <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\CodeProject.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCode.cs" />
