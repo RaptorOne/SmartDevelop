@@ -73,17 +73,31 @@ namespace SmartDevelop
         #endregion
 
         void LoadSyntaxHighlighner() {
-            // Load our custom highlighting definition
             IHighlightingDefinition customHighlighting;
 
-            StreamReader sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\Autohotkey.xshd"));
-            using(XmlReader reader = new XmlTextReader(sr)) {
+            // ToDo: Load syntaxfiles dynamically....
+
+            #region AHK
+
+            var sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\Autohotkey.xshd"));
+            using(var reader = new XmlTextReader(sr)) {
                 customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
                     HighlightingLoader.Load(reader, HighlightingManager.Instance);
             }
-
-            // and register it in the HighlightingManager
             HighlightingManager.Instance.RegisterHighlighting("AHK", new string[] { ".ahk" }, customHighlighting);
+
+            #endregion
+
+            #region IA
+
+            sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\IronAHK.xshd"));
+            using(var reader = new XmlTextReader(sr)) {
+                customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
+                    HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            }
+            HighlightingManager.Instance.RegisterHighlighting("IA", new string[] { ".ia" }, customHighlighting);
+
+            #endregion
         }
 
     }

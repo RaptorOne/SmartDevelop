@@ -15,7 +15,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 case CodeItemType.AHK:
                     return HighlightingManager.Instance.GetDefinition("AHK");
 
+                case CodeItemType.IA:
+                    return HighlightingManager.Instance.GetDefinition("IA");
 
+                case CodeItemType.AHK2:
+                    return HighlightingManager.Instance.GetDefinition("AHK2");
 
                 default:
                     return null;

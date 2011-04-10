@@ -25,7 +25,7 @@ namespace SmartDevelop.ViewModel.Main
             ServiceLocator.Instance.Resolve<IAvalonService>().PrimaryDockManager = _dockManager;
 
             // debug only
-            var codeVM = new CodeFileViewModel(new ProjectItemCode(CodeItemType.AHK));
+            var codeVM = new CodeFileViewModel(new ProjectItemCode(CodeItemType.IA));
             codeVM.DisplayName = "Example Content";
             _workbenchService.ShowDockedDocument(codeVM, codeVM.DisplayName);
         }

@@ -11,6 +11,8 @@ namespace SmartDevelop.TokenizerBase
         void Test(CodeTypeDeclaration type) {
             CodeTypeMember member = type.Members[0];
             var method = member as CodeMemberMethod;
+            //method.UserData.
+
         }
 
     }

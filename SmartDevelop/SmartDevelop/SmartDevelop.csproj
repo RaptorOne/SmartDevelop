@@ -91,6 +91,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Content Include="Syntax\IronAHK.xshd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Readme.txt" />
     <Content Include="Syntax\Autohotkey.xshd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
