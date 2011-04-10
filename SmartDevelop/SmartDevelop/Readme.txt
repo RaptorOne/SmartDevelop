@@ -1,8 +1,7 @@
-SmartDevelop the thiny but intelligent Script IDE
+SmartDevelop the tiny but intelligent Script IDE, with powerful Intelli-Sense support.
 
 Copyright (c) 2011, Pascal Büttiker
 All rights reserved.
-
 
 
     SmartDevelop is free software: you can redistribute it and/or modify
