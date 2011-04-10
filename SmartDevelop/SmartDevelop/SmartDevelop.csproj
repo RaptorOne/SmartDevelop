@@ -105,6 +105,14 @@
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Lib\Patterns\ServicesCommon.WPF\ServicesCommon.WPF.csproj">
+      <Project>{2254D47A-2DB9-41E6-B23D-B3633248F286}</Project>
+      <Name>ServicesCommon.WPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Lib\Patterns\ServicesCommon\ServicesCommon.csproj">
+      <Project>{846DB09F-A4BD-46BE-8B1A-F36C7A42DEFD}</Project>
+      <Name>ServicesCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lib\WPFCommon\WPFCommon.csproj">
       <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
       <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
@@ -116,6 +124,10 @@
     <ProjectReference Include="..\SmartDevelop.ViewModel\SmartDevelop.ViewModel.csproj">
       <Project>{F658A346-3514-4D78-8CC0-12B99AD3ED5B}</Project>
       <Name>SmartDevelop.ViewModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartDevelop.View\SmartDevelop.View.csproj">
+      <Project>{F4EDAA4B-E8B9-4520-A76F-C70551197218}</Project>
+      <Name>SmartDevelop.View</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

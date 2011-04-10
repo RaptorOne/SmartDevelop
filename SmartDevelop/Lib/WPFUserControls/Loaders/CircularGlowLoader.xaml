@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="WPFUserControls.Loaders.CircularGlowLoader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" Loaded="UserControl_Loaded">
+    <Grid Name="holder">
+        <Viewbox Name="ring" Stretch="Fill">
+            <Path StrokeThickness="1">
+                <Path.Data>
+                    <!-- Combines two geometries using the exclude combine mode. -->
+                    <CombinedGeometry GeometryCombineMode="Exclude">
+                        <CombinedGeometry.Geometry1>
+                            <EllipseGeometry RadiusX="50" RadiusY="50" Center="50,50" />
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <EllipseGeometry RadiusX="25" RadiusY="25" Center="50,50" />
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+                <Path.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="Transparent" Offset="0.312" />
+                        <GradientStop Color="#FF69AFFF" Offset="0.847" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush>
+                </Path.Fill>
+            </Path>
+        </Viewbox>
+        <Grid HorizontalAlignment="Stretch" Name="inner" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="75*" />
+                <ColumnDefinition Width="140*" />
+                <ColumnDefinition Width="75*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="54*" />
+                <RowDefinition Height="246*" />
+            </Grid.RowDefinitions>
+            <Ellipse Grid.Column="1" HorizontalAlignment="Stretch" Name="ellipse1" VerticalAlignment="Stretch">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="White" Offset="0.21" />
+                        <GradientStop Color="Transparent" Offset="0.497" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+        </Grid>
+    </Grid>
+</UserControl>

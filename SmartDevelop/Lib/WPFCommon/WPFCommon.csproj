@@ -114,12 +114,6 @@
     <Compile Include="VisualHelpers\UIHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandPattern\CommandPattern.csproj">
-      <Project>{ED85A03D-6B9E-4D97-8B05-FA4D52D83892}</Project>
-      <Name>CommandPattern</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -141,7 +135,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Patterns\CommandPattern\CommandPattern.csproj">
+      <Project>{ED85A03D-6B9E-4D97-8B05-FA4D52D83892}</Project>
+      <Name>CommandPattern</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="ServicesCommon.WPF.WorkBenchServices.MessageBox.MessageBox3View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:msgboxText="clr-namespace:ServicesCommon.WPF.WorkBenchServices.MessageBox"
+             mc:Ignorable="d" 
+             MinHeight="80"
+             MinWidth="400"
+             d:DesignHeight="117" d:DesignWidth="250">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <msgboxText:MessageBoxTextZoneView/>
+
+        <Grid Grid.Row="1">
+            <Button  Height="17" Command="{Binding Button1Command}" HorizontalAlignment="Left" Margin="10" VerticalAlignment="Center" Width="100">
+                <TextBlock Text="{Binding Button1}"/>
+            </Button>
+            <Button  Height="17" Command="{Binding Button2Command}" HorizontalAlignment="Center" Margin="10" VerticalAlignment="Center" Width="100">
+                <TextBlock Text="{Binding Button2}"/>
+            </Button>
+            <Button  Height="17" Command="{Binding Button3Command}" HorizontalAlignment="Right" Margin="10" VerticalAlignment="Center" Width="100">
+                <TextBlock Text="{Binding Button3}"/>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

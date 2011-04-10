@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="WPFUserControls.Validation.SimpleErrorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="142" d:DesignWidth="139"
+             MinWidth="25" MinHeight="25"
+             Height="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+             >    
+    <Grid>    
+        <Ellipse Fill="red" Stroke="White" StrokeThickness="3"/>
+        <Viewbox>
+            <TextBlock Text="!" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Viewbox>
+    </Grid>
+</UserControl>

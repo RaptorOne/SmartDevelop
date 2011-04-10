@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="WPFUserControls.CommandViews.UnDoCommandView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="113" d:DesignWidth="402">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="58*" />
+            <RowDefinition Height="55*" />
+        </Grid.RowDefinitions>
+        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Name}" TextAlignment="Center" FontSize="14" FontWeight="Bold" />
+        <TextBlock Grid.Row="1" HorizontalAlignment="Left" Text="{Binding Description}" VerticalAlignment="Center" />
+    </Grid>
+</UserControl>

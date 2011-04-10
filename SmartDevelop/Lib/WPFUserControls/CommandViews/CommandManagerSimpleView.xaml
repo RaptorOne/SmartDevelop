@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="WPFUserControls.CommandViews.CommandManagerSimpleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:my="clr-namespace:WPFUserControls.Arrows"
+             mc:Ignorable="d" 
+             d:DesignHeight="55" d:DesignWidth="154" >
+
+    <!-- This Control expects a given (set) Datasource of a CommandManagerViewModel!-->
+
+    <StackPanel Orientation="Horizontal">
+
+        <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="50"
+                Command="{Binding Path=UndoCommand}" IsEnabled="{Binding Path= CanUndo}"
+                ToolTip="{Binding PreviewUndoCommandText}">
+            <my:Undo Margin="2"/>
+        </Button>
+
+        <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="50"
+                Command="{Binding Path=RedoCommand}" IsEnabled="{Binding Path= CanRedo}"
+                ToolTip="{Binding PreviewRedoCommandText}">
+            <my:Redo Margin="2"/>
+        </Button>
+    </StackPanel>
+
+</UserControl>

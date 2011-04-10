@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AvalonDock;
 
 namespace SmartDevelop
 {
@@ -21,6 +22,10 @@ namespace SmartDevelop
     {
         public MainWindow() {
             InitializeComponent();
+        }
+
+        public DockingManager DockManger {
+            get { return dockManger; }
         }
     }
 }

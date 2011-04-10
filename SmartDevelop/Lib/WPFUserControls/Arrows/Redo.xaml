@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="WPFUserControls.Arrows.Redo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Viewbox>
+        <Path Width="58.5048" Height="41.9614" Style="{StaticResource ArrowPathStyle}"  Stretch="Fill" RenderTransformOrigin="0.5,0.5" Stroke="Gray"
+              Data="F1 M 148.546,498.655C 151.158,503.909 154.852,508.739 159.598,512.789C 167.15,519.237 176.231,522.734 185.428,523.4L 184.646,531.187C 184.6,531.643 184.832,532.081 185.24,532.294C 185.643,532.51 186.133,532.461 186.488,532.164L 198.24,522.366L 206.53,515.455C 206.795,515.231 206.942,514.907 206.932,514.559C 206.926,514.239 206.779,513.935 206.483,513.686L 196.919,506.514L 186.148,498.44C 185.783,498.17 185.302,498.14 184.908,498.368C 184.518,498.595 184.299,499.027 184.354,499.474L 185.255,507.046C 179.863,506.395 174.602,504.206 170.156,500.414C 167.04,497.755 164.644,494.571 162.97,491.1C 162.838,490.827 162.598,490.619 162.308,490.519C 162.019,490.427 161.699,490.455 161.43,490.592L 149.027,497.155C 148.486,497.445 148.275,498.106 148.546,498.655 Z "
+              >
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <RotateTransform Angle="-55"/>
+                        <ScaleTransform ScaleX="1"/>
+                        <ScaleTransform ScaleY="-1"/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+    </Viewbox>
+</UserControl>

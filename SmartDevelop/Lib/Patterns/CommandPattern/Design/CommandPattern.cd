@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CommandPattern.TransparentCommandUndo" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAgAiAAQAAEAAAAQBAAAAAAAAAAEBQAAAABA=</HashCode>
+      <FileName>TransparentCommandUndo.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CommandPattern.CustomCommandManager" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAIBAAABAQAACAAAAgBEAAAAAAAAAACAgEABAA=</HashCode>
+      <FileName>CommandManager.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CommandPattern.CommandUndo" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAoAAAAgAiAAQEAEIAAAQBAAAAAAAAAAEBQAABABA=</HashCode>
+      <FileName>CommandUndo.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CommandPattern.CompositeUnDoCommand" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAIAgAAAAgAgAAQAAEAAAAABAAAAAAAAAAAACBAAAAA=</HashCode>
+      <FileName>CompositeUnDoCommand.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CommandPattern.NotExecutableCommand" Collapsed="true">
+    <Position X="3" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAEgAAAAgAAAAQAAEAAAAABAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>NotExecutableCommand.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="CommandPattern.ICommandManager" Collapsed="true">
+    <Position X="6.25" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAABAQAAAAAAAgBAAAAAAAAAAACAgEAAAA=</HashCode>
+      <FileName>ICommandManager.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="CommandPattern.ICommandUndo" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAgAiAAQAAEAAAAQBAAAAAAAAAAEBQAAAAAA=</HashCode>
+      <FileName>ICommandUndo.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
