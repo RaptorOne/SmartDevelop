@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SmartDevelop.TokenizerBase</RootNamespace>
     <AssemblyName>SmartDevelop.TokenizerBase</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,12 +38,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AHK\BuildInMembers.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="CodeTokenRepesentation.cs" />
+    <Compile Include="IA\Indentation\IAIndentationStrategy.cs" />
+    <Compile Include="IA\Indentation\DocumentAccessor.cs" />
+    <Compile Include="IA\Indentation\IndentationReformatter.cs" />
+    <Compile Include="CodeStatement.cs" />
+    <Compile Include="Token.cs" />
+    <Compile Include="IA\SimpleTokinizerIA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="IA\" />
+    <ProjectReference Include="..\Lib\AvalonEdit\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
+      <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
+      <Name>ICSharpCode.AvalonEdit</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

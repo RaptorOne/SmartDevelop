@@ -20,6 +20,7 @@
     <Keywords fontWeight="bold" foreground="Blue">
       <Word>if</Word>
       <Word>else</Word>
+      <Word>return</Word>
       <!-- ... -->
     </Keywords>
 

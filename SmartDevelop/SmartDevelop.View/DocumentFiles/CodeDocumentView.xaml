@@ -6,6 +6,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="290" d:DesignWidth="369" xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit">
     <Grid>
-        <ContentControl Content="{Binding Editor}"/>
+        <ContentControl Content="{Binding Editor}" />
     </Grid>
 </UserControl>

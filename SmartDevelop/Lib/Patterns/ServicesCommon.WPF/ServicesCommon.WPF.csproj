@@ -161,7 +161,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\WPFCommon\WPFCommon.csproj">
       <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
-      <Name>WPFCommon</Name>
+      <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\WPFUserControls\WPFUserControls.csproj">
       <Project>{6E029912-02FE-42C3-BE64-34DF20674131}</Project>

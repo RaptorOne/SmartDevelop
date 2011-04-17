@@ -12,16 +12,22 @@ using SmartDevelop.Model.Projecting;
 using System.Windows.Threading;
 using ICSharpCode.AvalonEdit.Folding;
 using SmartDevelop.ViewModel.Folding;
+using SmartDevelop.TokenizerBase.IA.Indentation;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
     public class CodeFileViewModel : WorkspaceViewModel
     {
+        #region Fields
+
         readonly ProjectItemCode _projectitem;
         readonly TextEditor _texteditor = new TextEditor();
-        FoldingManager foldingManager;
+        FoldingManager _foldingManager;
+        AbstractFoldingStrategy _foldingStrategy;
 
-        AbstractFoldingStrategy foldingStrategy = new BraceFoldingStrategy();
+        #endregion
+
+        #region Constructor
 
         public CodeFileViewModel(ProjectItemCode projectitem) {
 
@@ -36,14 +42,21 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
 
-			if (foldingManager == null)
-                foldingManager = FoldingManager.Install(_texteditor.TextArea);
-            foldingStrategy.UpdateFoldings(foldingManager, _texteditor.Document);
+
+            _foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
+
+			if (_foldingManager == null)
+                _foldingManager = FoldingManager.Install(_texteditor.TextArea);
+            _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
 
 
             _texteditor.MouseHover += TextEditorMouseHover;
+            _texteditor.MouseHoverStopped += TextEditorMouseHoverStopped;
             _texteditor.TextArea.TextEntered += OnTextEntered;
             _texteditor.TextArea.TextEntering += OnTextEntering;
+
+            _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
+
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
@@ -51,11 +64,32 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             foldingUpdateTimer.Start();
         }
 
-        #region Properties
+        #endregion
+
+        #region VM Properties
 
         public TextEditor Editor {
             get {
                 return _texteditor;
+            }
+        }
+
+        string _contextToolTip;
+        bool _contextToolTipIsOpen;
+
+        public bool ContextToolTipIsOpen {
+            get { return _contextToolTipIsOpen; }
+            set { 
+                _contextToolTipIsOpen = value;
+                OnPropertyChanged(() => ContextToolTipIsOpen);
+            }
+        }
+
+        public string ContextToolTip {
+            get { return _contextToolTip; }
+            set { 
+                _contextToolTip = value;
+                OnPropertyChanged(() => ContextToolTip); 
             }
         }
 
@@ -104,8 +138,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             var pos = _texteditor.GetPositionFromPoint(e.GetPosition(_texteditor));
 
             if(pos != null) {
-                //_toolTip.PlacementTarget = _texteditor; // required for property inheritance
-                _toolTip.Content = pos.ToString();
+
+                var segment = _projectitem.TokenService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
+
+                var msg = string.Format("[{0}] {1}", segment.Type, segment.TokenString);
+                _toolTip.PlacementTarget = _texteditor; // required for property inheritance
+                _toolTip.Content = msg;
+                _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
                 _toolTip.IsOpen = true;
                 e.Handled = true;
             }
@@ -117,8 +156,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
-            if(foldingStrategy != null) {
-                foldingStrategy.UpdateFoldings(foldingManager, _texteditor.Document);
+            if(_foldingStrategy != null) {
+                _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
         }
         #endregion

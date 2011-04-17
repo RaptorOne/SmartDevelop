@@ -56,6 +56,10 @@
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SmartDevelop.TokenizerBase\SmartDevelop.TokenizerBase.csproj">
+      <Project>{DFACD34A-B3D0-4C45-BE90-ABBFF75979C9}</Project>
+      <Name>SmartDevelop.TokenizerBase</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

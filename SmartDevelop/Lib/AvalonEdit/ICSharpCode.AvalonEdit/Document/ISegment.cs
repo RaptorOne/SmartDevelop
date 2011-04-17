@@ -33,7 +33,7 @@ namespace ICSharpCode.AvalonEdit.Document
 		int EndOffset { get; }
 	}
 	
-	static class SegmentExtensions
+	public static class SegmentExtensions
 	{
 		/// <summary>
 		/// Gets whether the segment contains the offset.
@@ -67,7 +67,7 @@ namespace ICSharpCode.AvalonEdit.Document
 	/// Represents a simple segment (Offset,Length pair) that is not automatically updated
 	/// on document changes.
 	/// </summary>
-	struct SimpleSegment : IEquatable<SimpleSegment>, ISegment
+	public struct SimpleSegment : IEquatable<SimpleSegment>, ISegment
 	{
 		public static readonly SimpleSegment Invalid = new SimpleSegment(-1, -1);
 		

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICSharpCode.AvalonEdit.Document;
+using SmartDevelop.TokenizerBase.IA;
+using System.Threading;
+using System.Windows.Threading;
+
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -19,10 +23,23 @@ namespace SmartDevelop.Model.Projecting
     {
         readonly TextDocument _codedocument;
         CodeItemType _type = CodeItemType.None;
+        SimpleTokinizerIA _tokenizer;
+        bool _documentdirty = false;
 
         public ProjectItemCode(CodeItemType type) {
             _codedocument = new TextDocument();
+
+            _codedocument.Changed += OnCodedocumentChanged;
+
+            _tokenizer = new SimpleTokinizerIA(_codedocument);
             _type = type;
+
+
+            DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
+            foldingUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
+            foldingUpdateTimer.Tick += CheckUpdateTokenRepresentation;
+            foldingUpdateTimer.Start();
+
         }
 
         public CodeItemType Type {
@@ -31,6 +48,21 @@ namespace SmartDevelop.Model.Projecting
 
         public TextDocument Document {
             get { return _codedocument; }
+        }
+
+        public CodeTokenRepesentation TokenService {
+            get { return _tokenizer.CodeTokens; }
+        }
+
+        void OnCodedocumentChanged(object sender, EventArgs e){
+            _documentdirty = true;
+        }
+
+        void CheckUpdateTokenRepresentation(object sender, EventArgs e) {
+            if(_documentdirty && !_tokenizer.IsBusy) {
+                _documentdirty = false;
+                _tokenizer.TokenizeAsync();
+            }
         }
     }
 }
