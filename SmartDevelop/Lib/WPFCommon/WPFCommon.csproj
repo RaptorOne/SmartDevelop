@@ -106,6 +106,8 @@
     <Compile Include="ViewModels\ChooseItemViewModel.cs" />
     <Compile Include="ViewModels\NotifyChangedBase.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="ViewModels\Trees\ITreeViewItemViewModel.cs" />
+    <Compile Include="ViewModels\Trees\TreeViewItemViewModel.cs" />
     <Compile Include="ViewModels\ViewBuilder.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\WorkSpaceViewModel.cs" />

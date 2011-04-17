@@ -36,6 +36,8 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -44,10 +46,31 @@
     <Compile Include="DocumentFiles\CodeDocumentView.xaml.cs">
       <DependentUpon>CodeDocumentView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProjectExplorer\UserControl1.xaml.cs">
+      <DependentUpon>UserControl1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Projecting\ProjectExplorerTreeView.xaml.cs">
+      <DependentUpon>ProjectExplorerTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Projecting\SolutionExplorer.xaml.cs">
+      <DependentUpon>SolutionExplorer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="DocumentFiles\CodeDocumentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProjectExplorer\UserControl1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Projecting\ProjectExplorerTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Projecting\SolutionExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -57,6 +80,14 @@
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\blocks.ico" />
+    <Resource Include="Images\file-doc.ico" />
+    <Resource Include="Images\folder.ico" />
+    <Resource Include="Images\ironAHK.ico" />
+    <Resource Include="Images\project-folder.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

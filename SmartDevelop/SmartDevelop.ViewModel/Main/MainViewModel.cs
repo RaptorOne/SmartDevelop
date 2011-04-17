@@ -10,6 +10,7 @@ using ServicesCommon;
 using ServicesCommon.WPF.WorkBenchServices;
 using ServicesCommon.WPF.AvalonServices;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.ViewModel.SolutionExplorer;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -17,8 +18,12 @@ namespace SmartDevelop.ViewModel.Main
     {
         DockingManager _dockManager;
         IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+        SolutionExplorerVM _solutionVM;
 
-        public MainViewModel() { }
+        public MainViewModel(SmartSolution solution) 
+        {
+            _solutionVM = new SolutionExplorerVM(solution);
+        }
 
         public void SetDockManager(DockingManager dockmanager) {
             _dockManager = dockmanager;
@@ -28,6 +33,12 @@ namespace SmartDevelop.ViewModel.Main
             var codeVM = new CodeFileViewModel(new ProjectItemCode(CodeItemType.IA));
             codeVM.DisplayName = "Example Content";
             _workbenchService.ShowDockedDocument(codeVM, codeVM.DisplayName);
+        }
+
+
+        
+        public SolutionExplorerVM SolutionVM {
+            get { return _solutionVM; }
         }
         
     }

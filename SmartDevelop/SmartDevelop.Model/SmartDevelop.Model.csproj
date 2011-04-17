@@ -44,11 +44,13 @@
   <ItemGroup>
     <Compile Include="CodeCompleting\ICodeContextService.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
-    <Compile Include="Projecting\CodeProject.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCode.cs" />
-    <Compile Include="Projecting\ProjectManager.cs" />
+    <Compile Include="Projecting\ProjectItemFolder.cs" />
+    <Compile Include="Projecting\SmartSolution.cs" />
+    <Compile Include="Projecting\SmartCodeProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StdLib\StdLibLoader.cs" />
     <Compile Include="Tokenizer\CodeSegment.cs" />
   </ItemGroup>
   <ItemGroup>

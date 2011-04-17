@@ -16,6 +16,7 @@ using System.Xml;
 using System.IO;
 using SmartDevelop.Model.Highlighning;
 using System.Windows.Media;
+using SmartDevelop.Model.Projecting;
 
 namespace SmartDevelop
 {
@@ -38,7 +39,7 @@ namespace SmartDevelop
 
             RegisterServices();
 
-            _mainVM = new MainViewModel();
+            _mainVM = new MainViewModel(new SmartSolution());
 
             _mainView = new MainWindow();
             _mainView.DataContext = _mainVM;
