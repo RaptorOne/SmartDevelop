@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SmartDevelop.ViewModel.SolutionExplorer;
 
 namespace SmartDevelop.View.Projecting
 {
@@ -21,6 +22,11 @@ namespace SmartDevelop.View.Projecting
     {
         public ProjectExplorerTreeView() {
             InitializeComponent();
+        }
+
+        void OnItemMouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            var itemVM = (TreeViewProjectItem)((TreeViewItem)e.Source).DataContext;
+            var cc = itemVM.FocusCommand;
         }
     }
 }

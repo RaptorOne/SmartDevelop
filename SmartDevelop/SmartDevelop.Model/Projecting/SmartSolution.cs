@@ -10,6 +10,7 @@ namespace SmartDevelop.Model.Projecting
     {
         SmartCodeProject _current;
         List<SmartCodeProject> _projects = new List<SmartCodeProject>();
+        string _name = "Default Solution";
 
         public event EventHandler CurrentChanged;
         public event EventHandler<ProjectEventArgs> ProjectAdded;
@@ -19,6 +20,9 @@ namespace SmartDevelop.Model.Projecting
             this.Add(StdLibLoader.LoadStLib());
         }
 
+        /// <summary>
+        /// Active Project in this Solution
+        /// </summary>
         public SmartCodeProject Current {
             get { return _current; }
             set { 
@@ -26,6 +30,14 @@ namespace SmartDevelop.Model.Projecting
                 if(CurrentChanged != null)
                     CurrentChanged(this, EventArgs.Empty);
             }
+        }
+        
+        /// <summary>
+        /// Name of this Solution
+        /// </summary>
+        public string Name {
+            get { return _name; }
+            set { _name = value; }
         }
 
         public void Add(SmartCodeProject p) {

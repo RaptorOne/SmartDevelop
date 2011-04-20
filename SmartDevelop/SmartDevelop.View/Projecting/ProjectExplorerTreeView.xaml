@@ -3,19 +3,52 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:solex="clr-namespace:SmartDevelop.ViewModel.SolutionExplorer;assembly=SmartDevelop.ViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="436">
     <StackPanel Orientation="Vertical">
-        <TreeView  ItemsSource="{Binding Path=SolutionRoot.Children}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="500">
+        <TreeView  ItemsSource="{Binding Path=Solutions}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="500">
                 
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+            <TreeView.Resources>
+                
+                <!-- Solution Folder-->
+                <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemSolutionFolder}" ItemsSource="{Binding Children}" >
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add New Project"/>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                <!-- Project Folder-->
+                <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemProject}" ItemsSource="{Binding Children}" >
                     <StackPanel Orientation="Horizontal">
                         <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
                         <TextBlock Text="{Binding DisplayName}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
+
+                <!-- CodeFile Item-->
+                <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemCodeFile}" ItemsSource="{Binding Children}" >
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}"/>
+                                <MenuItem Header="Delete" Command="{Binding DeleteItemCommand}"/>
+                                <MenuItem Header="Clear"/>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+
+            </TreeView.Resources>
 
 
             <TreeView.ItemContainerStyle>
@@ -23,6 +56,7 @@
                 This Style binds a TreeViewItem to a TreeViewItemViewModel. 
                 -->
                 <Style TargetType="{x:Type TreeViewItem}">
+                    <EventSetter Event="MouseDoubleClick" Handler="OnItemMouseDoubleClick" />
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                     <Setter Property="FontWeight" Value="Normal" />
@@ -33,9 +67,7 @@
                     </Style.Triggers>
                 </Style>
             </TreeView.ItemContainerStyle>
-
-
-
+            
         </TreeView>
     </StackPanel>
 </UserControl>

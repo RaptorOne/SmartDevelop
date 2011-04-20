@@ -4,26 +4,28 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
 using WPFCommon.ViewModels;
+using SmartDevelop.ViewModel.DocumentFiles;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
     public class SolutionExplorerVM : WorkspaceViewModel
     {
+        List<TreeViewProjectItem> _solutions = new List<TreeViewProjectItem>();
         SmartSolution _smartSolution;
         TreeViewProjectItem _solutionRoot;
+
         public SolutionExplorerVM(SmartSolution solution){
            
             _smartSolution = solution;
-            _solutionRoot = new TreeViewProjectItem() 
-            { 
-                DisplayName = "Default SmartSolution",
-                ImageSource = @"/Images/blocks.ico"
-            };
+            
+            _solutionRoot = new TreeViewProjectItemSolutionFolder(_smartSolution, null);
+            _solutions.Add(_solutionRoot);
             _smartSolution.ProjectAdded += OnProjectAdded;
             _smartSolution.ProjectRemoved += OnProjectRemoved;
 
             Import();
         }
+
         void Import() {
             foreach(var p in _smartSolution.GetProjects()) {
                 AddProject(p);
@@ -32,6 +34,12 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         public TreeViewProjectItem SolutionRoot {
             get { return _solutionRoot; }
+        }
+
+
+
+        public IEnumerable<TreeViewProjectItem> Solutions {
+            get { return _solutions; }
         }
 
 
@@ -53,14 +61,11 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
 
         TreeViewProjectItem LoadProject(SmartCodeProject p){
-            var tree = new TreeViewProjectItem(_solutionRoot);
-            tree.DisplayName = p.Name;
-            tree.ImageSource = @"../Images/project-folder.ico";
+            var projecttree = new TreeViewProjectItemProject(p, _solutionRoot);
             foreach(var item in p.GetAllItems<ProjectItemCode>()) {
-                tree.Children.Add(new TreeViewProjectItem(tree) { DisplayName = item.Name, ImageSource = @"../Images/ironAHK.ico" });
+                projecttree.Children.Add(new TreeViewProjectItemCodeFile(item, projecttree));
             }
-
-            return tree;
+            return projecttree;
         }
     }
 }

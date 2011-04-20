@@ -13,6 +13,8 @@ using System.Windows.Threading;
 using ICSharpCode.AvalonEdit.Folding;
 using SmartDevelop.ViewModel.Folding;
 using SmartDevelop.TokenizerBase.IA.Indentation;
+using ServicesCommon.WPF.WorkBenchServices;
+using ServicesCommon;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -24,7 +26,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         readonly TextEditor _texteditor = new TextEditor();
         FoldingManager _foldingManager;
         AbstractFoldingStrategy _foldingStrategy;
-
+        readonly IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+        bool foldingDirty = true;
         #endregion
 
         #region Constructor
@@ -40,9 +43,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.Document = _projectitem.Document;
 
+            _texteditor.Document.TextChanged += OnDocumentTextChanged;
             _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
-
-
             _foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
 
 			if (_foldingManager == null)
@@ -55,8 +57,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _texteditor.TextArea.TextEntered += OnTextEntered;
             _texteditor.TextArea.TextEntering += OnTextEntering;
 
-            _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
-
+            //_texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
@@ -71,6 +72,15 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         public TextEditor Editor {
             get {
                 return _texteditor;
+            }
+        }
+
+        public override string DisplayName {
+            get {
+                return _projectitem.Name;
+            }
+            set {
+                _projectitem.Name = value;
             }
         }
 
@@ -95,12 +105,35 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #endregion
 
+        #region Commands
 
+        #region Show Command
 
+        RelayCommand _showCommand;
+        public ICommand ShowCommand {
+            get {
+                if(_showCommand == null) {
+                    _showCommand = new RelayCommand(x => Show());
+                }
+                return _showCommand;
+            }
+        }
+
+        void Show() {
+            _workbenchservice.ShowDockedDocument(this, this.DisplayName);
+        }
+
+        #endregion
+
+        #endregion
 
         #region Event Handlers
 
         CompletionWindow completionWindow;
+
+        void OnDocumentTextChanged(object sender, EventArgs e) {
+            foldingDirty = true;
+        }
 
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
             if(e.Text == ".") {
@@ -156,11 +189,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
-            if(_foldingStrategy != null) {
+            if(foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
+                foldingDirty = false;
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
         }
         #endregion
-
     }
 }

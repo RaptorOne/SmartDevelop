@@ -116,8 +116,9 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 // end one sign regions -> braktes/lines
                 // ensure that we differ from the token before in those cases
-                if( (ensureNewToken || _activeToken == Token.Bracket || _activeToken == Token.NewLine) || 
-                    (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
+                if( (ensureNewToken || _activeToken == Token.Bracket 
+                    || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
+                    || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
                     currentToken = Token.Unknown;
@@ -196,7 +197,9 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         #region Helpermethods
+
         static char[] trimchars = { ' ', '\t', '\n', '\r' };
+
         void EndActiveToken(int index) {
             int l = index - _currentRangeStart;
             if(l > 0) {
