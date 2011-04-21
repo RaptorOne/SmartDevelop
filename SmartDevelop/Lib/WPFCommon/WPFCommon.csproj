@@ -71,8 +71,6 @@
     <Compile Include="Behaviours\Effects\HoverGlowBehaviourEffect.cs" />
     <Compile Include="Behaviours\Popups\SimplePopupBehaviour.cs" />
     <Compile Include="Behaviours\WindowEvents\MVMVWindowEventBehaviour.cs" />
-    <Compile Include="CommandViewModels\CommandManagerViewModel.cs" />
-    <Compile Include="CommandViewModels\UnDoCommandViewModel.cs" />
     <Compile Include="Converters\BaseConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityInvertedConverter.cs" />
     <Compile Include="Converters\CommandToVisibiltyConverter.cs" />
@@ -103,16 +101,6 @@
     <Compile Include="SelectionServices\ISelectable.cs" />
     <Compile Include="SelectionServices\SelectionService.cs" />
     <Compile Include="Tools\ConnectorTools\SimpleArrowConnectorTool.cs" />
-    <Compile Include="ViewModels\ChooseItemViewModel.cs" />
-    <Compile Include="ViewModels\NotifyChangedBase.cs" />
-    <Compile Include="ViewModels\RelayCommand.cs" />
-    <Compile Include="ViewModels\Trees\ITreeViewItemViewModel.cs" />
-    <Compile Include="ViewModels\Trees\TreeViewItemViewModel.cs" />
-    <Compile Include="ViewModels\ViewBuilder.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="ViewModels\WorkSpaceViewModel.cs" />
-    <Compile Include="ViewModels\WrapperCommand.cs" />
-    <Compile Include="ViewModels\WrapperStateCommand.cs" />
     <Compile Include="VisualHelpers\UIHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -136,12 +124,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Patterns\CommandPattern\CommandPattern.csproj">
-      <Project>{ED85A03D-6B9E-4D97-8B05-FA4D52D83892}</Project>
-      <Name>CommandPattern</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

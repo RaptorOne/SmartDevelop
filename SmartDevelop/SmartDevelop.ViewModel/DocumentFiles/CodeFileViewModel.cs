@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
-using WPFCommon.ViewModels;
-using System.Windows.Input;
-using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.Windows.Controls;
-using SmartDevelop.Model.Projecting;
+using System.Windows.Input;
 using System.Windows.Threading;
+using Archimedes.Patterns.Services;
+using Archimedes.Patterns.WPF.ViewModels;
+using Archimedes.Services.WPF.WorkBenchServices;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Folding;
-using SmartDevelop.ViewModel.Folding;
+using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase.IA.Indentation;
-using ServicesCommon.WPF.WorkBenchServices;
-using ServicesCommon;
+using SmartDevelop.ViewModel.Folding;
+using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {

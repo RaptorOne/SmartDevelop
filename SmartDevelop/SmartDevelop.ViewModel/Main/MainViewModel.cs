@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using WPFCommon.ViewModels;
-using AvalonDock;
-using SmartDevelop.ViewModel.DocumentFiles;
-using ICSharpCode.AvalonEdit.Document;
-using ServicesCommon;
-using ServicesCommon.WPF.WorkBenchServices;
-using ServicesCommon.WPF.AvalonServices;
+﻿using Archimedes.Patterns.WPF.ViewModels;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.ViewModel.DocumentFiles;
 using SmartDevelop.ViewModel.SolutionExplorer;
+using Archimedes.Patterns.Services;
+using AvalonDock;
+using Archimedes.Services.WPF.WorkBenchServices;
+using Archimedes.Services.WPF.AvalonDockService;
 
 namespace SmartDevelop.ViewModel.Main
 {

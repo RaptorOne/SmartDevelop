@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
-using WPFCommon.ViewModels;
 using SmartDevelop.ViewModel.DocumentFiles;
+using Archimedes.Patterns.WPF.ViewModels;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {

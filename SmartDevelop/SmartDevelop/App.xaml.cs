@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Windows;
-using SmartDevelop.ViewModel.Main;
-using ServicesCommon.WPF.WindowViewModelMapping;
-using ServicesCommon;
-using ServicesCommon.WPF.WorkBenchServices;
-using SmartDevelop.ViewModel.DocumentFiles;
-using SmartDevelop.View.DocumentFiles;
-using ServicesCommon.WPF.AvalonServices;
-using ICSharpCode.AvalonEdit.Highlighting;
-using System.Xml;
 using System.IO;
-using SmartDevelop.Model.Highlighning;
+using System.Windows;
 using System.Windows.Media;
+using System.Xml;
+using Archimedes.Patterns.Services;
+using Archimedes.Services.WPF.AvalonDockService;
+using Archimedes.Services.WPF.WindowViewModelMapping;
+using Archimedes.Services.WPF.WorkBenchServices;
+using ICSharpCode.AvalonEdit.Highlighting;
+using SmartDevelop.Model.Highlighning;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.View.DocumentFiles;
+using SmartDevelop.ViewModel.DocumentFiles;
+using SmartDevelop.ViewModel.Main;
 
 namespace SmartDevelop
 {
@@ -60,7 +56,7 @@ namespace SmartDevelop
 
         void RegisterServices() {
             _serviceLocator.RegisterSingleton<IWindowViewModelMappings, WindowViewModelMappings>();
-            _serviceLocator.RegisterSingleton<IWorkBenchService, WorkBenchService>();
+            _serviceLocator.RegisterSingleton<IWorkBenchService, AvalonWorkBenchService>();
             _serviceLocator.RegisterSingleton<IAvalonService, AvalonService>();
 
             SetupViewModelViewMappings();

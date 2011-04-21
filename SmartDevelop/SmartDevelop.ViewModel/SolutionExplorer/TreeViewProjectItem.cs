@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using WPFCommon.ViewModels.Trees;
+using Archimedes.Patterns.WPF.ViewModels.Trees;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
