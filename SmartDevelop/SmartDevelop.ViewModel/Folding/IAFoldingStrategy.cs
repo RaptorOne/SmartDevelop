@@ -14,25 +14,19 @@ namespace SmartDevelop.ViewModel.Folding
     public class IAFoldingStrategy : AbstractFoldingStrategy
     {
         CodeTokenRepesentation _tokenservice;
+        readonly char _openingBrace;
+        readonly char _closingBrace;
+
+
         /// <summary>
         /// Creates a new BraceFoldingStrategy.
         /// </summary>
         public IAFoldingStrategy(CodeTokenRepesentation tokenservice) {
-            this.OpeningBrace = '{';
-            this.ClosingBrace = '}';
+            _openingBrace = '{';
+            _closingBrace = '}';
             _tokenservice = tokenservice;
         }
 
-
-        /// <summary>
-        /// Gets/Sets the opening brace. The default value is '{'.
-        /// </summary>
-        public char OpeningBrace { get; set; }
-
-        /// <summary>
-        /// Gets/Sets the closing brace. The default value is '}'.
-        /// </summary>
-        public char ClosingBrace { get; set; }
 
         /// <summary>
         /// Create <see cref="NewFolding"/>s for the specified document.
@@ -47,35 +41,33 @@ namespace SmartDevelop.ViewModel.Folding
         /// </summary>
         public IEnumerable<NewFolding> CreateNewFoldings(ITextSource document) {
             List<NewFolding> newFoldings = new List<NewFolding>();
-            
-
             Stack<int> startOffsets = new Stack<int>();
             int lastNewLineOffset = 0;
-            char openingBrace = this.OpeningBrace;
-            char closingBrace = this.ClosingBrace;
 
+            foreach(var token in _tokenservice.GetSegments()) {
+                if(token.Type == TokenizerBase.Token.Bracket) {
 
-
-            for(int i = 0; i < document.TextLength; i++) {
-                var token = _tokenservice.QueryCodeSegmentAt(i).Type;
-                if(token == TokenizerBase.Token.MultiLineComment || token == TokenizerBase.Token.SingleLineComment || token == TokenizerBase.Token.LiteralString)
-                    continue;
-
-                char c = document.GetCharAt(i);
-                if(c == openingBrace) {
-                    startOffsets.Push(i);
-                } else if(c == closingBrace && startOffsets.Count > 0) {
-                    int startOffset = startOffsets.Pop();
-                    // don't fold if opening and closing brace are on the same line
-                    if(startOffset < lastNewLineOffset) {
-                        newFoldings.Add(new NewFolding(startOffset, i + 1));
+                    if(token.TokenString[0] == _openingBrace) {
+                        startOffsets.Push(token.Range.Offset);
+                    } else if(token.TokenString[0] == _closingBrace && startOffsets.Count > 0) {
+                        int startOffset = startOffsets.Pop();
+                        // don't fold if opening and closing brace are on the same line
+                        if(startOffset < lastNewLineOffset) {
+                            newFoldings.Add(new NewFolding(startOffset, token.Range.Offset + 1));
+                        }
                     }
-                } else if(c == '\n' || c == '\r') {
-                    lastNewLineOffset = i + 1;
+                } else if(token.Type == TokenizerBase.Token.NewLine) {
+                    lastNewLineOffset = token.Range.Offset;
                 }
             }
+
             newFoldings.Sort((a, b) => a.StartOffset.CompareTo(b.StartOffset));
             return newFoldings;
         }
+
+
+
+
+
     }
 }

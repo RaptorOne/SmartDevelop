@@ -57,7 +57,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _texteditor.TextArea.TextEntered += OnTextEntered;
             _texteditor.TextArea.TextEntering += OnTextEntering;
 
-            //_texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
+            _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
