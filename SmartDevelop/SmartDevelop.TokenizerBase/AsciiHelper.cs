@@ -20,7 +20,7 @@ namespace SmartDevelop.TokenizerBase
             return (c > 96) && (c < 123);
         }
         /// <summary>
-        /// Is the given char a default AsciiLetter (a-zA-Z0-9)
+        /// Is the given char a default AsciiLetter? (a-zA-Z0-9)
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>

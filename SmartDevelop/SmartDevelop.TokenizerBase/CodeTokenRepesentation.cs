@@ -6,6 +6,9 @@ using ICSharpCode.AvalonEdit.Document;
 
 namespace SmartDevelop.TokenizerBase.IA
 {
+    /// <summary>
+    /// Threadsafe CodeToken Provider
+    /// </summary>
     public class CodeTokenRepesentation
     {
         #region Fields
@@ -25,15 +28,22 @@ namespace SmartDevelop.TokenizerBase.IA
             }
         }
 
-        public void Add(CodeSegment segment) {
-            lock(_codesegmentsLock) {
-                _codesegments.Add(segment);
-            }
-        }
+        //public void Add(CodeSegment segment) {
+        //    lock(_codesegmentsLock) {
+        //        _codesegments.Add(segment);
+        //    }
+        //}
 
-        public void Remove(CodeSegment segment) {
+        //public void Remove(CodeSegment segment) {
+        //    lock(_codesegmentsLock) {
+        //        _codesegments.Remove(segment);
+        //    }
+        //}
+
+        public void Reset(List<CodeSegment> newtokens) {
             lock(_codesegmentsLock) {
-                _codesegments.Remove(segment);
+                _codesegments.Clear();
+                _codesegments.AddRange(newtokens);
             }
         }
 
@@ -74,11 +84,6 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #endregion
 
-        internal void Reset(List<CodeSegment> newtokens) {
-            lock(_codesegmentsLock) {
-                _codesegments.Clear();
-                _codesegments.AddRange(newtokens);
-            }
-        }
+
     }
 }

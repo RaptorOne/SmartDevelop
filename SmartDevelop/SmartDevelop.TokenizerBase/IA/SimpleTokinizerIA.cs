@@ -49,7 +49,7 @@ namespace SmartDevelop.TokenizerBase.IA
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
         static List<char> BRAKETS = new List<char> { '(', ')', '{', '}', '[', ']' };
-        static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' };
+        static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' , '?' };
         static List<string> KEYWORDS = new List<string> 
             { 
                 "if",
@@ -96,7 +96,11 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #endregion
 
+        #region Public Methods
 
+        /// <summary>
+        /// Starts Tokenizing async
+        /// </summary>
         public void TokenizeAsync() {
             if(_tokenizerworker.IsBusy) {
                 _tokenizerworker.CancelAsync();
@@ -112,16 +116,33 @@ namespace SmartDevelop.TokenizerBase.IA
             _tokenizerworker.RunWorkerAsync();
         }
 
+        /// <summary>
+        /// Starts Tokenizing sync
+        /// </summary>
         public void TokenizeSync() {
             _text = _document.Text;
             _textlen = _text.Length;
             TokinizeWorker(null, new DoWorkEventArgs(null));
         }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Is tokenizing running now?
+        /// </summary>
         public bool IsBusy {
             get { return _tokenizerworker.IsBusy; }
         }
 
+        public CodeTokenRepesentation CodeTokens {
+            get { return _codetokenRep; }
+        }
+
+        #endregion
+
+        #region Tokenizer
 
         void TokinizeWorker(object sender, DoWorkEventArgs e) {
             var bgw = sender as BackgroundWorker;
@@ -135,7 +156,6 @@ namespace SmartDevelop.TokenizerBase.IA
             _activeToken = Token.Unknown;
             _codesegmentsTemp.Clear();
             _currentRangeStart = 0;
-            //_codetokenRep.Clear();
 
             for(i = 0; i < _textlen; i++) {
 
@@ -154,6 +174,7 @@ namespace SmartDevelop.TokenizerBase.IA
                 // ensure that we differ from the token before in those cases
                 if( (ensureNewToken || _activeToken == Token.Bracket 
                     || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
+                    || _activeToken == Token.MemberInvoke
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
@@ -208,7 +229,7 @@ namespace SmartDevelop.TokenizerBase.IA
                         currentToken = Token.WhiteSpace;
                     } else if(c == PARAMDELEMITER){
                         currentToken = Token.ParameterDelemiter;
-                    } else if(!traditionalMode && c == MEMBERINVOKE && i > 0 && !IsWhiteSpace(i - 1)) {
+                    } else if(!traditionalMode && c == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
                         currentToken = Token.MemberInvoke;
                     } else if(!traditionalMode && c == STRINGCONCAT) {
                         currentToken = Token.StringConcat;
@@ -234,12 +255,6 @@ namespace SmartDevelop.TokenizerBase.IA
             }
             EndActiveToken(_textlen);
             _codetokenRep.Reset(_codesegmentsTemp);
-        }
-
-
-
-        public CodeTokenRepesentation CodeTokens {
-            get { return _codetokenRep; }
         }
 
         #region Helpermethods
@@ -278,6 +293,11 @@ namespace SmartDevelop.TokenizerBase.IA
                 }
             return isNum;
         }
+
+        bool IsNumber(char c) {
+            return AsciiHelper.IsAsciiNum(c);
+        }
+
         bool IsHexNumber(string str) {
             return str.Length > 2 && str.Substring(0, 2) == "0x" && IsNumber(str.Substring(2));
         }
@@ -393,5 +413,6 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #endregion
 
+        #endregion
     }
 }
