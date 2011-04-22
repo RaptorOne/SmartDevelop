@@ -13,10 +13,11 @@ using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.ViewModel.Folding;
 using Archimedes.Patterns.WPF.Commands;
+using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
-    public class CodeFileViewModel : WorkspaceViewModel
+    public class CodeFileViewModel : WorkspaceViewModel, ICacheable
     {
         #region Fields
 
@@ -25,12 +26,30 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         FoldingManager _foldingManager;
         AbstractFoldingStrategy _foldingStrategy;
         readonly IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+        
         bool foldingDirty = true;
         #endregion
 
+        /// <summary>
+        /// Raised when this Instance no longer is required in the cache
+        /// </summary>
+        public event EventHandler CacheExpired;
+
         #region Constructor
 
-        public CodeFileViewModel(ProjectItemCode projectitem) {
+        public static CodeFileViewModel Create(ProjectItemCode projectitem) {
+            var viewModelPoolService = ServiceLocator.Instance.Resolve<IViewModelPoolService>();
+            CodeFileViewModel vm;
+            vm = viewModelPoolService.Resolve<CodeFileViewModel>(projectitem);
+            if(vm == null) {
+                vm = new CodeFileViewModel(projectitem);
+                viewModelPoolService.Register(projectitem, vm);
+            }
+            return vm;
+        }
+
+
+        CodeFileViewModel(ProjectItemCode projectitem) {
 
             if(projectitem == null)
                 throw new ArgumentNullException("projectitem");
@@ -193,5 +212,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             }
         }
         #endregion
+
     }
 }

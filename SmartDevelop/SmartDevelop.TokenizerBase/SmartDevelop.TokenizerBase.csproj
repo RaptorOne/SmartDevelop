@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AHK\BuildInMembers.cs" />
+    <Compile Include="AsciiHelper.cs" />
     <Compile Include="CodeTokenRepesentation.cs" />
     <Compile Include="IA\Indentation\IAIndentationStrategy.cs" />
     <Compile Include="IA\Indentation\DocumentAccessor.cs" />

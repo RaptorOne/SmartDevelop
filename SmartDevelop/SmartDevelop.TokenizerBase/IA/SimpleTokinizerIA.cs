@@ -4,12 +4,19 @@ using System.Text;
 using ICSharpCode.AvalonEdit.Document;
 using System.ComponentModel;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace SmartDevelop.TokenizerBase.IA
 {
 
     static class StringExtensions
     {
+        /// <summary>
+        /// Get the previous char of the given index (or NULL when index out of bounds)
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
         public static char Previous(this string str, int i) {
             if(i != 0)
                 return str[i - 1];
@@ -17,6 +24,12 @@ namespace SmartDevelop.TokenizerBase.IA
                 return '\0';
         }
 
+        /// <summary>
+        /// Get the next char at the given index of this string (or NULL when index out of bounds)
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
         public static char Next(this string str, int i) {
             if(i != str.Length - 1) {
                 return str[i + 1]; 
@@ -36,12 +49,31 @@ namespace SmartDevelop.TokenizerBase.IA
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
         static List<char> BRAKETS = new List<char> { '(', ')', '{', '}', '[', ']' };
+        static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' };
+        static List<string> KEYWORDS = new List<string> 
+            { 
+                "if",
+                "loop",
+                "while",
+                "return",
+                "is",
+                "global",
+                "static",
+
+                "true",
+                "false"
+                
+                //etc
+            };
+
 
         #endregion
 
         #region Fields
 
         CodeTokenRepesentation _codetokenRep = new CodeTokenRepesentation();
+        List<CodeSegment> _codesegmentsTemp = new List<CodeSegment>();
+
         ITextSource _document;
         string _text;
         int _textlen = 0;
@@ -94,12 +126,16 @@ namespace SmartDevelop.TokenizerBase.IA
         void TokinizeWorker(object sender, DoWorkEventArgs e) {
             var bgw = sender as BackgroundWorker;
             Token currentToken = Token.Unknown;
+            
             bool inliteralString = false;
             bool ensureNewToken = false;
+            bool traditionalMode = false;
             int i;
             //clean things up
             _activeToken = Token.Unknown;
-            _codetokenRep.Clear();
+            _codesegmentsTemp.Clear();
+            _currentRangeStart = 0;
+            //_codetokenRep.Clear();
 
             for(i = 0; i < _textlen; i++) {
 
@@ -126,7 +162,11 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 #endregion
 
-                if(IsLieralStringMarker(i)) {
+
+                if(_text[i] == '\n') {
+                    currentToken = Token.NewLine;
+                    traditionalMode = false;
+                } else if(!traditionalMode && IsLieralStringMarker(i)) {
                     if(_activeToken == Token.LiteralString) {
                         ensureNewToken = true;
                         inliteralString = false;
@@ -134,7 +174,7 @@ namespace SmartDevelop.TokenizerBase.IA
                         currentToken = Token.LiteralString;
                         inliteralString = true;
                     }
-                } else if(IsMultiLineCommentStart(i)) {
+                } else if(!traditionalMode && IsMultiLineCommentStart(i)) {
                     EndActiveToken(i);
                     _activeToken = Token.MultiLineComment;
 
@@ -157,28 +197,33 @@ namespace SmartDevelop.TokenizerBase.IA
                         i += 2;
                         EndActiveToken(i);
                     }
-
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
-                    if(BRAKETS.Contains(_text[i])) {
+                    char c = _text[i];
+                    if(!traditionalMode && BRAKETS.Contains(c)) {
                         currentToken = Token.Bracket;
-                    } else if(_text[i] == SINGLELINE_COMMENT) {
+                    } else if(c == SINGLELINE_COMMENT) {
                         currentToken = Token.SingleLineComment;
-                    } else if(IsWhiteSpace(i)) {
+                    } else if(!traditionalMode && IsWhiteSpace(i)) {
                         currentToken = Token.WhiteSpace;
-                    } else if(_text[i] == PARAMDELEMITER){
+                    } else if(c == PARAMDELEMITER){
                         currentToken = Token.ParameterDelemiter;
-                    } else if(_text[i] == MEMBERINVOKE && i > 0 && !IsWhiteSpace(i-1)) {
+                    } else if(!traditionalMode && c == MEMBERINVOKE && i > 0 && !IsWhiteSpace(i - 1)) {
                         currentToken = Token.MemberInvoke;
-                    } else if(_text[i] == STRINGCONCAT) {
+                    } else if(!traditionalMode && c == STRINGCONCAT) {
                         currentToken = Token.StringConcat;
-                    } else {
-                        // to do: default expressions
-                    }
-                }
 
-                if(_text[i] == '\n') {
-                    currentToken = Token.NewLine;
+                    //}else if(!traditionalMode && IsVariableAsignStart(i)){
+
+                    } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
+                        currentToken = Token.TraditionalCommandInvoke;
+                        traditionalMode = true;
+                    } else if(!traditionalMode && OPERATORS.Contains(c)) {
+                        currentToken = Token.OperatorFlow;
+                        // to do: default expressions_activeToken
+                    } else if(_activeToken == Token.OperatorFlow && !OPERATORS.Contains(c)) {
+                        currentToken = Token.Unknown;
+                    }
                 }
 
                 if(currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
@@ -188,6 +233,7 @@ namespace SmartDevelop.TokenizerBase.IA
                 }
             }
             EndActiveToken(_textlen);
+            _codetokenRep.Reset(_codesegmentsTemp);
         }
 
 
@@ -205,15 +251,85 @@ namespace SmartDevelop.TokenizerBase.IA
             if(l > 0) {
                 var str = _text.Substring(_currentRangeStart, l).Trim(trimchars);
                 if(!(_activeToken == Token.Unknown && str.Length == 0)){
-                    _codetokenRep.Add(new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l)));
+
+                    if(_activeToken == Token.Unknown){
+                        if(IsNumber(str))
+                            _activeToken = Token.Number;
+                        else if(IsHexNumber(str)) {
+                            _activeToken = Token.HexNumber;
+                        } else if(KEYWORDS.Contains(str.ToLowerInvariant())) {
+                            _activeToken = Token.KeyWord;
+                        }
+                    }
+
+                    _codesegmentsTemp.Add(new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l)));
                 }
             }
             _currentRangeStart = index;
         }
 
+        bool IsNumber(string str) {
+            bool isNum = true;
+                //check for number:
+            foreach(char c in str)
+                if(!AsciiHelper.IsAsciiNum(c)) {
+                    isNum = false;
+                    break;
+                }
+            return isNum;
+        }
+        bool IsHexNumber(string str) {
+            return str.Length > 2 && str.Substring(0, 2) == "0x" && IsNumber(str.Substring(2));
+        }
+
         bool IsWhiteSpace(int index) {
             return (_text[index] == ' ') ||( _text[index] == '\t');
         }
+
+        /// <summary>
+        /// Checks if at this index a traditional command starts:
+        /// -> Must be sequeled by whitechars
+        /// -> Must not be followed by '(' or ')' 
+        /// </summary>
+        /// <returns></returns>
+        bool IsTraditionalCommandBegin(int index) {
+            if(IsCleanPrefixSpace(index)) {
+                if(IsReservedKeyWordStart(index))
+                    return false;
+
+                var command = ExtractWord(index);
+                if(command.Length == 0)
+                    return false;
+
+                char c;
+                bool fail = false;
+                for(int scanPtr = index + command.Length; _textlen > scanPtr; scanPtr++) {
+                    c = _text[scanPtr];
+                    if(c == '(' || OPERATORS.Contains(c)) {
+                        fail = true;
+                        break;
+                    }
+                    if(AsciiHelper.IsAsciiLiteralLetter(c))
+                        break;
+                }
+                return !fail;
+            }
+            return false;
+        }
+
+        //bool IsVariableAsignStart(int index) {
+        //    if(IsCleanPrefixSpace(index)) {
+
+        //        var word = ExtractWord(index);
+        //        if(KEYWORDS.Contains(word))
+        //            return false;
+
+        //        //scan for asignment OP:
+
+
+
+        //    }
+        //}
 
         bool IsLieralStringMarker(int index) {
             return (_text[index] == LITERALSTR && !IsInAnyComment());
@@ -237,6 +353,42 @@ namespace SmartDevelop.TokenizerBase.IA
 
         bool IsSingleCharToken(Token token) {
             return token == Token.Bracket || token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat;
+        }
+
+        bool IsReservedKeyWordStart(int index) {
+            return (KEYWORDS.Contains(ExtractWord(index).ToLowerInvariant()));
+        }
+
+        string ExtractWord(int start) {
+            var sb = new StringBuilder();
+            char c;
+
+            for(int sprt = start; sprt < _textlen; sprt++) {
+                c = _text[sprt];
+                if(!IsWhiteChar(sprt) && AsciiHelper.IsAsciiLiteralLetter(c)) {
+                    sb.Append(c);
+                } else
+                    break;
+            }
+            return sb.ToString();
+        }
+
+
+        bool IsCleanPrefixSpace(int index) {
+            bool cleanPrefixSpace = true;
+            for(int pPtr = index - 1; pPtr >= 0; pPtr--) {
+                if(_text[pPtr] == '\n')
+                    break;
+                if(!IsWhiteChar(pPtr)) {
+                    cleanPrefixSpace = false;
+                    break;
+                }
+            }
+            return cleanPrefixSpace;
+        }
+
+        bool IsWhiteChar(int index) {
+            return _text[index] == ' ' || _text[index] == '\t';
         }
 
         #endregion

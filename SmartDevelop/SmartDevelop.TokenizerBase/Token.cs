@@ -8,6 +8,7 @@ namespace SmartDevelop.TokenizerBase
     public enum Token
     {
         Unknown,
+        Assign,
         SingleLineComment,
         MultiLineComment,
         LiteralString,
@@ -16,6 +17,16 @@ namespace SmartDevelop.TokenizerBase
         ParameterDelemiter,
         NewLine,
         MemberInvoke,
-        StringConcat
+        StringConcat,
+        OperatorFlow,
+        Number,
+        HexNumber,
+        KeyWord,
+
+        //Legacy
+        TraditionalString,
+        TraditionalCommandInvoke,
+        TraditionalAssign,
+        Deref,
     }
 }

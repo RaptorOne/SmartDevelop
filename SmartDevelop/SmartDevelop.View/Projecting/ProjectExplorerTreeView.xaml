@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:solex="clr-namespace:SmartDevelop.ViewModel.SolutionExplorer;assembly=SmartDevelop.ViewModel"
+             xmlns:acb="Archimedes.Patterns.WPF.ACB;assembly=Archimedes.Patterns.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="436">
-    <StackPanel Orientation="Vertical">
-        <TreeView  ItemsSource="{Binding Path=Solutions}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="500">
+    
+        <TreeView  ItemsSource="{Binding Path=Solutions}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 
             <TreeView.Resources>
                 
@@ -33,7 +34,9 @@
                 </HierarchicalDataTemplate>
 
                 <!-- CodeFile Item-->
-                <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemCodeFile}" ItemsSource="{Binding Children}" >
+                <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemCodeFile}" ItemsSource="{Binding Children}">
+
+                <Grid >
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.ContextMenu>
                             <ContextMenu>
@@ -42,10 +45,12 @@
                                 <MenuItem Header="Clear"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
-                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                   
+                    <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
                         <TextBlock Text="{Binding DisplayName}" />
                     </StackPanel>
-                </HierarchicalDataTemplate>
+                </Grid>
+            </HierarchicalDataTemplate>
 
 
             </TreeView.Resources>
@@ -69,5 +74,4 @@
             </TreeView.ItemContainerStyle>
             
         </TreeView>
-    </StackPanel>
 </UserControl>

@@ -24,9 +24,15 @@
       <Word>is</Word>
       <Word>null</Word>
       <Word>return</Word>
+      <Word>global</Word>
+      <Word>static</Word>
+
+      <Word>true</Word>
+      <Word>false</Word>
       
       <Word>loop</Word>
       <Word>while</Word>
+
     </Keywords>
 
 

@@ -26,7 +26,15 @@ namespace SmartDevelop.View.Projecting
 
         void OnItemMouseDoubleClick(object sender, MouseButtonEventArgs e) {
             var itemVM = (TreeViewProjectItem)((TreeViewItem)e.Source).DataContext;
-            var cc = itemVM.FocusCommand;
+            //var cc = itemVM.FocusCommand;
+
+            if(itemVM is TreeViewProjectItemCodeFile) {
+                var viewCodeCMD = ((TreeViewProjectItemCodeFile)itemVM).ViewCodeCommand;
+                if(viewCodeCMD.CanExecute(null)) {
+                    viewCodeCMD.Execute(null);
+                }
+            }
+
         }
     }
 }

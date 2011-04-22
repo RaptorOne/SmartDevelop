@@ -16,7 +16,6 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             throw new NotImplementedException("LazyLoading");
         }
 
-        
         /// <summary>
         /// Relative URI to Image Resource
         /// </summary>

@@ -38,7 +38,7 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         public ICommand ViewCodeCommand {
             get {
                 if(_codeVM == null) {
-                    _codeVM = new CodeFileViewModel(_codeitem);
+                    _codeVM = CodeFileViewModel.Create(_codeitem);
                 }
                 return _codeVM.ShowCommand;
             }

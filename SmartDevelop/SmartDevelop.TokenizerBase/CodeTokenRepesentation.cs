@@ -8,7 +8,6 @@ namespace SmartDevelop.TokenizerBase.IA
 {
     public class CodeTokenRepesentation
     {
-
         #region Fields
 
         readonly object _codesegmentsLock = new object();
@@ -38,6 +37,18 @@ namespace SmartDevelop.TokenizerBase.IA
             }
         }
 
+        public int IndexOf(CodeSegment segment) {
+            lock(_codesegmentsLock) {
+                return _codesegments.IndexOf(segment);
+            }
+        }
+
+        public int LastIndexOf(CodeSegment segment) {
+            lock(_codesegmentsLock) {
+                return _codesegments.LastIndexOf(segment);
+            }
+        }
+
         public IEnumerable<CodeSegment> GetSegments() {
             return new List<CodeSegment>(_codesegments);
         }
@@ -63,5 +74,11 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #endregion
 
+        internal void Reset(List<CodeSegment> newtokens) {
+            lock(_codesegmentsLock) {
+                _codesegments.Clear();
+                _codesegments.AddRange(newtokens);
+            }
+        }
     }
 }
