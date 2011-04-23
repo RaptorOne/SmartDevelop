@@ -17,7 +17,7 @@ namespace SmartDevelop.Model.StdLib
             SmartCodeProject stdlib = new SmartCodeProject("Std Lib");
 
             foreach(var file in Directory.GetFiles(AHK_STDLIB_x64)) {
-                var p = ProjectItemCode.FromFile(file);
+                var p = ProjectItemCode.FromFile(file, stdlib);
                 if(p != null)
                     stdlib.Add(p);
             }

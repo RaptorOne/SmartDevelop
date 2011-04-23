@@ -23,15 +23,8 @@ namespace SmartDevelop.ViewModel.Main
         public void SetDockManager(DockingManager dockmanager) {
             _dockManager = dockmanager;
             ServiceLocator.Instance.Resolve<IAvalonService>().PrimaryDockManager = _dockManager;
-
-            // debug only
-            var codeVM = CodeFileViewModel.Create(new ProjectItemCode(CodeItemType.IA));
-            codeVM.DisplayName = "Example Content";
-            _workbenchService.ShowDockedDocument(codeVM, codeVM.DisplayName);
         }
 
-
-        
         public SolutionExplorerVM SolutionVM {
             get { return _solutionVM; }
         }

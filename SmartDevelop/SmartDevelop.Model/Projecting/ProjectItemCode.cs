@@ -7,6 +7,7 @@ using SmartDevelop.TokenizerBase.IA;
 using System.Threading;
 using System.Windows.Threading;
 using System.IO;
+using SmartDevelop.Model.Tokening;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -20,6 +21,9 @@ namespace SmartDevelop.Model.Projecting
         AHK2 = 8
     }
 
+    /// <summary>
+    /// Represents a single Codefile
+    /// </summary>
     public class ProjectItemCode : ProjectItem
     {
         #region Fields
@@ -27,9 +31,16 @@ namespace SmartDevelop.Model.Projecting
         readonly TextDocument _codedocument;
         CodeItemType _type = CodeItemType.None;
         SimpleTokinizerIA _tokenizer;
+        CodeTokenService _codeTokenService;
         bool _documentdirty = false;
+        bool _isModified = false;
 
         #endregion
+
+        /// <summary>
+        /// Raised when the background tokenizer has refreshed the tokens 
+        /// </summary>
+        public event EventHandler TokenizerUpdated;
 
         #region Constructors
 
@@ -38,11 +49,11 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         /// <param name="filepath"></param>
         /// <returns></returns>
-        public static ProjectItemCode FromFile(string filepath){
+        public static ProjectItemCode FromFile(string filepath, ProjectItem parent) {
             if(!File.Exists(filepath))
                 return null;
 
-            ProjectItemCode newp = new ProjectItemCode(CodeItemTypeFromExtension(Path.GetExtension(filepath)));
+            ProjectItemCode newp = new ProjectItemCode(CodeItemTypeFromExtension(Path.GetExtension(filepath)), parent);
             newp.FilePath = filepath;
             try
             {
@@ -57,32 +68,30 @@ namespace SmartDevelop.Model.Projecting
                 // to do
             }
             return newp;
-        }
+        }     
 
-        public static CodeItemType CodeItemTypeFromExtension(string ext) {
-            switch(ext.ToLowerInvariant()){
-                case ".ia":
-                    return CodeItemType.IA;
-                case ".ahk":
-                    return CodeItemType.AHK;
-                default:
-                    return CodeItemType.None;
-            }
-        }
-
-        public ProjectItemCode(CodeItemType type) {
+        ProjectItemCode(CodeItemType type, ProjectItem parent) 
+            : base(parent) {
             _codedocument = new TextDocument();
             Encoding = Encoding.UTF8;
 
             _codedocument.Changed += OnCodedocumentChanged;
 
+            _codeTokenService = new CodeTokenService(this);
             _tokenizer = new SimpleTokinizerIA(_codedocument);
+
+            _tokenizer.Finished += (s, e) => {
+                _codeTokenService.Reset(_tokenizer.GetSegmentsSnapshot());
+                if(TokenizerUpdated != null) {
+                    TokenizerUpdated(this, EventArgs.Empty);
+                }
+            };
             _type = type;
 
-            DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
-            foldingUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
-            foldingUpdateTimer.Tick += CheckUpdateTokenRepresentation;
-            foldingUpdateTimer.Start();
+            DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
+            tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
+            tokenUpdateTimer.Tick += CheckUpdateTokenRepresentation;
+            tokenUpdateTimer.Start();
         }
 
         #endregion
@@ -136,6 +145,7 @@ namespace SmartDevelop.Model.Projecting
             using(FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)) {
                 Save(fs);
             }
+            IsModified = false;
         }
 
         #endregion
@@ -148,8 +158,8 @@ namespace SmartDevelop.Model.Projecting
             get { return _codedocument; }
         }
 
-        public CodeTokenRepesentation TokenService {
-            get { return _tokenizer.CodeTokens; }
+        public CodeTokenService TokenService {
+            get { return _codeTokenService; }
         }
 
         void OnCodedocumentChanged(object sender, EventArgs e){
@@ -163,12 +173,27 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        bool _isModified;
-        public bool IsModified { get { return _isModified; } set { _isModified = value; } }
-
+        public bool IsModified { 
+            get { return _isModified; } 
+            private set { 
+                _isModified = value; 
+            } 
+        }
 
         public override string ToString() {
             return string.Format("{0} ({1})", this.Name, Type);
+        }
+
+
+        public static CodeItemType CodeItemTypeFromExtension(string ext) {
+            switch(ext.ToLowerInvariant()) {
+                case ".ia":
+                    return CodeItemType.IA;
+                case ".ahk":
+                    return CodeItemType.AHK;
+                default:
+                    return CodeItemType.None;
+            }
         }
     }
 }

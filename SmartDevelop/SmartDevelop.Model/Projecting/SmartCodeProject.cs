@@ -3,50 +3,110 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SmartDevelop.Model.CodeCompleting;
+using SmartDevelop.Model.DOM;
+using System.CodeDom;
 
 namespace SmartDevelop.Model.Projecting
 {
-
-    public class SmartCodeProject
+    /// <summary>
+    /// Represents a smart Project
+    /// </summary>
+    public class SmartCodeProject : ProjectItem
     {
-        List<ProjectItem> _items = new List<ProjectItem>();
+        #region Fields
+
+        readonly CodeDOMService _domservice;
+
+        #endregion
+
+        #region Events
 
         public event EventHandler<ProjectItemEventArgs> ItemAdded;
         public event EventHandler<ProjectItemEventArgs> ItemRemoved;
 
+        #endregion
 
-        public SmartCodeProject(string name) {
+        #region Constructor
+
+        public SmartCodeProject(string name) 
+            : base(null) {
             Name = name;
+            _domservice = new CodeDOMService(this);
         }
 
+        #endregion
+
+        #region ProjectItem Access
+
         public void Add(ProjectItem item) {
-            _items.Add(item);
+            Children.Add(item);
             if(ItemAdded != null)
                 ItemAdded(this, new ProjectItemEventArgs(item));
+
+
+            if(item is ProjectItemCode) {
+                ((ProjectItemCode)item).TokenizerUpdated += OnCodeFileTokenizerUpdated;
+            }
         }
 
         public void Remove(ProjectItem item) {
-            _items.Remove(item);
+            if(item is ProjectItemCode) {
+                ((ProjectItemCode)item).TokenizerUpdated -= OnCodeFileTokenizerUpdated;
+            }
+            Children.Remove(item);
             if(ItemRemoved != null)
                 ItemRemoved(this, new ProjectItemEventArgs(item));
         }
 
         public IEnumerable<ProjectItem> GetAllItems() {
-            return new List<ProjectItem>(_items);
+            return new List<ProjectItem>(Children);
         }
 
         public IEnumerable<T> GetAllItems<T>()
             where T : ProjectItem {
-            return from i in _items
+                return from i in Children
                    where i is T
                    select i as T;
         }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Returns itself ;) 
+        /// (children delegate their Project Get up to the parent root)
+        /// </summary>
+        public override SmartCodeProject Project {
+            get {
+                return this;
+            }
+        }
+
         string _name="";
-        public string Name {
+        public override string Name {
             get { return _name; }
             set { _name = value; }
         }
+
+        #endregion
+
+        #region Event Handlers
+
+        void OnCodeFileTokenizerUpdated(object sender, EventArgs e) {
+
+                _domservice.CompileFile((ProjectItemCode)sender, _domservice.RootType);
+                var i = _domservice.RootType.Members.Count;
+
+                var str = "";
+                foreach(CodeMemberMethod m in _domservice.RootType.Members)
+                    str += m.Name + "\n";
+
+                var sa = str;
+        }
+
+
+        #endregion
     }
 
     public class ProjectItemEventArgs : EventArgs

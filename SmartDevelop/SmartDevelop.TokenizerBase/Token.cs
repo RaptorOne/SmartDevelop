@@ -12,7 +12,6 @@ namespace SmartDevelop.TokenizerBase
         SingleLineComment,
         MultiLineComment,
         LiteralString,
-        Bracket,
         WhiteSpace,
         ParameterDelemiter,
         NewLine,
@@ -22,6 +21,41 @@ namespace SmartDevelop.TokenizerBase
         Number,
         HexNumber,
         KeyWord,
+
+        #region Brackets
+
+        /// <summary>
+        /// (
+        /// </summary>
+        LiteralBracketOpen,
+        
+        /// <summary>
+        /// )
+        /// </summary>
+        LiteralBracketClosed,
+
+        /// <summary>
+        /// [
+        /// </summary>
+        IndexerBracketOpen,
+
+        /// <summary>
+        /// ]
+        /// </summary>
+        IndexerBracketClosed,
+
+        /// <summary>
+        /// {
+        /// </summary>
+        BlockOpen,
+
+        /// <summary>
+        /// }
+        /// </summary>
+        BlockClosed,
+
+
+        #endregion
 
         //Legacy
         TraditionalString,

@@ -48,11 +48,14 @@ namespace SmartDevelop.TokenizerBase.IA
         const char PARAMDELEMITER = ',';
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
-        static List<char> BRAKETS = new List<char> { '(', ')', '{', '}', '[', ']' };
+
+        static Dictionary<char, Token> BRAKETS = new Dictionary<char, Token>();
+
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' , '?' };
         static List<string> KEYWORDS = new List<string> 
             { 
                 "if",
+                "else",
                 "loop",
                 "while",
                 "return",
@@ -62,22 +65,35 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 "true",
                 "false"
-                
                 //etc
             };
+
+        static SimpleTokinizerIA(){
+            BRAKETS.Add('(', Token.LiteralBracketOpen);
+            BRAKETS.Add(')', Token.LiteralBracketClosed);
+            BRAKETS.Add('{', Token.BlockOpen);
+            BRAKETS.Add('}', Token.BlockClosed);
+            BRAKETS.Add('[', Token.IndexerBracketOpen);
+            BRAKETS.Add(']', Token.IndexerBracketClosed);
+        }
 
 
         #endregion
 
+        public event EventHandler Finished;
+
         #region Fields
 
-        CodeTokenRepesentation _codetokenRep = new CodeTokenRepesentation();
-        List<CodeSegment> _codesegmentsTemp = new List<CodeSegment>();
+        
+        List<CodeSegment> _codesegmentsWorker = new List<CodeSegment>();
+        List<CodeSegment> _codesegmentsSave = new List<CodeSegment>();
+        object __codesegmentsSaveLock = new object();
 
         ITextSource _document;
         string _text;
         int _textlen = 0;
         int _currentRangeStart = 0;
+        int _currentLine = 0;
         Token _activeToken = Token.Unknown;
 
         BackgroundWorker _tokenizerworker;
@@ -92,6 +108,11 @@ namespace SmartDevelop.TokenizerBase.IA
             _tokenizerworker = new BackgroundWorker();
             _tokenizerworker.DoWork += TokinizeWorker;
             _tokenizerworker.WorkerSupportsCancellation = true;
+
+            _tokenizerworker.RunWorkerCompleted += (s, e) => {
+                    if(Finished != null)
+                        Finished(this, EventArgs.Empty);
+                };
         }
 
         #endregion
@@ -125,6 +146,16 @@ namespace SmartDevelop.TokenizerBase.IA
             TokinizeWorker(null, new DoWorkEventArgs(null));
         }
 
+        /// <summary>
+        /// Get imutalble List of segments
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<CodeSegment> GetSegmentsSnapshot() {
+            lock(__codesegmentsSaveLock) {
+                return new List<CodeSegment>(_codesegmentsSave);
+            }
+        }
+
         #endregion
 
         #region Properties
@@ -134,10 +165,6 @@ namespace SmartDevelop.TokenizerBase.IA
         /// </summary>
         public bool IsBusy {
             get { return _tokenizerworker.IsBusy; }
-        }
-
-        public CodeTokenRepesentation CodeTokens {
-            get { return _codetokenRep; }
         }
 
         #endregion
@@ -154,8 +181,9 @@ namespace SmartDevelop.TokenizerBase.IA
             int i;
             //clean things up
             _activeToken = Token.Unknown;
-            _codesegmentsTemp.Clear();
+            _codesegmentsWorker.Clear();
             _currentRangeStart = 0;
+            _currentLine = 0;
 
             for(i = 0; i < _textlen; i++) {
 
@@ -172,7 +200,7 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 // end one sign regions -> braktes/lines
                 // ensure that we differ from the token before in those cases
-                if( (ensureNewToken || _activeToken == Token.Bracket 
+                if((ensureNewToken || BRAKETS.ContainsValue(_activeToken) 
                     || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
                     || _activeToken == Token.MemberInvoke
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
@@ -186,6 +214,7 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 if(_text[i] == '\n') {
                     currentToken = Token.NewLine;
+                    _currentLine++;
                     traditionalMode = false;
                 } else if(!traditionalMode && IsLieralStringMarker(i)) {
                     if(_activeToken == Token.LiteralString) {
@@ -204,6 +233,8 @@ namespace SmartDevelop.TokenizerBase.IA
                     // to speed things up
                     bool endingboundsFound = false;
                     while(i < _textlen) {
+                        if(_text[i] == '\n')
+                            _currentLine++;
                         if(IsMultiLineCommentEnd(i)) {
                             endingboundsFound = true;
                             break;
@@ -221,8 +252,8 @@ namespace SmartDevelop.TokenizerBase.IA
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
                     char c = _text[i];
-                    if(!traditionalMode && BRAKETS.Contains(c)) {
-                        currentToken = Token.Bracket;
+                    if(!traditionalMode && BRAKETS.ContainsKey(c)) {
+                        currentToken = BRAKETS[c];
                     } else if(c == SINGLELINE_COMMENT) {
                         currentToken = Token.SingleLineComment;
                     } else if(!traditionalMode && IsWhiteSpace(i)) {
@@ -254,12 +285,17 @@ namespace SmartDevelop.TokenizerBase.IA
                 }
             }
             EndActiveToken(_textlen);
-            _codetokenRep.Reset(_codesegmentsTemp);
+            lock(__codesegmentsSaveLock) {
+                _codesegmentsSave.Clear();
+                _codesegmentsSave.AddRange(_codesegmentsWorker);
+            }
         }
 
         #region Helpermethods
 
         static char[] trimchars = { ' ', '\t', '\n', '\r' };
+
+        CodeSegment _previous = null;
 
         void EndActiveToken(int index) {
             int l = index - _currentRangeStart;
@@ -276,8 +312,11 @@ namespace SmartDevelop.TokenizerBase.IA
                             _activeToken = Token.KeyWord;
                         }
                     }
-
-                    _codesegmentsTemp.Add(new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l)));
+                    var current = new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _previous);
+                    if(_previous != null)
+                        _previous.Next = current;
+                    _previous = current;
+                    _codesegmentsWorker.Add(current);
                 }
             }
             _currentRangeStart = index;
@@ -372,7 +411,7 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         bool IsSingleCharToken(Token token) {
-            return token == Token.Bracket || token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat;
+            return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || BRAKETS.ContainsValue(token);
         }
 
         bool IsReservedKeyWordStart(int index) {

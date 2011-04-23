@@ -10,8 +10,6 @@ namespace SmartDevelop.Model.Projecting
         ProjectItem _parent;
         List<ProjectItem> _children = new List<ProjectItem>();
 
-        public ProjectItem() { }
-
         public ProjectItem(ProjectItem parent) {
             _parent = parent;
         }
@@ -24,6 +22,14 @@ namespace SmartDevelop.Model.Projecting
             get { return _parent; }
         }
 
+        public virtual SmartCodeProject Project {
+            get {
+                if(_parent != null)
+                    return _parent.Project;
+                else
+                    return null;
+            }
+        }
 
         public abstract string Name { get; set; }
     }

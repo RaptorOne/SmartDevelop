@@ -17,7 +17,7 @@ namespace SmartDevelop.Tests.TestCases
             var tokenizer = new SimpleTokinizerIA(doc);
 
             tokenizer.TokenizeSync();
-            return tokenizer.CodeTokens.GetSegments();
+            return tokenizer.GetSegmentsSnapshot();
         }
     }
 }

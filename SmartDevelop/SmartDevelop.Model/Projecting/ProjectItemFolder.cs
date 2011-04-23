@@ -7,17 +7,18 @@ namespace SmartDevelop.Model.Projecting
 {
     public class ProjectItemFolder : ProjectItem
     {
-
-        public ProjectItemFolder(string name) {
+        string _name;
+        public ProjectItemFolder(string name, ProjectItem parent) 
+            : base(parent) {
 
         }
 
         public override string Name {
             get {
-                throw new NotImplementedException();
+                return _name;
             }
             set {
-                throw new NotImplementedException();
+                _name = value;
             }
         }
     }

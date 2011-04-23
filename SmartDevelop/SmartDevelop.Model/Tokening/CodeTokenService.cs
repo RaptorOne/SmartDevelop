@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.Projecting;
+
+namespace SmartDevelop.Model.Tokening
+{
+    /// <summary>
+    /// Threadsafe CodeToken Provider
+    /// </summary>
+    public class CodeTokenService
+    {
+        #region Fields
+
+        readonly object _codesegmentsLock = new object();
+        readonly Dictionary<int, CodeTokenLine> _codeLineSegments = new Dictionary<int, CodeTokenLine>();
+        IEnumerable<CodeSegment> _segments;
+        readonly ProjectItemCode _codeitem;
+        int _maxLine = 0;
+
+        #endregion
+
+        public CodeTokenService(ProjectItemCode codeitem) {
+            _codeitem = codeitem; 
+        }
+
+        public CodeTokenLine GetNextLine(int currentLine) {
+            CodeTokenLine nextLine = new CodeTokenLine();
+            for(int i = currentLine + 1; i <= _maxLine; i++) {
+                if(_codeLineSegments.ContainsKey(i)) {
+                    nextLine = _codeLineSegments[i];
+                    break;
+                }
+            }
+            return nextLine;
+        }
+
+        #region CodeSegment Access
+
+
+        public void Reset(IEnumerable<CodeSegment> newtokens) {
+            lock(_codesegmentsLock) {
+                _segments = new List<CodeSegment>(newtokens);
+                _codeLineSegments.Clear();
+                foreach(var t in newtokens) {
+                    if(_codeLineSegments.ContainsKey(t.Line))
+                        _codeLineSegments[t.Line].Add(t);
+                    else {
+                        _codeLineSegments.Add(t.Line, new CodeTokenLine(t));
+                        _maxLine = t.Line;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a swallow copy of the codeline map
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<int, CodeTokenLine> GetCodeSegmentLinesMap() {
+            lock(_codesegmentsLock) {
+                return new Dictionary<int, CodeTokenLine>(_codeLineSegments);
+            }
+        }
+
+        /// <summary>
+        /// returns a swallow copy of all segemnts
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<CodeSegment> GetSegments() {
+            lock(_codesegmentsLock) {
+            return new List<CodeSegment>(_segments);
+            }
+        }
+
+        #endregion
+
+        #region Query Methods
+
+        [Obsolete]
+        public CodeSegment QueryCodeSegmentAt(int offset) {
+            CodeSegment t = CodeSegment.Empty;
+            lock(_codesegmentsLock) {
+                foreach(var segment in _segments) {
+                    if(segment.Range.Offset <= offset && segment.Range.EndOffset >= offset) {
+                        t = segment;
+                        break;
+                    } else if(segment.Range.Offset > offset) {
+                        break;
+                    }
+                }
+            }
+            return t;
+        }
+
+        public CodeTokenLine QueryCodeSegmentsAtLine(int line) {
+            CodeTokenLine tokline = new CodeTokenLine();
+            if(_codeLineSegments.ContainsKey(line)) {
+                tokline = _codeLineSegments[line];
+            }
+            return tokline;
+        }
+        #endregion
+    }
+
+    public struct CodeTokenLine
+    {
+        public CodeTokenLine(CodeSegment initialToken) 
+            : this() {
+            Line = initialToken.Line;
+            CodeSegments = new List<CodeSegment>() { initialToken };
+        }
+
+        public bool IsEmpty {
+            get {
+                return CodeSegments == null;
+            }
+        }
+
+        public List<CodeSegment> CodeSegments { get; set; }
+        public int Line { get; set;}
+
+        public void Add(CodeSegment s) {
+            CodeSegments.Add(s);
+        }
+    }
+}
