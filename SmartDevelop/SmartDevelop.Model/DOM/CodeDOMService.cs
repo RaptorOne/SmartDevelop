@@ -19,7 +19,7 @@ namespace SmartDevelop.Model.DOM
         SmartCodeProject _project;
         CodeTypeDeclaration _scriptRoot;
         static List<Token> whitespacetoken = new List<Token> { Token.WhiteSpace, Token.NewLine };
-
+        
         #endregion
 
         #region Constructor
@@ -41,22 +41,48 @@ namespace SmartDevelop.Model.DOM
 
         #region Methods
 
+        // public IEnumerable<CodeMemberMethod> FindAllMethodsFrom()
 
+
+        //public CodeObject QueryCodeObjectAt(string filepath, int line, int col) {
+
+
+
+        //}
 
         #endregion
 
+
+        //IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
+
+        //    //List<CodeMemberMethod>
+
+        //    //var oldMembers = (from CodeTypeMember m in _scriptRoot.Members
+        //    //                  where m.LinePragma.FileName == filepath
+        //    //                  select m).ToList();
+
+
+
+        //    // todo look up class methods
+
+
+        //}
+
         #region File Compiler
 
-        public void CompileFile(ProjectItemCode codeitem, CodeTypeDeclaration initialparent) {
+        public void CompileTokenFile(ProjectItemCode codeitem, CodeTypeDeclaration initialparent) {
+
+            //remove all old members which are from this code file:
+            var oldMembers = (from CodeTypeMember m in _scriptRoot.Members
+                             where m.LinePragma.FileName == codeitem.FilePath
+                             select m).ToList();
+            foreach(var m in oldMembers)
+                _scriptRoot.Members.Remove(m);
+
+
             var segments = codeitem.TokenService.GetCodeSegmentLinesMap();
             CodeTypeDeclaration parent = initialparent;
-            Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
-
-            List<int> lines = new List<int>(segments.Keys.Count);
-            foreach(var k in segments.Keys) {
-                lines.Add(k);
-            }
-            
+            Stack<CodeSegment> paramstack = new Stack<CodeSegment>();           
             int linecnt = codeitem.Document.LineCount;
             CodeTokenLine line;
 
@@ -83,7 +109,6 @@ namespace SmartDevelop.Model.DOM
                                 // Method body starts at startMethodBody
                                 // Method body ends at
                                 var endMethodBody = startMethodBody.FindClosingBracked(true);
-                                // move the scanpointer to the method end:
                                 if(endMethodBody != null) {
 
                                     var method = new CodeMemberMethod()
@@ -93,6 +118,17 @@ namespace SmartDevelop.Model.DOM
                                         ReturnType = new CodeTypeReference(typeof(object))
                                     };
 
+
+                                    // extract Method Comment
+                                    var comment = methodName.PreviousOmit(whitespacetoken);
+                                    if(comment != null && comment.Type == Token.MultiLineComment) {
+                                        method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
+                                    } else if(comment != null && comment.Type == Token.SingleLineComment) {
+
+                                        //todo: collect all above singleline comments
+                                    }
+
+                                    // extract method params
                                     paramstack.Clear();
                                     CodeSegment previous = methodSignatureStart;
                                     // get method properties:
@@ -114,7 +150,11 @@ namespace SmartDevelop.Model.DOM
                                         }
                                         previous = current;
                                     }
+
+
                                     parent.Members.Add(method);
+                                    // move the scanpointer to the method end:
+                                    i = endMethodBody.Line;
                                     continue;
                                 }
 
@@ -124,6 +164,7 @@ namespace SmartDevelop.Model.DOM
                 }
             }
         }
+
         #endregion
     }
 

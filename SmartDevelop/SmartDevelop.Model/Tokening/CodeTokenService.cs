@@ -79,7 +79,11 @@ namespace SmartDevelop.Model.Tokening
 
         #region Query Methods
 
-        [Obsolete]
+
+
+
+
+        [Obsolete("Use line/column for much more performance")]
         public CodeSegment QueryCodeSegmentAt(int offset) {
             CodeSegment t = CodeSegment.Empty;
             lock(_codesegmentsLock) {
@@ -95,13 +99,20 @@ namespace SmartDevelop.Model.Tokening
             return t;
         }
 
-        public CodeTokenLine QueryCodeSegmentsAtLine(int line) {
+        //public CodeSegment QueryCodeSegmentAt(int line, int col) {
+        //    var tokenline = QueryCodeTokenLine(line);
+            
+
+        //}
+
+        public CodeTokenLine QueryCodeTokenLine(int line) {
             CodeTokenLine tokline = new CodeTokenLine();
             if(_codeLineSegments.ContainsKey(line)) {
                 tokline = _codeLineSegments[line];
             }
             return tokline;
         }
+
         #endregion
     }
 
@@ -124,6 +135,10 @@ namespace SmartDevelop.Model.Tokening
 
         public void Add(CodeSegment s) {
             CodeSegments.Add(s);
+        }
+
+        public override string ToString() {
+            return string.Format("L{0}, [{1}] {{2}}", Line, CodeSegments[0], CodeSegments.Count);
         }
     }
 }

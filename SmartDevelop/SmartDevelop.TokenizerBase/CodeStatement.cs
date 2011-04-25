@@ -9,12 +9,14 @@ namespace SmartDevelop.TokenizerBase
     {
         #region Fields
 
-        SimpleSegment _codesegment;
-        Token _type;
-        string _tokenstring;
+        readonly SimpleSegment _codesegment;
+        readonly Token _type;
+        readonly string _tokenstring;
         readonly int _line;
+        readonly int _column;
+
+        CodeSegment _previous;
         CodeSegment _next;
-        readonly CodeSegment _previous;
 
         #endregion
 
@@ -26,11 +28,12 @@ namespace SmartDevelop.TokenizerBase
             _previous = null;
         }
 
-        public CodeSegment(Token token, string tokenstr, SimpleSegment anchorsegment, int line, CodeSegment previous) {
+        public CodeSegment(Token token, string tokenstr, SimpleSegment anchorsegment, int line, int colstart, CodeSegment previous) {
             _type = token;
             _tokenstring = tokenstr;
             _codesegment = anchorsegment;
             _line = line;
+            _column = colstart;
             _previous = previous;
         }
 
@@ -63,6 +66,21 @@ namespace SmartDevelop.TokenizerBase
             else
                 return this.Next.NextOmit(tokenstoignore);
         }
+
+        /// <summary>
+        /// Return the previous codesegment by ignoring all tokens in the ignorelist
+        /// </summary>
+        /// <param name="tokenstoignore"></param>
+        /// <returns></returns>
+        public CodeSegment PreviousOmit(List<Token> tokenstoignore) {
+            if(this.Previous == null)
+                return null;
+            else if(!tokenstoignore.Contains(this.Previous.Type))
+                return this.Previous;
+            else
+                return this.Previous.PreviousOmit(tokenstoignore);
+        }
+
 
         /// <summary>
         /// Return the this or one of the following token depending on the token ignore list
@@ -135,6 +153,10 @@ namespace SmartDevelop.TokenizerBase
             get { return _tokenstring; }
         }
 
+        public int ColumnStart {
+            get { return _column; }
+        }
+
         public int Line {
             get { return _line; }
         }
@@ -160,7 +182,7 @@ namespace SmartDevelop.TokenizerBase
 
         public static CodeSegment Empty {
             get {
-                return new CodeSegment(Token.Unknown, "", new SimpleSegment(), 0, null);
+                return new CodeSegment(Token.Unknown, "", new SimpleSegment(), 0, 0, null);
             }
         }
     }

@@ -73,6 +73,10 @@ namespace SmartDevelop.Model.Projecting
 
         #region Properties
 
+        public CodeDOMService DOMService {
+            get { return _domservice; }
+        }
+
         /// <summary>
         /// Returns itself ;) 
         /// (children delegate their Project Get up to the parent root)
@@ -95,7 +99,7 @@ namespace SmartDevelop.Model.Projecting
 
         void OnCodeFileTokenizerUpdated(object sender, EventArgs e) {
 
-                _domservice.CompileFile((ProjectItemCode)sender, _domservice.RootType);
+                _domservice.CompileTokenFile((ProjectItemCode)sender, _domservice.RootType);
                 var i = _domservice.RootType.Members.Count;
 
                 var str = "";

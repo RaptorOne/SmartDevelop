@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AvalonDock;
 
-namespace SmartDevelop
+namespace SmartDevelop.View.Main
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

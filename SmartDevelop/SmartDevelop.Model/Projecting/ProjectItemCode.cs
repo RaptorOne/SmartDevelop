@@ -42,6 +42,8 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler TokenizerUpdated;
 
+        public event EventHandler IsModifiedChanged;
+
         #region Constructors
 
         /// <summary>
@@ -67,6 +69,8 @@ namespace SmartDevelop.Model.Projecting
                 // Let the user know what went wrong.
                 // to do
             }
+            newp.IsModified = false;
+            newp.Document.UndoStack.ClearAll();
             return newp;
         }     
 
@@ -164,6 +168,7 @@ namespace SmartDevelop.Model.Projecting
 
         void OnCodedocumentChanged(object sender, EventArgs e){
             _documentdirty = true;
+            IsModified = true;
         }
 
         void CheckUpdateTokenRepresentation(object sender, EventArgs e) {
@@ -175,8 +180,13 @@ namespace SmartDevelop.Model.Projecting
 
         public bool IsModified { 
             get { return _isModified; } 
-            private set { 
-                _isModified = value; 
+            private set {
+                if(_isModified == value)
+                    return;
+
+                _isModified = value;
+                if(IsModifiedChanged != null)
+                    IsModifiedChanged(this, EventArgs.Empty);
             } 
         }
 

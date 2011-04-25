@@ -50,7 +50,7 @@ namespace SmartDevelop.TokenizerBase.IA
         const char STRINGCONCAT = '.';
 
         static Dictionary<char, Token> BRAKETS = new Dictionary<char, Token>();
-
+        static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' , '?' };
         static List<string> KEYWORDS = new List<string> 
             { 
@@ -92,8 +92,12 @@ namespace SmartDevelop.TokenizerBase.IA
         ITextSource _document;
         string _text;
         int _textlen = 0;
+
         int _currentRangeStart = 0;
+        int _currentColStart = 0;
+
         int _currentLine = 0;
+        int _currentColumn = 0;
         Token _activeToken = Token.Unknown;
 
         BackgroundWorker _tokenizerworker;
@@ -183,8 +187,11 @@ namespace SmartDevelop.TokenizerBase.IA
             _activeToken = Token.Unknown;
             _codesegmentsWorker.Clear();
             _currentRangeStart = 0;
+            _currentColStart = 0;
             _currentLine = 0;
+            _currentColumn = 0;
 
+            char currentChar;
             for(i = 0; i < _textlen; i++) {
 
                 #region Handle Cancel Tokenizer
@@ -211,10 +218,12 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 #endregion
 
+                currentChar = _text[i];
 
-                if(_text[i] == '\n') {
+                if(currentChar == '\n') {
                     currentToken = Token.NewLine;
                     _currentLine++;
+                    _currentColumn = 0;
                     traditionalMode = false;
                 } else if(!traditionalMode && IsLieralStringMarker(i)) {
                     if(_activeToken == Token.LiteralString) {
@@ -247,22 +256,22 @@ namespace SmartDevelop.TokenizerBase.IA
                         return; // we are done ;)
                     } else {
                         i += 2;
+                        _currentColumn = 0;
                         EndActiveToken(i);
                     }
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
-                    char c = _text[i];
-                    if(!traditionalMode && BRAKETS.ContainsKey(c)) {
-                        currentToken = BRAKETS[c];
-                    } else if(c == SINGLELINE_COMMENT) {
+                    if(!traditionalMode && BRAKETS.ContainsKey(currentChar)) {
+                        currentToken = BRAKETS[currentChar];
+                    } else if(currentChar == SINGLELINE_COMMENT) {
                         currentToken = Token.SingleLineComment;
                     } else if(!traditionalMode && IsWhiteSpace(i)) {
                         currentToken = Token.WhiteSpace;
-                    } else if(c == PARAMDELEMITER){
+                    } else if(currentChar == PARAMDELEMITER) {
                         currentToken = Token.ParameterDelemiter;
-                    } else if(!traditionalMode && c == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
+                    } else if(!traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
                         currentToken = Token.MemberInvoke;
-                    } else if(!traditionalMode && c == STRINGCONCAT) {
+                    } else if(!traditionalMode && currentChar == STRINGCONCAT) {
                         currentToken = Token.StringConcat;
 
                     //}else if(!traditionalMode && IsVariableAsignStart(i)){
@@ -270,10 +279,10 @@ namespace SmartDevelop.TokenizerBase.IA
                     } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
                         currentToken = Token.TraditionalCommandInvoke;
                         traditionalMode = true;
-                    } else if(!traditionalMode && OPERATORS.Contains(c)) {
+                    } else if(!traditionalMode && OPERATORS.Contains(currentChar)) {
                         currentToken = Token.OperatorFlow;
                         // to do: default expressions_activeToken
-                    } else if(_activeToken == Token.OperatorFlow && !OPERATORS.Contains(c)) {
+                    } else if(_activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
                         currentToken = Token.Unknown;
                     }
                 }
@@ -283,6 +292,9 @@ namespace SmartDevelop.TokenizerBase.IA
                     EndActiveToken(i);
                     _activeToken = currentToken;
                 }
+
+                if(currentChar != '\n')
+                    _currentColumn++;
             }
             EndActiveToken(_textlen);
             lock(__codesegmentsSaveLock) {
@@ -312,7 +324,7 @@ namespace SmartDevelop.TokenizerBase.IA
                             _activeToken = Token.KeyWord;
                         }
                     }
-                    var current = new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _previous);
+                    var current = new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = current;
                     _previous = current;
@@ -320,6 +332,7 @@ namespace SmartDevelop.TokenizerBase.IA
                 }
             }
             _currentRangeStart = index;
+            _currentColStart = _currentColumn;
         }
 
         bool IsNumber(string str) {
@@ -356,7 +369,7 @@ namespace SmartDevelop.TokenizerBase.IA
                 if(IsReservedKeyWordStart(index))
                     return false;
 
-                var command = ExtractWord(index);
+                var command = ExtractWord(index, ALLOWED_SPECAILCHARS);
                 if(command.Length == 0)
                     return false;
 
@@ -368,27 +381,13 @@ namespace SmartDevelop.TokenizerBase.IA
                         fail = true;
                         break;
                     }
-                    if(AsciiHelper.IsAsciiLiteralLetter(c))
+                    if(AsciiHelper.IsAsciiLiteralLetter(c) || ALLOWED_SPECAILCHARS.Contains(c))
                         break;
                 }
                 return !fail;
             }
             return false;
         }
-
-        //bool IsVariableAsignStart(int index) {
-        //    if(IsCleanPrefixSpace(index)) {
-
-        //        var word = ExtractWord(index);
-        //        if(KEYWORDS.Contains(word))
-        //            return false;
-
-        //        //scan for asignment OP:
-
-
-
-        //    }
-        //}
 
         bool IsLieralStringMarker(int index) {
             return (_text[index] == LITERALSTR && !IsInAnyComment());
@@ -419,12 +418,15 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         string ExtractWord(int start) {
+            return ExtractWord(start, null);
+        }
+        string ExtractWord(int start, List<char> allowedspecailChars) {
             var sb = new StringBuilder();
             char c;
 
             for(int sprt = start; sprt < _textlen; sprt++) {
                 c = _text[sprt];
-                if(!IsWhiteChar(sprt) && AsciiHelper.IsAsciiLiteralLetter(c)) {
+                if(!IsWhiteChar(sprt) && (AsciiHelper.IsAsciiLiteralLetter(c) || (allowedspecailChars != null && allowedspecailChars.Contains(c)))) {
                     sb.Append(c);
                 } else
                     break;
