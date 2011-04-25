@@ -1,7 +1,7 @@
 ﻿<SyntaxDefinition name="AHK"
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="Green" />
-  <Color name="String" foreground="Blue" />
+  <Color name="String" foreground="DarkRed" />
 
   <!-- This is the main ruleset. -->
   <RuleSet ignoreCase="true">

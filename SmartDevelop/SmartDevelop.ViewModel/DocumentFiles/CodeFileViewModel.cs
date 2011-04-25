@@ -14,6 +14,9 @@ using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.ViewModel.Folding;
 using Archimedes.Patterns.WPF.Commands;
 using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
+using SmartDevelop.ViewModel.CodeCompleting;
+using System.CodeDom;
+using System.Text;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -28,6 +31,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         readonly IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
         
         bool foldingDirty = true;
+
         #endregion
 
         /// <summary>
@@ -45,6 +49,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 vm = new CodeFileViewModel(projectitem);
                 viewModelPoolService.Register(projectitem, vm);
             }
+
+
             return vm;
         }
 
@@ -55,11 +61,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 throw new ArgumentNullException("projectitem");
             _projectitem = projectitem;
 
+            _projectitem.IsModifiedChanged += OnIsModifiedChanged;
+
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
 
             _texteditor.Document = _projectitem.Document;
-
+            
             _texteditor.Document.TextChanged += OnDocumentTextChanged;
             _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
             _foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
@@ -94,7 +102,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         public override string DisplayName {
             get {
-                return _projectitem.Name;
+                return _projectitem.Name + (_projectitem.IsModified ? "*" : "");
             }
             set {
                 _projectitem.Name = value;
@@ -137,7 +145,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         void Show() {
-            _workbenchservice.ShowDockedDocument(this, this.DisplayName);
+            _workbenchservice.ShowDockedDocument(this);
         }
 
         #endregion
@@ -152,22 +160,45 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             foldingDirty = true;
         }
 
+        void OnIsModifiedChanged(object sender, EventArgs e) {
+            OnPropertyChanged(() => DisplayName);
+        }
+
+
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
             if(e.Text == ".") {
                 // Open code completion after the user has pressed dot:
                 completionWindow = new CompletionWindow(_texteditor.TextArea);
                 IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
 
-                //data.Add(new MyCompletionData("Item1"));
-                //data.Add(new MyCompletionData("Item2"));
-                //data.Add(new MyCompletionData("Item3"));
-                //completionWindow.Show();
+                foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
+                    if(m is CodeMemberMethod){
+                        var info = new StringBuilder();
+                        var method = m as CodeMemberMethod;
 
-                //completionWindow.Closed += delegate
-                //{
-                //    completionWindow = null;
-                //};
+                        foreach(CodeCommentStatement com in method.Comments) {
+                            if(com.Comment.DocComment)
+                                info.AppendLine(com.Comment.Text);
+                        }
+
+                        data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
+                    }
+                }
+                completionWindow.Show();
+
+                completionWindow.Closed += delegate
+                {
+                    completionWindow = null;
+                };
             }
+        }
+
+        string GetParamInfo(CodeParameterDeclarationExpressionCollection parsams){
+            string str = "";
+            foreach(CodeParameterDeclarationExpression p in parsams) {
+                str += p.Name + ", ";
+            }
+            return str;
         }
 
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
@@ -191,7 +222,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 var segment = _projectitem.TokenService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
-                var msg = string.Format("[{0}] {1}", segment.Type, segment.TokenString);
+
+
+                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} ", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;
                 _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;

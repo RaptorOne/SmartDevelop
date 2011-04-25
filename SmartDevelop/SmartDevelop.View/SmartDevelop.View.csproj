@@ -46,6 +46,9 @@
     <Compile Include="DocumentFiles\CodeDocumentView.xaml.cs">
       <DependentUpon>CodeDocumentView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Main\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Projecting\ProjectExplorerTreeView.xaml.cs">
       <DependentUpon>ProjectExplorerTreeView.xaml</DependentUpon>
     </Compile>
@@ -56,6 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="DocumentFiles\CodeDocumentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Main\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -95,7 +102,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ProjectExplorer\" />
+    <Resource Include="Images\MemberMethod.png" />
+    <Resource Include="Images\MemberProperty.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\blocks.ico" />
@@ -103,6 +111,42 @@
     <Resource Include="Images\folder.ico" />
     <Resource Include="Images\ironAHK.ico" />
     <Resource Include="Images\project-folder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\WordWrap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Cut.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Paste.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Redo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Undo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\debug-step-instruction.ico" />
+    <Resource Include="Images\debug-step-into-instruction.ico" />
+    <Resource Include="Images\debug-step-into.ico" />
+    <Resource Include="Images\debug-step-out.ico" />
+    <Resource Include="Images\debug-step-over.ico" />
+    <Resource Include="Images\document-save-5.ico" />
+    <Resource Include="Images\document-save-all.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

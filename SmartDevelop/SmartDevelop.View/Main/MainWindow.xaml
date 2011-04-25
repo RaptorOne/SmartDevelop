@@ -1,0 +1,93 @@
+﻿<Window x:Class="SmartDevelop.View.Main.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+        xmlns:my="clr-namespace:SmartDevelop.View.Projecting"
+        Title="SmartDevelop" Height="388" Width="642" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <Menu>
+                <MenuItem Header="File">
+                    <MenuItem Header="New"/>
+                    <MenuItem Header="Open"/>
+                </MenuItem>
+            </Menu>
+
+            <ToolBar>
+
+
+                <Button Command="{Binding OpenFileCommand}" >
+                    <Image Source="../Images/Open.png" Height="16"/>
+                </Button>
+
+                <Button Command="{Binding SaveCurrentFileCommand}" ToolTip="Save current file">
+                    <Image Source="../Images/document-save-5.ico" Height="16"/>
+                </Button>
+                <Button Command="{Binding SaveAllCommand}" ToolTip="Save all files">
+                    <Image Source="../Images/document-save-all.ico" Height="16"/>
+                </Button>
+
+                <Separator/>
+                <Button Command="Cut">
+                    <Image Source="../Images/Cut.png" Height="16"/>
+                </Button>
+                <Button Command="Copy">
+                    <Image Source="../Images/Copy.png" Height="16"/>
+                </Button>
+                <Button Command="Paste">
+                    <Image Source="../Images/Paste.png" Height="16"/>
+                </Button>
+                <Button Command="Delete">
+                    <Image Source="../Images/Delete.png" Height="16"/>
+                </Button>
+                <Separator/>
+                <Button Command="Undo">
+                    <Image Source="../Images/Undo.png" Height="16"/>
+                </Button>
+                <Button Command="Redo">
+                    <Image Source="../Images/Redo.png" Height="16"/>
+                </Button>
+                <Separator/>
+
+                <CheckBox IsChecked="{Binding ElementName=textEditor,Path=WordWrap}">
+                    <Image Source="../Images/WordWrap.png" Height="16"/>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding ElementName=textEditor,Path=ShowLineNumbers}">
+                    <TextBlock Width="16" TextAlignment="Center">#</TextBlock>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding ElementName=textEditor,Path=Options.ShowEndOfLine}">
+                    <TextBlock Width="16" TextAlignment="Center">¶</TextBlock>
+                </CheckBox>
+            </ToolBar>
+
+        </StackPanel>
+
+        <ad:DockingManager x:Name="dockManger" Grid.Row="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+            <ad:ResizingPanel Orientation="Horizontal" x:Name="mainResizingPanel">
+
+                <ad:DockablePane x:Name="toolsLeftPane" ad:ResizingPanel.ResizeWidth="200" >
+                    <ad:DockableContent x:Name="ToolContent" Title="Classes" IsCloseable="False">
+                        <!-- add some tools -->
+                    </ad:DockableContent>
+                </ad:DockablePane>
+
+                <ad:DocumentPane x:Name="mainDocumentPane">
+                    <!-- contains all Documents -->
+                </ad:DocumentPane>
+
+                <ad:DockablePane x:Name="toolsRightPane" ad:ResizingPanel.ResizeWidth="200">
+                    <ad:DockableContent x:Name="ProjectExplorerContent" Title="Solution" IsCloseable="False">
+                        <my:SolutionExplorer DataContext="{Binding SolutionVM}" />
+                    </ad:DockableContent>
+                </ad:DockablePane>
+
+            </ad:ResizingPanel>
+        </ad:DockingManager>
+
+    </Grid>
+</Window>

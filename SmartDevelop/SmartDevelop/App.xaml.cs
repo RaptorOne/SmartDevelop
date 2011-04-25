@@ -14,6 +14,7 @@ using SmartDevelop.View.DocumentFiles;
 using SmartDevelop.ViewModel.DocumentFiles;
 using SmartDevelop.ViewModel.Main;
 using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
+using SmartDevelop.View.Main;
 
 namespace SmartDevelop
 {

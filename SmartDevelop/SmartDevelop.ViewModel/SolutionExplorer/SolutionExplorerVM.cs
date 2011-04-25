@@ -32,11 +32,11 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
         }
 
+
+
         public TreeViewProjectItem SolutionRoot {
             get { return _solutionRoot; }
         }
-
-
 
         public IEnumerable<TreeViewProjectItem> Solutions {
             get { return _solutions; }
@@ -58,7 +58,6 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         }
 
         #endregion
-
 
         TreeViewProjectItem LoadProject(SmartCodeProject p){
             var projecttree = new TreeViewProjectItemProject(p, _solutionRoot);

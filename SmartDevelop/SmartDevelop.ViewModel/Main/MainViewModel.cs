@@ -28,6 +28,6 @@ namespace SmartDevelop.ViewModel.Main
         public SolutionExplorerVM SolutionVM {
             get { return _solutionVM; }
         }
-        
+
     }
 }
