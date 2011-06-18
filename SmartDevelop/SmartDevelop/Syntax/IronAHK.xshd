@@ -1,7 +1,7 @@
 ﻿<SyntaxDefinition name="IA"
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="Green" />
-  <Color name="String" foreground="DarkRed" />
+  <Color name="String" foreground="crimson" />
 
   <!-- This is the main ruleset. -->
   <RuleSet ignoreCase="true">
@@ -18,7 +18,7 @@
     </Span>
 
     <!-- reserved keywords -->
-    <Keywords fontWeight="bold" foreground="Blue">
+    <Keywords fontWeight="bold" foreground="LightBlue">
       <Word>if</Word>
       <Word>else</Word>
       <Word>is</Word>

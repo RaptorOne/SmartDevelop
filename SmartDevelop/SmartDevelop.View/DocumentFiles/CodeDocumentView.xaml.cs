@@ -21,6 +21,10 @@ namespace SmartDevelop.View.DocumentFiles
     {
         public CodeDocumentView() {
             InitializeComponent();
+
+
+
         }
+
     }
 }

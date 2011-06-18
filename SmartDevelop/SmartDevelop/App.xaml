@@ -6,9 +6,7 @@
         <ResourceDictionary>
 
             <ResourceDictionary.MergedDictionaries>
-                
-                
-                
+                <ResourceDictionary Source="/SmartDevelop;component/Resources/TextEditorExpressionDark.xaml"/>
                 <ResourceDictionary Source="/AvalonDock.Themes;component/Themes/ExpressionDark.xaml"/>
                 <ResourceDictionary Source="/AvalonDock.Themes;component/Resources/ExpressionDarkControlStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>

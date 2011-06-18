@@ -1,7 +1,7 @@
 ﻿<SyntaxDefinition name="AHK"
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="Green" />
-  <Color name="String" foreground="DarkRed" />
+  <Color name="String" foreground="crimson" />
 
   <!-- This is the main ruleset. -->
   <RuleSet ignoreCase="true">
@@ -17,7 +17,7 @@
       </RuleSet>
     </Span>
 
-    <Keywords fontWeight="bold" foreground="Blue">
+    <Keywords fontWeight="bold" foreground="LightBlue">
       <Word>if</Word>
       <Word>else</Word>
       <Word>return</Word>
@@ -185,7 +185,7 @@
 
 
     <!-- Digits -->
-    <Rule foreground="DarkBlue">
+    <Rule foreground="deepskyblue">
       \b0[xX][0-9a-fA-F]+  # hex number
       |    \b
       (    \d+(\.[0-9]+)?   #number with optional floating point
