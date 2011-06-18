@@ -56,11 +56,12 @@
             </TreeView.Resources>
 
 
+        <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
+            
+           
             <TreeView.ItemContainerStyle>
-                <!-- 
-                This Style binds a TreeViewItem to a TreeViewItemViewModel. 
-                -->
-                <Style TargetType="{x:Type TreeViewItem}">
+                <Style TargetType="{x:Type TreeViewItem}"
+                       BasedOn="{StaticResource {x:Type TreeViewItem}}">
                     <EventSetter Event="MouseDoubleClick" Handler="OnItemMouseDoubleClick" />
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
@@ -72,6 +73,6 @@
                     </Style.Triggers>
                 </Style>
             </TreeView.ItemContainerStyle>
-            
-        </TreeView>
+        
+    </TreeView>
 </UserControl>
