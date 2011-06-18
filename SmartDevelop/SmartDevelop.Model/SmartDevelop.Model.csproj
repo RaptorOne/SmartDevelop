@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="CodeCompleting\ICodeContextService.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
+    <Compile Include="DOM\DereferenceStatement.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCode.cs" />

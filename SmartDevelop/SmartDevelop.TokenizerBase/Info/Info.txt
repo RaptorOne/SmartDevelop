@@ -1,0 +1,15 @@
+﻿
+
+
+Issue: #Include
+
+Each Project is splitted up in some files. As files can be #included everywhere in another file, the tokenizer/parser design must handle this.
+Each file can be Tokenized separatly. Tokenizing doesn't analyze the sense of the code, so the tokenizer results can be cached.
+
+The resulting CodeSegments from the Tokenizer must contain File, Line and Column information.
+Those Codesegments then gets parsed and analyzed everytime something changes in one of the included files.
+
+
+There might be opertunities to minimize the re-parsing when Includefiles not violate Blocks and are Included at the beginning.
+
+

@@ -24,6 +24,8 @@
       <Word>is</Word>
       <Word>null</Word>
       <Word>return</Word>
+      
+      <Word>local</Word>
       <Word>global</Word>
       <Word>static</Word>
 

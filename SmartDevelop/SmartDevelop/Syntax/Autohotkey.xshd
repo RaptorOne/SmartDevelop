@@ -21,6 +21,8 @@
       <Word>if</Word>
       <Word>else</Word>
       <Word>return</Word>
+      
+      <Word>local</Word>
       <Word>global</Word>
       <Word>static</Word>
 

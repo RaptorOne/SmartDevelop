@@ -53,20 +53,18 @@ namespace SmartDevelop.Model.DOM
         #endregion
 
 
-        //IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
+        IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
 
-        //    //List<CodeMemberMethod>
+            List<CodeMemberMethod> methods;
 
-        //    //var oldMembers = (from CodeTypeMember m in _scriptRoot.Members
-        //    //                  where m.LinePragma.FileName == filepath
-        //    //                  select m).ToList();
+            methods = (from CodeTypeMember m in _scriptRoot.Members
+                       where m is CodeMemberMethod && m.LinePragma.FileName == filepath
+                       select m as CodeMemberMethod).ToList();
+            
+             // todo look up class methods
 
-
-
-        //    // todo look up class methods
-
-
-        //}
+            return methods;
+        }
 
         #region File Compiler
 

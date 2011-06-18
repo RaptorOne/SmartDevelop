@@ -154,7 +154,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #region Event Handlers
 
-        CompletionWindow completionWindow;
+        
 
         void OnDocumentTextChanged(object sender, EventArgs e) {
             foldingDirty = true;
@@ -164,32 +164,68 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             OnPropertyChanged(() => DisplayName);
         }
 
+        static List<char> whitespaces = new List<char> { ' ', '\t', '\n', '\r' };
+        static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', ';' , ' ', '\t' };
+
+        CompletionWindow _completionWindow;
 
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
-            if(e.Text == ".") {
+
+            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(e.Text[0])) {
+                // this is just for first debugging purposes
+                // as this code belongs to a completion service which handles and caches those completion items
+
                 // Open code completion after the user has pressed dot:
-                completionWindow = new CompletionWindow(_texteditor.TextArea);
-                IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+                if(e.Text == ".") {
 
-                foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
-                    if(m is CodeMemberMethod){
-                        var info = new StringBuilder();
-                        var method = m as CodeMemberMethod;
+                    // do type lookup & list avaiable members
+                    //completionWindow = new CompletionWindow(_texteditor.TextArea);
+                    //IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
 
-                        foreach(CodeCommentStatement com in method.Comments) {
-                            if(com.Comment.DocComment)
-                                info.AppendLine(com.Comment.Text);
+
+                    //foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
+                    //    if(m is CodeMemberMethod){
+                    //        var info = new StringBuilder();
+                    //        var method = m as CodeMemberMethod;
+
+                    //        foreach(CodeCommentStatement com in method.Comments) {
+                    //            if(com.Comment.DocComment)
+                    //                info.AppendLine(com.Comment.Text);
+                    //        }
+                    //        data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
+                    //    }
+                    //}
+                    //completionWindow.Show();
+
+                    //completionWindow.Closed += delegate
+                    //{
+                    //    completionWindow = null;
+                    //};
+                } else if(_completionWindow == null && e.Text != "\n" && whitespaces.Contains(_texteditor.Document.GetCharAt(_texteditor.CaretOffset))) {
+                    // show avaiable global Methods & build in Methods + commands
+
+                    _completionWindow = new CompletionWindow(_texteditor.TextArea);
+                    IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
+
+                    foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
+                        if(m is CodeMemberMethod) {
+                            var info = new StringBuilder();
+                            var method = m as CodeMemberMethod;
+
+                            foreach(CodeCommentStatement com in method.Comments) {
+                                if(com.Comment.DocComment)
+                                    info.AppendLine(com.Comment.Text);
+                            }
+                            data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
                         }
-
-                        data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
                     }
-                }
-                completionWindow.Show();
+                    _completionWindow.Show();
 
-                completionWindow.Closed += delegate
-                {
-                    completionWindow = null;
-                };
+                    _completionWindow.Closed += delegate
+                    {
+                        _completionWindow = null;
+                    };
+                }
             }
         }
 
@@ -202,11 +238,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
-            if(e.Text.Length > 0 && completionWindow != null) {
+            if(e.Text.Length > 0 && _completionWindow != null) {
                 if(!char.IsLetterOrDigit(e.Text[0])) {
                     // Whenever a non-letter is typed while the completion window is open,
                     // insert the currently selected element.
-                    completionWindow.CompletionList.RequestInsertion(e);
+                    _completionWindow.CompletionList.RequestInsertion(e);
                 }
             }
             // Do not set e.Handled=true.
@@ -221,8 +257,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             if(pos != null) {
 
                 var segment = _projectitem.TokenService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
-
-
 
                 var msg = string.Format("[{0}] {1} @ Line {2} Col {3} ", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
@@ -244,6 +278,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
         }
+
         #endregion
 
     }
