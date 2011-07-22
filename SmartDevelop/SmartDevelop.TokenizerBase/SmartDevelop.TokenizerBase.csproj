@@ -42,7 +42,8 @@
     <Compile Include="IA\Indentation\IAIndentationStrategy.cs" />
     <Compile Include="IA\Indentation\DocumentAccessor.cs" />
     <Compile Include="IA\Indentation\IndentationReformatter.cs" />
-    <Compile Include="CodeStatement.cs" />
+    <Compile Include="CodeSegment.cs" />
+    <Compile Include="IA\TokenMapIA.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="IA\SimpleTokinizerIA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

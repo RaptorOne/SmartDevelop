@@ -31,7 +31,7 @@ namespace SmartDevelop.Model.Projecting
         public SmartCodeProject(string name) 
             : base(null) {
             Name = name;
-            _domservice = new CodeDOMService(this);
+            _domservice = new CodeDOMServiceIA(this); /*ToDo: choose Domservice depending of the language */ 
         }
 
         #endregion

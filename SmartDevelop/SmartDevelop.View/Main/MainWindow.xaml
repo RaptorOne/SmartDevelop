@@ -8,7 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="1*" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel>
             <Menu>
@@ -19,7 +19,6 @@
             </Menu>
 
             <ToolBar>
-
 
                 <Button Command="{Binding OpenFileCommand}" >
                     <Image Source="../Images/Open.png" Height="16"/>

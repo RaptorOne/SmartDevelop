@@ -79,10 +79,6 @@ namespace SmartDevelop.Model.Tokening
 
         #region Query Methods
 
-
-
-
-
         [Obsolete("Use line/column for much more performance")]
         public CodeSegment QueryCodeSegmentAt(int offset) {
             CodeSegment t = CodeSegment.Empty;

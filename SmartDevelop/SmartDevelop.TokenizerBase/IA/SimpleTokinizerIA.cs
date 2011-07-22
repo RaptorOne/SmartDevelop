@@ -68,6 +68,8 @@ namespace SmartDevelop.TokenizerBase.IA
                 //etc
             };
 
+        static TokenMapIA OPERATOR_TOKEN = new TokenMapIA();
+
         static SimpleTokinizerIA(){
             BRAKETS.Add('(', Token.LiteralBracketOpen);
             BRAKETS.Add(')', Token.LiteralBracketClosed);
@@ -315,16 +317,34 @@ namespace SmartDevelop.TokenizerBase.IA
                 var str = _text.Substring(_currentRangeStart, l).Trim(trimchars);
                 if(!(_activeToken == Token.Unknown && str.Length == 0)){
 
+                    Token? tokenToStore = null;
+                    
+
                     if(_activeToken == Token.Unknown){
-                        if(IsNumber(str))
+                        
+                        if(IsNumber(str)) {
                             _activeToken = Token.Number;
-                        else if(IsHexNumber(str)) {
+                        } else if(IsHexNumber(str)) {
                             _activeToken = Token.HexNumber;
                         } else if(KEYWORDS.Contains(str.ToLowerInvariant())) {
                             _activeToken = Token.KeyWord;
+                        } else {
+                            tokenToStore = Token.Identifier;
                         }
                     }
-                    var current = new CodeSegment(_activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
+
+                    if(_activeToken == Token.OperatorFlow){
+                        // toDo:
+                        // handle AHK specail cases like:
+                        // := AND = Asign
+                        // == AND = Equality
+                        // to do so, look back this line for
+
+                        tokenToStore = OPERATOR_TOKEN.FindOperatorToken(str);
+                    }
+
+
+                    var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = current;
                     _previous = current;

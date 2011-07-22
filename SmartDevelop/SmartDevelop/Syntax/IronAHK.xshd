@@ -18,7 +18,7 @@
     </Span>
 
     <!-- reserved keywords -->
-    <Keywords fontWeight="bold" foreground="LightBlue">
+    <Keywords fontWeight="bold" foreground="deepskyblue">
       <Word>if</Word>
       <Word>else</Word>
       <Word>is</Word>
@@ -189,7 +189,7 @@
 
 
     <!-- Digits -->
-    <Rule foreground="DarkBlue">
+    <Rule foreground="deepskyblue">
       \b0[xX][0-9a-fA-F]+  # hex number
       |    \b
       (    \d+(\.[0-9]+)?   #number with optional floating point

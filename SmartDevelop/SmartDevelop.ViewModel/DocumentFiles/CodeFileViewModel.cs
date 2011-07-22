@@ -70,12 +70,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             
             _texteditor.Document.TextChanged += OnDocumentTextChanged;
             _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
-            _foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
+            //_foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
 
-			if (_foldingManager == null)
-                _foldingManager = FoldingManager.Install(_texteditor.TextArea);
-            _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
-
+            if(_foldingStrategy != null) {
+                if(_foldingManager == null)
+                    _foldingManager = FoldingManager.Install(_texteditor.TextArea);
+                _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
+            }
 
             _texteditor.MouseHover += TextEditorMouseHover;
             _texteditor.MouseHoverStopped += TextEditorMouseHoverStopped;
@@ -201,7 +202,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     //{
                     //    completionWindow = null;
                     //};
-                } else if(_completionWindow == null && e.Text != "\n" && whitespaces.Contains(_texteditor.Document.GetCharAt(_texteditor.CaretOffset))) {
+                } else if(_completionWindow == null && e.Text != "\n" && 
+                    (_texteditor.Document.TextLength > _texteditor.CaretOffset && whitespaces.Contains(_texteditor.Document.GetCharAt(_texteditor.CaretOffset)))) {
                     // show avaiable global Methods & build in Methods + commands
 
                     _completionWindow = new CompletionWindow(_texteditor.TextArea);
@@ -245,6 +247,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     _completionWindow.CompletionList.RequestInsertion(e);
                 }
             }
+            _toolTip.IsOpen = false;
             // Do not set e.Handled=true.
             // We still want to insert the character that was typed.
         }
@@ -258,7 +261,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 var segment = _projectitem.TokenService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
-                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} ", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart);
+                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart, segment.CodeDOMObject);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;
                 _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;

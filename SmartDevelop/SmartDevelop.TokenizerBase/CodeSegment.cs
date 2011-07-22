@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ICSharpCode.AvalonEdit.Document;
+using System.CodeDom;
 
 namespace SmartDevelop.TokenizerBase
 {
@@ -17,6 +18,8 @@ namespace SmartDevelop.TokenizerBase
 
         CodeSegment _previous;
         CodeSegment _next;
+
+        CodeObject _codeDOMObject = null;
 
         #endregion
 
@@ -98,11 +101,28 @@ namespace SmartDevelop.TokenizerBase
             if(this.Next != null) {
                 if(Next.Type == tokeoFind)
                     return Next;
+                else if(Next.Type == Token.NewLine)
+                    return null;
                 else
                     return Next.FindNextOnSameLine(tokeoFind);
             } else
                 return null;
         }
+        
+        public CodeSegment FindNext(Token tokeoFind, List<Token> endTokens) {
+            if(this.Next != null) {
+                if(Next.Type == tokeoFind)
+                    return Next;
+                else if(endTokens.Contains(Next.Type))
+                    return null;
+                else
+                    return Next.FindNextOnSameLine(tokeoFind);
+            } else
+                return null;
+        }
+
+
+        
 
         /// <summary>
         /// Very handy Method to find the Closing Bracket Codesegment of this Segment
@@ -167,6 +187,11 @@ namespace SmartDevelop.TokenizerBase
 
         public override string ToString() {
             return string.Format("{0}::{1}", _type, _tokenstring);
+        }
+
+        public CodeObject CodeDOMObject {
+            get { return _codeDOMObject; }
+            set { _codeDOMObject = value; }
         }
 
         public CodeSegment Next {

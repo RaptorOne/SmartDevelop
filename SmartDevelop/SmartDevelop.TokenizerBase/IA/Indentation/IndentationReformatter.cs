@@ -323,9 +323,9 @@ namespace SmartDevelop.TokenizerBase.IA.Indentation
 						if (block.Bracket == '[')
 							block = blocks.Pop();
 						break;
-					case ';':
+
 					case ',':
-						block.Continuation = false;
+                        block.Continuation = false;
 						block.ResetOneLineBlock();
 						break;
 					case ':':
@@ -336,6 +336,11 @@ namespace SmartDevelop.TokenizerBase.IA.Indentation
 							block.Continuation = false;
 							block.ResetOneLineBlock();
 						}
+						break;
+
+                    default:
+                        block.Continuation = false;
+						block.ResetOneLineBlock();
 						break;
 				}
 				
@@ -450,8 +455,6 @@ namespace SmartDevelop.TokenizerBase.IA.Indentation
 				case "while":
 				case "do":
 				case "loop":
-				case "using":
-				case "lock":
 					return true;
 				default:
 					return false;

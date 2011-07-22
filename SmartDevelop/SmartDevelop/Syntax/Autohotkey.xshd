@@ -1,4 +1,6 @@
-﻿<SyntaxDefinition name="AHK"
+﻿<!-- This is the syntax definition for AHK 1.1 -->
+
+<SyntaxDefinition name="AHK"
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Comment" foreground="Green" />
   <Color name="String" foreground="crimson" />
@@ -17,7 +19,7 @@
       </RuleSet>
     </Span>
 
-    <Keywords fontWeight="bold" foreground="LightBlue">
+    <Keywords fontWeight="bold" foreground="deepskyblue">
       <Word>if</Word>
       <Word>else</Word>
       <Word>return</Word>
@@ -31,6 +33,11 @@
       
       <Word>loop</Word>
       <Word>while</Word>
+
+      <Word>class</Word>
+      <Word>var</Word>
+      <Word>this</Word>
+      <Word>new</Word>
       
       <!-- ... -->
     </Keywords>
