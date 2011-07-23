@@ -8,18 +8,12 @@ using System.Threading;
 using System.Windows.Threading;
 using System.IO;
 using SmartDevelop.Model.Tokening;
+using SmartDevelop.Model.CodeLanguage;
 
 
 namespace SmartDevelop.Model.Projecting
 {
-    public enum CodeItemType
-    {
-        None = 0,
-        IA = 1,
-        AHK = 2,
-        AHK_L = 4,
-        AHK2 = 8
-    }
+
 
     /// <summary>
     /// Represents a single Codefile
@@ -31,7 +25,7 @@ namespace SmartDevelop.Model.Projecting
         readonly TextDocument _codedocument;
         CodeItemType _type = CodeItemType.None;
         SimpleTokinizerIA _tokenizer;
-        CodeTokenService _codeTokenService;
+        DocumentCodeSegmentService _codeSegmentService;
         bool _documentdirty = false;
         bool _isModified = false;
 
@@ -42,7 +36,7 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler TokenizerUpdated;
 
-        public event EventHandler IsModifiedChanged;
+        public event EventHandler HasUnsavedChangesChanged;
 
         #region Constructors
 
@@ -69,7 +63,7 @@ namespace SmartDevelop.Model.Projecting
                 // Let the user know what went wrong.
                 // to do
             }
-            newp.IsModified = false;
+            newp.HasUnsavedChanges = false;
             newp.Document.UndoStack.ClearAll();
             return newp;
         }     
@@ -81,11 +75,11 @@ namespace SmartDevelop.Model.Projecting
 
             _codedocument.Changed += OnCodedocumentChanged;
 
-            _codeTokenService = new CodeTokenService(this);
+            _codeSegmentService = new DocumentCodeSegmentService(this);
             _tokenizer = new SimpleTokinizerIA(_codedocument);
 
             _tokenizer.Finished += (s, e) => {
-                _codeTokenService.Reset(_tokenizer.GetSegmentsSnapshot());
+                _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
                 if(TokenizerUpdated != null) {
                     TokenizerUpdated(this, EventArgs.Empty);
                 }
@@ -122,7 +116,7 @@ namespace SmartDevelop.Model.Projecting
         /// Saves the text to the stream.
         /// </summary>
         /// <remarks>
-        /// This method sets <see cref="IsModified"/> to false.
+        /// This method sets <see cref="HasUnsavedChanges"/> to false.
         /// </remarks>
         public void Save(Stream stream) {
             if(stream == null)
@@ -131,7 +125,7 @@ namespace SmartDevelop.Model.Projecting
             writer.Write(_codedocument.Text);
             writer.Flush();
             // do not close the stream
-            this.IsModified = false;
+            this.HasUnsavedChanges = false;
         }
 
 
@@ -149,7 +143,7 @@ namespace SmartDevelop.Model.Projecting
             using(FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)) {
                 Save(fs);
             }
-            IsModified = false;
+            HasUnsavedChanges = false;
         }
 
         #endregion
@@ -162,13 +156,13 @@ namespace SmartDevelop.Model.Projecting
             get { return _codedocument; }
         }
 
-        public CodeTokenService TokenService {
-            get { return _codeTokenService; }
+        public DocumentCodeSegmentService SegmentService {
+            get { return _codeSegmentService; }
         }
 
         void OnCodedocumentChanged(object sender, EventArgs e){
             _documentdirty = true;
-            IsModified = true;
+            HasUnsavedChanges = true;
         }
 
         void CheckUpdateTokenRepresentation(object sender, EventArgs e) {
@@ -178,15 +172,15 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        public bool IsModified { 
+        public bool HasUnsavedChanges { 
             get { return _isModified; } 
             private set {
                 if(_isModified == value)
                     return;
 
                 _isModified = value;
-                if(IsModifiedChanged != null)
-                    IsModifiedChanged(this, EventArgs.Empty);
+                if(HasUnsavedChangesChanged != null)
+                    HasUnsavedChangesChanged(this, EventArgs.Empty);
             } 
         }
 

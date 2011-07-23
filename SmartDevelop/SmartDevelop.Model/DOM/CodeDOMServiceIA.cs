@@ -17,6 +17,8 @@ namespace SmartDevelop.Model.DOM
     /// </summary>
     public class CodeDOMServiceIA : CodeDOMService
     {
+        Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
+
 
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
@@ -31,7 +33,7 @@ namespace SmartDevelop.Model.DOM
                 RootType.Members.Remove(m);
 
 
-            var segments = codeitem.TokenService.GetCodeSegmentLinesMap();
+            var segments = codeitem.SegmentService.GetCodeSegmentLinesMap();
             CodeTypeDeclaration parent = initialparent;
             Stack<CodeSegment> paramstack = new Stack<CodeSegment>();           
             int linecnt = codeitem.Document.LineCount;
@@ -106,6 +108,7 @@ namespace SmartDevelop.Model.DOM
                                         previous = current;
                                     }
 
+
                                     // get method statements
                                     method.Statements.AddRange(
                                         CollectAllCodeStatements(segments, startMethodBody.Line + 1, endMethodBody.Line));
@@ -158,7 +161,11 @@ namespace SmartDevelop.Model.DOM
                 && nextidentifier.Next.Type == Token.LiteralBracketOpen) {
                 var invokeExpression = new CodeMethodInvokeExpression();
 
+
+                // var method = _codeDOMTraveler.FindBestMethod(nextidentifier.TokenString, null, RootType); //<-- todo emit correct type
+
                 var methodRef = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), nextidentifier.TokenString);
+                
                 invokeExpression.Method = methodRef;
                 nextidentifier.CodeDOMObject = methodRef;
 
@@ -172,8 +179,6 @@ namespace SmartDevelop.Model.DOM
                 } else {
                     // missing closing bracket...
                 }
-
-
 
                 return invokeExpression;
             }

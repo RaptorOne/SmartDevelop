@@ -6,6 +6,8 @@ using Archimedes.Patterns.Services;
 using AvalonDock;
 using Archimedes.Services.WPF.WorkBenchServices;
 using Archimedes.Services.WPF.AvalonDockService;
+using System.Windows.Input;
+using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -28,6 +30,31 @@ namespace SmartDevelop.ViewModel.Main
         public SolutionExplorerVM SolutionVM {
             get { return _solutionVM; }
         }
+
+
+        public ICommand OpenFileCommand {
+            get { return null; }
+        }
+
+
+        ICommand _saveCurrentFileCommand;
+        public ICommand SaveCurrentFileCommand {
+            get {
+                if(_saveCurrentFileCommand == null) {
+                    _saveCurrentFileCommand = new RelayCommand(x => 
+                    {
+
+                    });
+                }
+                return _saveCurrentFileCommand;
+            }
+        }
+
+        public ICommand SaveAllCommand {
+            get { return null; }
+        }
+
+            
 
     }
 }

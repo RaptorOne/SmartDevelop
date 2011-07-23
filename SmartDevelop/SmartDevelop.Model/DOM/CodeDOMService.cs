@@ -45,7 +45,6 @@ namespace SmartDevelop.Model.DOM
         #endregion
 
         IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
-
             List<CodeMemberMethod> methods;
 
             methods = (from CodeTypeMember m in RootType.Members
@@ -53,7 +52,6 @@ namespace SmartDevelop.Model.DOM
                        select m as CodeMemberMethod).ToList();
             
              // todo look up class methods
-
             return methods;
         }
 

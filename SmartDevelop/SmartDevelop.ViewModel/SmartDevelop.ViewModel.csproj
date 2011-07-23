@@ -44,6 +44,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackgroundRenderer\CurrentLineHighlightRenderer.cs" />
     <Compile Include="CodeCompleting\CompletionItem.cs" />
     <Compile Include="CodeCompleting\CompletionItemMethod.cs" />
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
@@ -57,6 +58,8 @@
     <Compile Include="SolutionExplorer\TreeViewProjectItemFolder.cs" />
     <Compile Include="SolutionExplorer\TreeViewProjectItemProject.cs" />
     <Compile Include="SolutionExplorer\TreeViewProjectItemSolutionFolder.cs" />
+    <Compile Include="TextTransformators\AvalonTransformator.cs" />
+    <Compile Include="TextTransformators\ContextHighlightTransformator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns.Services.WPF\Archimedes.Services.WPF.csproj">

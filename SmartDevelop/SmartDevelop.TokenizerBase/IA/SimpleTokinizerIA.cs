@@ -371,7 +371,15 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         bool IsHexNumber(string str) {
-            return str.Length > 2 && str.Substring(0, 2) == "0x" && IsNumber(str.Substring(2));
+            if(str.Length > 2 && str.Substring(0, 2) == "0x") {
+                foreach(char c in str.Substring(2)) {
+                    if(!AsciiHelper.IsAsciiHexNum(c)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         bool IsWhiteSpace(int index) {

@@ -8,13 +8,21 @@ namespace SmartDevelop.Model.Projecting
 {
     public class SmartSolution
     {
+        #region Fields
+
         SmartCodeProject _current;
         List<SmartCodeProject> _projects = new List<SmartCodeProject>();
         string _name = "Default Solution";
 
+        #endregion
+
+        #region Events
+
         public event EventHandler CurrentChanged;
         public event EventHandler<ProjectEventArgs> ProjectAdded;
         public event EventHandler<ProjectEventArgs> ProjectRemoved;
+
+        #endregion
 
         public SmartSolution() {
             this.Add(StdLibLoader.LoadStLib());

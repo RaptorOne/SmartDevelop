@@ -6,6 +6,10 @@ using System.CodeDom;
 
 namespace SmartDevelop.TokenizerBase
 {
+    /// <summary>
+    /// Represents a CodeSegment
+    /// A CodeSegment is a Code-Token with exact definde document location. It gets automatically extended when the DOM Parser has found its context
+    /// </summary>
     public class CodeSegment
     {
         #region Fields
@@ -23,6 +27,8 @@ namespace SmartDevelop.TokenizerBase
 
         #endregion
 
+        #region Constructor
+
         CodeSegment() {
             _codesegment = new SimpleSegment();
             _type = Token.Unknown;
@@ -39,6 +45,8 @@ namespace SmartDevelop.TokenizerBase
             _column = colstart;
             _previous = previous;
         }
+
+        #endregion
 
         #region Access neightbour CodeSegments
 
@@ -165,22 +173,37 @@ namespace SmartDevelop.TokenizerBase
 
         #region Properties
 
+        /// <summary>
+        /// Underlying Token
+        /// </summary>
         public Token Type {
             get { return _type; }
         }
 
+        /// <summary>
+        /// Source Code String
+        /// </summary>
         public string TokenString {
             get { return _tokenstring; }
         }
 
+        /// <summary>
+        /// Start Column of this CodeSegment
+        /// </summary>
         public int ColumnStart {
             get { return _column; }
         }
 
+        /// <summary>
+        /// Line number of this Segment
+        /// </summary>
         public int Line {
             get { return _line; }
         }
 
+        /// <summary>
+        /// Segment - Location / Range
+        /// </summary>
         public SimpleSegment Range {
             get { return _codesegment; }
         }
@@ -189,22 +212,33 @@ namespace SmartDevelop.TokenizerBase
             return string.Format("{0}::{1}", _type, _tokenstring);
         }
 
+
         public CodeObject CodeDOMObject {
             get { return _codeDOMObject; }
             set { _codeDOMObject = value; }
         }
 
+
+        /// <summary>
+        /// Get the next CodeSegment -> Look Forward
+        /// </summary>
         public CodeSegment Next {
             get { return _next; }
             internal set { _next = value; }
         }
 
+        /// <summary>
+        /// Get the previous CodeSegment -> Look Backwards
+        /// </summary>
         public CodeSegment Previous {
             get { return _previous; }
         }
 
         #endregion
 
+        /// <summary>
+        /// Get a empty/undefined CodeSegment
+        /// </summary>
         public static CodeSegment Empty {
             get {
                 return new CodeSegment(Token.Unknown, "", new SimpleSegment(), 0, 0, null);

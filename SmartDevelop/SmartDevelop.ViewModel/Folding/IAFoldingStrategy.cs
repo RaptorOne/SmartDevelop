@@ -15,7 +15,7 @@ namespace SmartDevelop.ViewModel.Folding
     /// </summary>
     public class IAFoldingStrategy : AbstractFoldingStrategy
     {
-        CodeTokenService _tokenservice;
+        DocumentCodeSegmentService _tokenservice;
         readonly Token _openingBrace;
         readonly Token _closingBrace;
 
@@ -23,7 +23,7 @@ namespace SmartDevelop.ViewModel.Folding
         /// <summary>
         /// Creates a new BraceFoldingStrategy.
         /// </summary>
-        public IAFoldingStrategy(CodeTokenService tokenservice) {
+        public IAFoldingStrategy(DocumentCodeSegmentService tokenservice) {
             _openingBrace = Token.BlockOpen;
             _closingBrace = Token.BlockClosed;
             _tokenservice = tokenservice;

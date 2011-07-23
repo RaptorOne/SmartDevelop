@@ -6,7 +6,13 @@
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="290" d:DesignWidth="369" >
-    <Grid>
+
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding SaveCurrentFileCommand}" Gesture="CTRL+S"/>
+    </UserControl.InputBindings>
+    
+    
+            <Grid>
         <ContentControl Name="editorContainer" Content="{Binding Editor}" />
     </Grid>
 </UserControl>

@@ -8,9 +8,9 @@ using SmartDevelop.Model.Projecting;
 namespace SmartDevelop.Model.Tokening
 {
     /// <summary>
-    /// Threadsafe CodeToken Provider
+    /// Threadsafe CodeSegment Provider
     /// </summary>
-    public class CodeTokenService
+    public class DocumentCodeSegmentService
     {
         #region Fields
 
@@ -22,7 +22,7 @@ namespace SmartDevelop.Model.Tokening
 
         #endregion
 
-        public CodeTokenService(ProjectItemCode codeitem) {
+        public DocumentCodeSegmentService(ProjectItemCode codeitem) {
             _codeitem = codeitem; 
         }
 
@@ -38,7 +38,6 @@ namespace SmartDevelop.Model.Tokening
         }
 
         #region CodeSegment Access
-
 
         public void Reset(IEnumerable<CodeSegment> newtokens) {
             lock(_codesegmentsLock) {

@@ -10,7 +10,6 @@ namespace SmartDevelop.Model.Projecting
         string _name;
         public ProjectItemFolder(string name, ProjectItem parent) 
             : base(parent) {
-
         }
 
         public override string Name {

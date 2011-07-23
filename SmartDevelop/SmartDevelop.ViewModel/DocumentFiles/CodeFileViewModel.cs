@@ -17,6 +17,8 @@ using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.ViewModel.CodeCompleting;
 using System.CodeDom;
 using System.Text;
+using SmartDevelop.ViewModel.BackgroundRenderer;
+using SmartDevelop.ViewModel.TextTransformators;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -61,7 +63,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 throw new ArgumentNullException("projectitem");
             _projectitem = projectitem;
 
-            _projectitem.IsModifiedChanged += OnIsModifiedChanged;
+            _projectitem.HasUnsavedChangesChanged += OnIsModifiedChanged;
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
@@ -85,6 +87,15 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
 
+            var renderer = new CurrentLineHighlightRenderer(_texteditor, projectitem);
+            _texteditor.TextArea.TextView.BackgroundRenderers.Add(renderer);
+
+            var contextTransformer = new ContextHighlightTransformator(projectitem);
+            _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
+
+            
+
+
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
             foldingUpdateTimer.Tick += foldingUpdateTimer_Tick;
@@ -103,7 +114,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         public override string DisplayName {
             get {
-                return _projectitem.Name + (_projectitem.IsModified ? "*" : "");
+                return _projectitem.Name + (_projectitem.HasUnsavedChanges ? "*" : "");
             }
             set {
                 _projectitem.Name = value;
@@ -139,15 +150,34 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         public ICommand ShowCommand {
             get {
                 if(_showCommand == null) {
-                    _showCommand = new RelayCommand(x => Show());
+                    _showCommand = new RelayCommand(x => 
+                        {
+                            _workbenchservice.ShowDockedDocument(this);
+                        });
                 }
                 return _showCommand;
             }
         }
 
-        void Show() {
-            _workbenchservice.ShowDockedDocument(this);
+        #endregion
+
+        #region Save item Command
+
+        RelayCommand _saveCurrentFileCommand;
+
+        public ICommand SaveCurrentFileCommand {
+            get {
+                if(_saveCurrentFileCommand == null) {
+                    _saveCurrentFileCommand = new RelayCommand(x => {
+                        _projectitem.Save(_projectitem.FilePath);
+                    }, x => {
+                        return !string.IsNullOrWhiteSpace(_projectitem.FilePath);
+                    });
+                }
+                return _saveCurrentFileCommand;
+            }
         }
+
 
         #endregion
 
@@ -155,7 +185,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #region Event Handlers
 
-        
+
 
         void OnDocumentTextChanged(object sender, EventArgs e) {
             foldingDirty = true;
@@ -259,7 +289,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             if(pos != null) {
 
-                var segment = _projectitem.TokenService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
+                var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
                 var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart, segment.CodeDOMObject);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
