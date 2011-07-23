@@ -40,6 +40,11 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler TokenizerUpdated;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public event EventHandler RequestTextInvalidation;
+
         public event EventHandler HasUnsavedChangesChanged;
 
         #region Constructors
@@ -87,6 +92,7 @@ namespace SmartDevelop.Model.Projecting
                 if(TokenizerUpdated != null) {
                     TokenizerUpdated(this, EventArgs.Empty);
                 }
+                OnRequestTextInvalidation();
             };
             _type = type;
 
@@ -180,7 +186,13 @@ namespace SmartDevelop.Model.Projecting
             if(_documentdirty && !_tokenizer.IsBusy) {
                 _documentdirty = false;
                 _tokenizer.TokenizeAsync();
+                OnRequestTextInvalidation();
             }
+        }
+
+        void OnRequestTextInvalidation(){
+            if(RequestTextInvalidation != null)
+                    RequestTextInvalidation(this, EventArgs.Empty);
         }
 
         public bool HasUnsavedChanges { 

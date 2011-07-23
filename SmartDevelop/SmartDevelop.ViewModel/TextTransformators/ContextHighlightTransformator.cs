@@ -53,6 +53,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
                     }
                 } else if(segment.CodeDOMObject is CodeTypeDeclaration && ((CodeTypeDeclaration)segment.CodeDOMObject).IsClass) {
+
                     try {
 
                     base.ChangeLinePart(

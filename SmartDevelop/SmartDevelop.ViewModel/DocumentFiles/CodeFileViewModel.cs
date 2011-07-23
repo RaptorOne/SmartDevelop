@@ -52,7 +52,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 viewModelPoolService.Register(projectitem, vm);
             }
 
-
             return vm;
         }
 
@@ -93,8 +92,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             var contextTransformer = new ContextHighlightTransformator(projectitem);
             _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
 
-            
-
+            projectitem.RequestTextInvalidation += (s, e) => {
+                _texteditor.TextArea.TextView.Redraw();
+            };
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
@@ -254,6 +254,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                             }
                             data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
                         }
+
+                        if(m is CodeTypeDeclaration && ((CodeTypeDeclaration)m).IsClass) {
+                            var classdecl = ((CodeTypeDeclaration)m);
+                            data.Add(new CompletionItemClass(classdecl.Name, ""));
+                        }
+
                     }
                     _completionWindow.Show();
 

@@ -72,7 +72,13 @@ namespace SmartDevelop.Model.DOM
                                     IsClass = true
                                 };
                                 classNameSegment.CodeDOMObject = type;
-                                parentHirarchy.Peek().Members.Add(type);
+                                
+                                if(parentHirarchy.Any()) {
+                                    parentHirarchy.Peek().Members.Add(type);
+                                } else {
+                                    RootType.Members.Add(type);
+                                }
+
                                 parentHirarchy.Push(type);
                                 bcc++;
 
@@ -151,7 +157,11 @@ namespace SmartDevelop.Model.DOM
                                     method.Statements.AddRange(
                                         CollectAllCodeStatements(codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
-                                    parentHirarchy.Peek().Members.Add(method);
+                                    if(parentHirarchy.Any()){
+                                        parentHirarchy.Peek().Members.Add(method);
+                                    }else{
+                                        RootType.Members.Add(method);
+                                    }
                                     // move the scanpointer to the method end:
                                     i = endMethodBody.LineNumber;
                                     continue;

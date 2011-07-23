@@ -109,7 +109,7 @@ namespace SmartDevelop.TokenizerBase.IA
         int _currentLine;
         int _currentColumn;
         Token _activeToken = Token.Unknown;
-
+        Token _currentToken = Token.Unknown;
         BackgroundWorker _tokenizerworker;
 
         #endregion
@@ -187,12 +187,14 @@ namespace SmartDevelop.TokenizerBase.IA
 
         void TokinizeWorker(object sender, DoWorkEventArgs e) {
             var bgw = sender as BackgroundWorker;
-            Token currentToken = Token.Unknown;
+            _currentToken = Token.Unknown;
             
             bool inliteralString = false;
             bool ensureNewToken = false;
             bool traditionalMode = false;
             int i;
+
+
             //clean things up
             _activeToken = Token.Unknown;
             _codesegmentsWorker.Clear();
@@ -223,7 +225,7 @@ namespace SmartDevelop.TokenizerBase.IA
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
-                    currentToken = Token.Unknown;
+                    _currentToken = Token.Unknown;
                 }
 
                 #endregion
@@ -231,8 +233,8 @@ namespace SmartDevelop.TokenizerBase.IA
                 currentChar = _text[i];
 
                 if(currentChar == '\n') {
-                    currentToken = Token.NewLine;
-                    _currentLine++;
+                    _currentToken = Token.NewLine;
+                    //_currentLine++;
                     _currentColumn = 0;
                     traditionalMode = false;
                 } else if(!traditionalMode && IsLieralStringMarker(i)) {
@@ -240,10 +242,13 @@ namespace SmartDevelop.TokenizerBase.IA
                         ensureNewToken = true;
                         inliteralString = false;
                     } else {
-                        currentToken = Token.LiteralString;
+                        _currentToken = Token.LiteralString;
                         inliteralString = true;
                     }
                 } else if(!traditionalMode && IsMultiLineCommentStart(i)) {
+
+                    #region Handle Multiline Comment
+
                     EndActiveToken(i);
                     _activeToken = Token.MultiLineComment;
 
@@ -269,41 +274,46 @@ namespace SmartDevelop.TokenizerBase.IA
                         _currentColumn = 0;
                         EndActiveToken(i);
                     }
+
+                    #endregion
+
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
                     if(!traditionalMode && BRAKETS.ContainsKey(currentChar)) {
-                        currentToken = BRAKETS[currentChar];
+                        _currentToken = BRAKETS[currentChar];
                     } else if(currentChar == SINGLELINE_COMMENT) {
-                        currentToken = Token.SingleLineComment;
+                        _currentToken = Token.SingleLineComment;
                     } else if(!traditionalMode && IsWhiteSpace(i)) {
-                        currentToken = Token.WhiteSpace;
+                        _currentToken = Token.WhiteSpace;
                     } else if(currentChar == PARAMDELEMITER) {
-                        currentToken = Token.ParameterDelemiter;
+                        _currentToken = Token.ParameterDelemiter;
                     } else if(!traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
-                        currentToken = Token.MemberInvoke;
+                        _currentToken = Token.MemberInvoke;
                     } else if(!traditionalMode && currentChar == STRINGCONCAT) {
-                        currentToken = Token.StringConcat;
+                        _currentToken = Token.StringConcat;
 
                     //}else if(!traditionalMode && IsVariableAsignStart(i)){
 
                     } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
-                        currentToken = Token.TraditionalCommandInvoke;
+                        _currentToken = Token.TraditionalCommandInvoke;
                         traditionalMode = true;
                     } else if(!traditionalMode && OPERATORS.Contains(currentChar)) {
-                        currentToken = Token.OperatorFlow;
+                        _currentToken = Token.OperatorFlow;
                         // to do: default expressions_activeToken
                     } else if(_activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
-                        currentToken = Token.Unknown;
+                        _currentToken = Token.Unknown;
                     }
                 }
 
-                if(currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
+                if(_currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
                     // we have to end the previous token region and set the new one active
                     EndActiveToken(i);
-                    _activeToken = currentToken;
+                    _activeToken = _currentToken;
                 }
 
-                if(currentChar != '\n')
+                if(currentChar == '\n')
+                    _currentLine++;
+                else
                     _currentColumn++;
             }
             EndActiveToken(_textlen);
@@ -351,6 +361,8 @@ namespace SmartDevelop.TokenizerBase.IA
                         tokenToStore = OPERATOR_TOKEN.FindOperatorToken(str);
                     }
 
+                    if(l > 1 && _currentToken == Token.NewLine)
+                        l--;
 
                     var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
                         str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);

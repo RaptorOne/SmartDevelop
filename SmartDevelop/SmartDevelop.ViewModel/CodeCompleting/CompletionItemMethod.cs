@@ -13,7 +13,15 @@ namespace SmartDevelop.ViewModel.CodeCompleting
 
 
         public CompletionItemMethod(string text, string description) 
-            : base(text, description) { }
+            : base(text, description) {
+                
+        }
+
+        public override double Priority {
+            get {
+                return base.Priority + 1;
+            }
+        }
 
         public override System.Windows.Media.ImageSource Image {
             get {
