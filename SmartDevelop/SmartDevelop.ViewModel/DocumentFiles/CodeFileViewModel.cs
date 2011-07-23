@@ -244,20 +244,15 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     }
 
                     foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
-                        if(m is CodeMemberMethod) {
-                            var info = new StringBuilder();
-                            var method = m as CodeMemberMethod;
 
-                            foreach(CodeCommentStatement com in method.Comments) {
-                                if(com.Comment.DocComment)
-                                    info.AppendLine(com.Comment.Text);
-                            }
-                            data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
+                        if(m is CodeMemberMethod) {
+                            var method = m as CodeMemberMethod;
+                            data.Add(new CompletionItemMethod(method.Name, string.Format("Method {0}\n{1}", GetDocumentCommentString(method.Comments), GetParamInfo(method.Parameters))));
                         }
 
                         if(m is CodeTypeDeclaration && ((CodeTypeDeclaration)m).IsClass) {
                             var classdecl = ((CodeTypeDeclaration)m);
-                            data.Add(new CompletionItemClass(classdecl.Name, ""));
+                            data.Add(new CompletionItemClass(classdecl.Name, string.Format("class {0}\n{1}", classdecl.Name, GetDocumentCommentString(classdecl.Comments))));
                         }
 
                     }
@@ -271,6 +266,14 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             }
         }
 
+        string GetDocumentCommentString(CodeCommentStatementCollection comments) {
+            var info = new StringBuilder();
+            foreach(CodeCommentStatement com in comments) {
+                if(com.Comment.DocComment)
+                    info.AppendLine(com.Comment.Text);
+            }
+            return info.ToString();
+        }
 
         IEnumerable<CompletionItem> GetStaticCompletionItems() {
             var it = CompletionCache.Instance[_projectitem.CodeLanguage];
