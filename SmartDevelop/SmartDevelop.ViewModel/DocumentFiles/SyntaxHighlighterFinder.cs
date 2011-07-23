@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
 using ICSharpCode.AvalonEdit.Highlighting;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {

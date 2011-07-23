@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SmartDevelop.Model.CodeLanguage
+namespace SmartDevelop.Model.CodeLanguages
 {
+    [Obsolete("Hardcoded Languages are obsolete, use CodeLanguage-Ids")]
     public enum CodeItemType
     {
         None = 0,

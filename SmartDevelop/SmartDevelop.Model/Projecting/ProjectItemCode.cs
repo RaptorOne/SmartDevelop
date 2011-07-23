@@ -8,7 +8,8 @@ using System.Threading;
 using System.Windows.Threading;
 using System.IO;
 using SmartDevelop.Model.Tokening;
-using SmartDevelop.Model.CodeLanguage;
+using SmartDevelop.Model.CodeLanguages;
+using Archimedes.Patterns.Services;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -23,7 +24,10 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         readonly TextDocument _codedocument;
+        
         CodeItemType _type = CodeItemType.None;
+        CodeLanguage _language;
+
         SimpleTokinizerIA _tokenizer;
         DocumentCodeSegmentService _codeSegmentService;
         bool _documentdirty = false;
@@ -85,6 +89,9 @@ namespace SmartDevelop.Model.Projecting
                 }
             };
             _type = type;
+
+            var languageService = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
+            _language = languageService.GetById("ahk-dialect"); /* ToDo: load by given id*/
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
             tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
@@ -150,6 +157,10 @@ namespace SmartDevelop.Model.Projecting
 
         public CodeItemType Type {
             get { return _type; }
+        }
+
+        public CodeLanguage CodeLanguage {
+            get { return _language; }
         }
 
         public TextDocument Document {

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.Windows.Media;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
 
 namespace SmartDevelop.ViewModel.CodeCompleting
 {
@@ -38,8 +40,13 @@ namespace SmartDevelop.ViewModel.CodeCompleting
             get { return 1; }
         }
 
-        public virtual void Complete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, EventArgs insertionRequestEventArgs) {
-            textArea.Document.Replace(completionSegment, this.Text);
+        public virtual void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs) {
+            textArea.Document.Replace(SubSegment(completionSegment), this.Text);
         }
+
+        ISegment SubSegment(ISegment segment) {
+            return new SimpleSegment(segment.Offset-1, segment.Length+1);;
+        }
+
     }
 }

@@ -116,12 +116,15 @@ namespace SmartDevelop.TokenizerBase
             } else
                 return null;
         }
-        
+
+        public CodeSegment FindNext(Token tokeoFind) {
+            return FindNext(tokeoFind, null);
+        }
         public CodeSegment FindNext(Token tokeoFind, List<Token> endTokens) {
             if(this.Next != null) {
                 if(Next.Type == tokeoFind)
                     return Next;
-                else if(endTokens.Contains(Next.Type))
+                else if(endTokens != null && endTokens.Contains(Next.Type))
                     return null;
                 else
                     return Next.FindNextOnSameLine(tokeoFind);
@@ -197,7 +200,7 @@ namespace SmartDevelop.TokenizerBase
         /// <summary>
         /// Line number of this Segment
         /// </summary>
-        public int Line {
+        public int LineNumber {
             get { return _line; }
         }
 

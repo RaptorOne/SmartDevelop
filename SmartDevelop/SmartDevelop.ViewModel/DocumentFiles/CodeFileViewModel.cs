@@ -196,7 +196,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         static List<char> whitespaces = new List<char> { ' ', '\t', '\n', '\r' };
-        static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', ';' , ' ', '\t' };
+        static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t' };
 
         CompletionWindow _completionWindow;
 
@@ -239,6 +239,10 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     _completionWindow = new CompletionWindow(_texteditor.TextArea);
                     IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
 
+                    foreach(var item in GetStaticCompletionItems()) {
+                        data.Add(item);
+                    }
+
                     foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
                         if(m is CodeMemberMethod) {
                             var info = new StringBuilder();
@@ -259,6 +263,19 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     };
                 }
             }
+        }
+
+
+        IEnumerable<CompletionItem> GetStaticCompletionItems() {
+            var it = CompletionCache.Instance[_projectitem.CodeLanguage];
+            if(it == null) {
+                it = new CompletionCache.LanguageCompletionCache();
+                foreach(var keyword in _projectitem.CodeLanguage.LanguageKeywords) {
+                    it.AddStatic(new CompletionItemKeyword(keyword));
+                }
+                CompletionCache.Instance[_projectitem.CodeLanguage] = it;
+            }
+            return it.GetAllStaticCompletionItems();
         }
 
         string GetParamInfo(CodeParameterDeclarationExpressionCollection parsams){
@@ -291,7 +308,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
-                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Type, segment.TokenString, segment.Line, segment.ColumnStart, segment.CodeDOMObject);
+                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Type, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;
                 _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;

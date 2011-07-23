@@ -43,6 +43,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeCompleting\ICodeContextService.cs" />
+    <Compile Include="CodeLanguages\CodeItemType.cs" />
+    <Compile Include="CodeLanguages\CodeKeyWord.cs" />
+    <Compile Include="CodeLanguages\CodeLanguage.cs" />
+    <Compile Include="CodeLanguages\CodeLanguageService.cs" />
+    <Compile Include="CodeLanguages\ICodeLanguageService.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
     <Compile Include="DOM\CodeDOMServiceIA.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
@@ -53,12 +58,16 @@
     <Compile Include="Projecting\SmartCodeProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StdLib\StdLibLoader.cs" />
-    <Compile Include="Tokening\DocumentCodeSegmentService.cs" />
+    <Compile Include="DocumentCodeSegmentService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.CodeDOM\Archimedes.CodeDOM.csproj">
       <Project>{5FFA870A-6811-438E-B111-B36DD3651CEE}</Project>
       <Name>Archimedes.CodeDOM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns\Archimedes.Patterns.csproj">
+      <Project>{5C5031E6-C6A4-4D8F-A473-CDB08DB8E282}</Project>
+      <Name>Archimedes.Patterns</Name>
     </ProjectReference>
     <ProjectReference Include="..\Lib\AvalonEdit\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>

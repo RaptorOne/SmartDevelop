@@ -57,11 +57,20 @@ namespace SmartDevelop.TokenizerBase.IA
                 "if",
                 "else",
                 "loop",
+                "break",
+                "continue",
                 "while",
+                "for",
                 "return",
                 "is",
                 "global",
+                "local",
                 "static",
+
+                "class",
+                "this",
+                "var",
+                "new",
 
                 "true",
                 "false"
@@ -95,11 +104,10 @@ namespace SmartDevelop.TokenizerBase.IA
         string _text;
         int _textlen = 0;
 
-        int _currentRangeStart = 0;
-        int _currentColStart = 0;
-
-        int _currentLine = 0;
-        int _currentColumn = 0;
+        int _currentRangeStart;
+        int _currentColStart;
+        int _currentLine;
+        int _currentColumn;
         Token _activeToken = Token.Unknown;
 
         BackgroundWorker _tokenizerworker;
@@ -190,7 +198,7 @@ namespace SmartDevelop.TokenizerBase.IA
             _codesegmentsWorker.Clear();
             _currentRangeStart = 0;
             _currentColStart = 0;
-            _currentLine = 0;
+            _currentLine = 1;
             _currentColumn = 0;
 
             char currentChar;
@@ -344,7 +352,8 @@ namespace SmartDevelop.TokenizerBase.IA
                     }
 
 
-                    var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken, str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
+                    var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
+                        str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = current;
                     _previous = current;

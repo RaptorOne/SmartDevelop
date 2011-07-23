@@ -5,6 +5,8 @@ using System.Text;
 using SmartDevelop.Model.CodeCompleting;
 using SmartDevelop.Model.DOM;
 using System.CodeDom;
+using SmartDevelop.Model.CodeLanguages;
+using Archimedes.Patterns.Services;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -16,7 +18,7 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         readonly CodeDOMService _domservice;
-
+        
         #endregion
 
         #region Events
@@ -31,7 +33,8 @@ namespace SmartDevelop.Model.Projecting
         public SmartCodeProject(string name) 
             : base(null) {
             Name = name;
-            _domservice = new CodeDOMServiceIA(this); /*ToDo: choose Domservice depending of the language */ 
+
+            _domservice = new CodeDOMServiceIA(this); /* ToDo: choose Domservice depending of the language */ 
         }
 
         #endregion
@@ -100,13 +103,13 @@ namespace SmartDevelop.Model.Projecting
         void OnCodeFileTokenizerUpdated(object sender, EventArgs e) {
 
                 _domservice.CompileTokenFile((ProjectItemCode)sender, _domservice.RootType);
-                var i = _domservice.RootType.Members.Count;
+                //var i = _domservice.RootType.Members.Count;
 
-                var str = "";
-                foreach(CodeMemberMethod m in _domservice.RootType.Members)
-                    str += m.Name + "\n";
+                //var str = "";
+                //foreach(CodeMemberMethod m in _domservice.RootType.Members)
+                //    str += m.Name + "\n";
 
-                var sa = str;
+                //var sa = str;
         }
 
 

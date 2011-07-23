@@ -15,6 +15,7 @@ using SmartDevelop.ViewModel.DocumentFiles;
 using SmartDevelop.ViewModel.Main;
 using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.View.Main;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop
 {
@@ -61,6 +62,8 @@ namespace SmartDevelop
             _serviceLocator.RegisterSingleton<IWorkBenchService, AvalonWorkBenchService>();
             _serviceLocator.RegisterSingleton<IAvalonService, AvalonService>();
             _serviceLocator.RegisterSingleton<IViewModelPoolService, ViewModelPoolService>();
+            _serviceLocator.RegisterSingleton<ICodeLanguageService, CodeLanguageService>();
+            
 
             SetupViewModelViewMappings();
             LoadSyntaxHighlighner();

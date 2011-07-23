@@ -44,11 +44,11 @@ namespace SmartDevelop.Model.Tokening
                 _segments = new List<CodeSegment>(newtokens);
                 _codeLineSegments.Clear();
                 foreach(var t in newtokens) {
-                    if(_codeLineSegments.ContainsKey(t.Line))
-                        _codeLineSegments[t.Line].Add(t);
+                    if(_codeLineSegments.ContainsKey(t.LineNumber))
+                        _codeLineSegments[t.LineNumber].Add(t);
                     else {
-                        _codeLineSegments.Add(t.Line, new CodeTokenLine(t));
-                        _maxLine = t.Line;
+                        _codeLineSegments.Add(t.LineNumber, new CodeTokenLine(t));
+                        _maxLine = t.LineNumber;
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace SmartDevelop.Model.Tokening
         /// <returns></returns>
         public IEnumerable<CodeSegment> GetSegments() {
             lock(_codesegmentsLock) {
-            return new List<CodeSegment>(_segments);
+                return new List<CodeSegment>(_segments);
             }
         }
 
@@ -100,6 +100,11 @@ namespace SmartDevelop.Model.Tokening
 
         //}
 
+        /// <summary>
+        /// Get the Line with Line-Number x
+        /// </summary>
+        /// <param name="line">Linenumber</param>
+        /// <returns></returns>
         public CodeTokenLine QueryCodeTokenLine(int line) {
             CodeTokenLine tokline = new CodeTokenLine();
             if(_codeLineSegments.ContainsKey(line)) {
@@ -115,7 +120,7 @@ namespace SmartDevelop.Model.Tokening
     {
         public CodeTokenLine(CodeSegment initialToken) 
             : this() {
-            Line = initialToken.Line;
+            Line = initialToken.LineNumber;
             CodeSegments = new List<CodeSegment>() { initialToken };
         }
 

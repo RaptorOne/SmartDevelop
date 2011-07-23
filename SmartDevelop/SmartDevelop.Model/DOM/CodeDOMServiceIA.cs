@@ -27,29 +27,64 @@ namespace SmartDevelop.Model.DOM
         public override void CompileTokenFile(Projecting.ProjectItemCode codeitem, System.CodeDom.CodeTypeDeclaration initialparent) {
             //remove all old members which are from this code file:
             var oldMembers = (from CodeTypeMember m in RootType.Members
-                             where m.LinePragma.FileName == codeitem.FilePath
+                             where m.LinePragma == null || m.LinePragma.FileName == codeitem.FilePath
                              select m).ToList();
             foreach(var m in oldMembers)
                 RootType.Members.Remove(m);
 
 
-            var segments = codeitem.SegmentService.GetCodeSegmentLinesMap();
+            var codeLineMap = codeitem.SegmentService.GetCodeSegmentLinesMap();
             CodeTypeDeclaration parent = initialparent;
             Stack<CodeSegment> paramstack = new Stack<CodeSegment>();           
             int linecnt = codeitem.Document.LineCount;
             CodeTokenLine line;
 
+            Stack<CodeTypeDeclaration> parentHirarchy = new Stack<CodeTypeDeclaration>();
+            int bcc = 0;
+            parentHirarchy.Push(initialparent);
+            
+
             for(int i = 0; i < linecnt; i++) {
 
-                if(segments.ContainsKey(i))
-                    line = segments[i];
+                if(codeLineMap.ContainsKey(i))
+                    line = codeLineMap[i];
                 else
                     continue;
 
                 // is class definition?:
 
+                var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetoken);
+                if(classkeywordSegment != null && classkeywordSegment.Type == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
+                    var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
+                    if(classNameSegment != null) {
+
+                        var classBodyStart = classNameSegment.NextOmit(whitespacetoken);
+                        if(classBodyStart != null) {
+                            if(classBodyStart.Type != Token.BlockOpen) {
+                                // unexpected token
+                                // block open was expected!!
+                            } else {
+                                //classBodyStart = classBodyStart.Next;
+                                //var classBodyEnd = classBodyStart.FindClosingBracked(true);
+
+                                var type = new CodeTypeDeclaration(classNameSegment.TokenString)
+                                {
+                                    IsClass = true
+                                };
+                                classNameSegment.CodeDOMObject = type;
+                                parentHirarchy.Peek().Members.Add(type);
+                                parentHirarchy.Push(type);
+                                bcc++;
+
+                                i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
+                                continue;
+                            }
+                        }
+                    }
+                }
 
                 // is method definition?:
+
                 #region Analyze for Method Definition
 
                 var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetoken);
@@ -66,10 +101,12 @@ namespace SmartDevelop.Model.DOM
                                 var endMethodBody = startMethodBody.FindClosingBracked(true);
                                 if(endMethodBody != null) {
 
+                                    #region Generate Method Definition DOM
+
                                     var method = new CodeMemberMethod()
                                     {
                                         Name = methodSegment.TokenString,
-                                        LinePragma = new CodeLinePragma(codeitem.FilePath, methodSegment.Line),
+                                        LinePragma = new CodeLinePragma(codeitem.FilePath, methodSegment.LineNumber),
                                         ReturnType = new CodeTypeReference(typeof(object))
                                     };
                                     methodSegment.CodeDOMObject = method;
@@ -108,14 +145,15 @@ namespace SmartDevelop.Model.DOM
                                         previous = current;
                                     }
 
+                                    #endregion
 
                                     // get method statements
                                     method.Statements.AddRange(
-                                        CollectAllCodeStatements(segments, startMethodBody.Line + 1, endMethodBody.Line));
-                                     
-                                    parent.Members.Add(method);
+                                        CollectAllCodeStatements(codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+
+                                    parentHirarchy.Peek().Members.Add(method);
                                     // move the scanpointer to the method end:
-                                    i = endMethodBody.Line;
+                                    i = endMethodBody.LineNumber;
                                     continue;
                                 }
                             }
@@ -124,6 +162,22 @@ namespace SmartDevelop.Model.DOM
                 }
 
                 #endregion
+
+                if(codeLineMap.ContainsKey(i)) {
+                    var lineBlock = codeLineMap[i];
+                    foreach(var segment in lineBlock.CodeSegments) {
+                        if(segment.Type == Token.BlockOpen) {
+                            bcc++;
+                        } else if(segment.Type == Token.BlockClosed) {
+                            bcc--;
+                            if(parentHirarchy.Count - 2 == bcc) {
+                                parentHirarchy.Pop();
+                            }
+                        }
+                    }
+                } else
+                    continue;
+
             }
         }
 
