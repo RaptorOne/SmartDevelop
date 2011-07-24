@@ -5,52 +5,97 @@ using System.CodeDom;
 
 namespace SmartDevelop.TokenizerBase
 {
-    public enum Token
+    public enum Token : int
     {
-        Unknown,
+        Unknown = 0,
         
         /// <summary>
         /// Identifier which can be a class, field, property, method, local variable, type identifier etc...
         /// The tokenizer doesn't have enought context info to judge about.
         /// </summary>
-        Identifier,
-        SingleLineComment,
-        MultiLineComment,
-        LiteralString,
-        WhiteSpace,
-        ParameterDelemiter,
-        NewLine,
+        Identifier = 1,
+        SingleLineComment = 2,
+        MultiLineComment = 3,
+        LiteralString = 4,
+        WhiteSpace = 5,
+        ParameterDelemiter = 6,
+        NewLine = 7,
         /// <summary>
         /// Member Invoke, mostly a Dot like in:
         /// class.Action()
         /// class.Property
         /// </summary>
-        MemberInvoke,
-        StringConcat,
-        OperatorFlow,
-        Number,
-        HexNumber,
-        KeyWord,
+        MemberInvoke = 8,
+        StringConcat = 9,
+        OperatorFlow = 10,
+        Number = 11,
+        HexNumber = 12,
+        KeyWord = 13,
 
         #region Operators
 
-        Operator_Add,
-        Operator_BitwiseAnd,
-        Operator_BitwiseOr,
-        Operator_BooleanAnd,
-        Operator_BooleanOr,
-        Operator_Divide,
+        /// <summary>
+        /// +
+        /// </summary>
+        Operator_Add = 20,
+
+        /// <summary>
+        /// -
+        /// </summary>
+        Operator_Subtract = 21,
+
+        /// <summary>
+        /// &
+        /// </summary>
+        Operator_BitwiseAnd = 22,
+        
+        /// <summary>
+        /// |
+        /// </summary>
+        Operator_BitwiseOr = 23,
+        
+        /// <summary>
+        /// &&
+        /// </summary>
+        Operator_BooleanAnd = 24,
+        
+        /// <summary>
+        /// ||
+        /// </summary>
+        Operator_BooleanOr = 25,
+
+        /// <summary>
+        /// /
+        /// </summary>
+        Operator_Divide = 26,
+
+        /// <summary>
+        /// //
+        /// </summary>
+        Operator_Modulus = 27,
+
+        /// <summary>
+        /// *
+        /// </summary>
+        Operator_Multiply = 28,
+
+        /// <summary>
+        /// x**a 
+        /// x ^ (a)
+        /// </summary>
+        Operator_Power = 29,
+
+
         Operator_GreaterThan,
         Operator_GreaterThanOrEqual,
         Operator_IdentityEquality,
         Operator_IdentityInequality,
         Operator_LessThan,
         Operator_LessThanOrEqual,
-        Operator_Modulus,
-        Operator_Multiply,
-        Operator_Subtract,
+
+
         
-        /*Operator_ValueEquality,*/
+        /* Operator_ValueEquality */
 
         Operator_Assign,
         Operator_AssignAdd,
@@ -70,38 +115,37 @@ namespace SmartDevelop.TokenizerBase
 
         #endregion
 
-
         #region Brackets
 
         /// <summary>
         /// (
         /// </summary>
-        LiteralBracketOpen,
-        
+        LiteralBracketOpen = 50,
+
         /// <summary>
         /// )
         /// </summary>
-        LiteralBracketClosed,
+        LiteralBracketClosed = 51,
 
         /// <summary>
         /// [
         /// </summary>
-        IndexerBracketOpen,
+        IndexerBracketOpen = 52,
 
         /// <summary>
         /// ]
         /// </summary>
-        IndexerBracketClosed,
+        IndexerBracketClosed = 53,
 
         /// <summary>
         /// {
         /// </summary>
-        BlockOpen,
+        BlockOpen = 54,
 
         /// <summary>
         /// }
         /// </summary>
-        BlockClosed,
+        BlockClosed = 55,
 
 
         #endregion

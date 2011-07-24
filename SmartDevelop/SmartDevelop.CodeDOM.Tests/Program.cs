@@ -81,7 +81,7 @@ namespace SmartDevelop.CodeDOM.Tests
 
             CodeExpression mathExpression = new CodeBinaryOperatorExpression(new CodePrimitiveExpression(1),
                 CodeBinaryOperatorType.Add,
-                new CodeBinaryOperatorExpression(new CodePrimitiveExpression(6), CodeBinaryOperatorType.Add, new CodePrimitiveExpression(5))
+                new CodeBinaryOperatorExpression(new CodePrimitiveExpression(6), CodeBinaryOperatorType.BooleanAnd, new CodePrimitiveExpression(5))
                 );
 
 

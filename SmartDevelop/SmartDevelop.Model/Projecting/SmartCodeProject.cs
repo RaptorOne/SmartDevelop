@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SmartDevelop.Model.CodeCompleting;
 using SmartDevelop.Model.DOM;
 using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
+using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -18,7 +18,7 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         readonly CodeDOMService _domservice;
-        
+
         #endregion
 
         #region Events
@@ -79,6 +79,7 @@ namespace SmartDevelop.Model.Projecting
         public CodeDOMService DOMService {
             get { return _domservice; }
         }
+
 
         /// <summary>
         /// Returns itself ;) 

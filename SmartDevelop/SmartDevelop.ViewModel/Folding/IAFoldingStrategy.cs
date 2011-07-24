@@ -47,18 +47,18 @@ namespace SmartDevelop.ViewModel.Folding
             int lastNewLineOffset = 0;
 
             foreach(var segment in _tokenservice.GetSegments()) {
-                if(segment.Type == TokenizerBase.Token.BlockOpen || segment.Type == TokenizerBase.Token.BlockClosed) {
+                if(segment.Token == TokenizerBase.Token.BlockOpen || segment.Token == TokenizerBase.Token.BlockClosed) {
 
-                    if(segment.Type == _openingBrace) {
+                    if(segment.Token == _openingBrace) {
                         startOffsets.Push(segment.Range.Offset);
-                    } else if(segment.Type == _closingBrace && startOffsets.Count > 0) {
+                    } else if(segment.Token == _closingBrace && startOffsets.Count > 0) {
                         int startOffset = startOffsets.Pop();
                         // don't fold if opening and closing brace are on the same line
                         if(startOffset < lastNewLineOffset) {
                             newFoldings.Add(new NewFolding(startOffset, segment.Range.Offset + 1));
                         }
                     }
-                } else if(segment.Type == TokenizerBase.Token.NewLine) {
+                } else if(segment.Token == TokenizerBase.Token.NewLine) {
                     lastNewLineOffset = segment.Range.Offset;
                 }
             }

@@ -6,26 +6,31 @@ using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.Tokening;
 using System.CodeDom;
+using SmartDevelop.Model.DOM.Types;
+using SmartDevelop.Model.CodeContexts;
+using ICSharpCode.AvalonEdit.Document;
+using SmartDevelop.Model.DOM.Ranges;
 
 namespace SmartDevelop.Model.DOM
 {
     /// <summary>
-    /// Service to compile tokenized RAW Data into CodeDOM Representation
+    /// Service to compile tokenized RAW Data into CodeDOM Representation and offers several CodeDOM based Querys
     /// </summary>
     public abstract class CodeDOMService
     {
         #region Fields
 
         SmartCodeProject _project;
-        CodeTypeDeclaration _scriptRoot;
+        CodeTypeDeclarationEx _scriptRoot;
         protected static List<Token> whitespacetoken = new List<Token> { Token.WhiteSpace, Token.NewLine };
-        
+        protected Dictionary<ProjectItemCode, CodeRangeManager> CodeRanges = new Dictionary<ProjectItemCode, CodeRangeManager>();
+
         #endregion
 
         #region Constructor
 
         public CodeDOMService(SmartCodeProject project) {
-            _scriptRoot = new CodeTypeDeclaration("Global");
+            _scriptRoot = new CodeTypeDeclarationEx("Global");
             _project = project;
         }
 
@@ -33,7 +38,7 @@ namespace SmartDevelop.Model.DOM
 
         #region Properties
 
-        public CodeTypeDeclaration RootType {
+        public CodeTypeDeclarationEx RootType {
             get { return _scriptRoot; }
         }
 
@@ -43,6 +48,8 @@ namespace SmartDevelop.Model.DOM
 
 
         #endregion
+
+        #region Public Methods
 
         IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
             List<CodeMemberMethod> methods;
@@ -55,15 +62,50 @@ namespace SmartDevelop.Model.DOM
             return methods;
         }
 
-        #region File Compiler
-
-        public abstract void CompileTokenFile(ProjectItemCode codeitem, CodeTypeDeclaration initialparent); 
         
+
+        public CodeContext GetCodeContext(ProjectItemCode codeitem, TextLocation location) {
+            return GetCodeContext(codeitem, codeitem.Document.GetOffset(location));
+        }
+
+        public virtual CodeContext GetCodeContext(ProjectItemCode codeitem, int offset) {
+            var context = new CodeContext(this);
+
+            if(CodeRanges.ContainsKey(codeitem)) {
+                var ranges = from r in CodeRanges[codeitem].FindEncapsulatingRanges(offset)
+                             where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
+                             select r;
+
+                if(ranges.Any()) {
+                    var range = ranges.First();
+                    if(range.RangedCodeObject is CodeMemberMethodEx) {
+                        context.EnclosingMethod = range.RangedCodeObject as CodeMemberMethodEx;
+                        context.EnclosingType = context.EnclosingMethod.DefiningType;
+                    }
+                    if(range.RangedCodeObject is CodeTypeDeclarationEx) {
+                        context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
+                    }
+                }
+            }
+
+            if(context.EnclosingType == null)
+                context.EnclosingType = this.RootType;
+
+            return context;
+        }
 
         #endregion
 
+        #region File Compiler
 
+        public abstract void CompileTokenFile(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent);
+
+        #endregion
     }
+
+
+
+
 
         
 }

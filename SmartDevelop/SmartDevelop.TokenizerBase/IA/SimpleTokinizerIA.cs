@@ -5,6 +5,7 @@ using ICSharpCode.AvalonEdit.Document;
 using System.ComponentModel;
 using System.Threading;
 using System.Text.RegularExpressions;
+using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.TokenizerBase.IA
 {
@@ -363,9 +364,12 @@ namespace SmartDevelop.TokenizerBase.IA
 
                     if(l > 1 && _currentToken == Token.NewLine)
                         l--;
+                    int linenumber = _currentLine;
+                    if(_activeToken == Token.NewLine)
+                        --linenumber;
 
                     var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
-                        str, new SimpleSegment(_currentRangeStart, l), _currentLine, _currentColStart, _previous);
+                        str, new SimpleSegment(_currentRangeStart, l), linenumber, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = current;
                     _previous = current;

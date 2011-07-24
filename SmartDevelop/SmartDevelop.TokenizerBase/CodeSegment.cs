@@ -22,14 +22,13 @@ namespace SmartDevelop.TokenizerBase
 
         CodeSegment _previous;
         CodeSegment _next;
-
         CodeObject _codeDOMObject = null;
 
         #endregion
 
         #region Constructor
 
-        CodeSegment() {
+        public CodeSegment() {
             _codesegment = new SimpleSegment();
             _type = Token.Unknown;
             _line = -1;
@@ -58,7 +57,7 @@ namespace SmartDevelop.TokenizerBase
         public CodeSegment NextOf(Token type) {
             if(this.Next == null)
                 return null;
-            else if(this.Next.Type == type)
+            else if(this.Next.Token == type)
                 return this.Next;
             else
                 return this.Next.NextOf(type);
@@ -72,7 +71,7 @@ namespace SmartDevelop.TokenizerBase
         public CodeSegment NextOmit(List<Token> tokenstoignore) {
             if(this.Next == null)
                 return null;
-            else if(!tokenstoignore.Contains(this.Next.Type))
+            else if(!tokenstoignore.Contains(this.Next.Token))
                 return this.Next;
             else
                 return this.Next.NextOmit(tokenstoignore);
@@ -86,7 +85,7 @@ namespace SmartDevelop.TokenizerBase
         public CodeSegment PreviousOmit(List<Token> tokenstoignore) {
             if(this.Previous == null)
                 return null;
-            else if(!tokenstoignore.Contains(this.Previous.Type))
+            else if(!tokenstoignore.Contains(this.Previous.Token))
                 return this.Previous;
             else
                 return this.Previous.PreviousOmit(tokenstoignore);
@@ -107,9 +106,9 @@ namespace SmartDevelop.TokenizerBase
 
         public CodeSegment FindNextOnSameLine(Token tokeoFind) {
             if(this.Next != null) {
-                if(Next.Type == tokeoFind)
+                if(Next.Token == tokeoFind)
                     return Next;
-                else if(Next.Type == Token.NewLine)
+                else if(Next.Token == Token.NewLine)
                     return null;
                 else
                     return Next.FindNextOnSameLine(tokeoFind);
@@ -120,17 +119,28 @@ namespace SmartDevelop.TokenizerBase
         public CodeSegment FindNext(Token tokeoFind) {
             return FindNext(tokeoFind, null);
         }
+
         public CodeSegment FindNext(Token tokeoFind, List<Token> endTokens) {
             if(this.Next != null) {
-                if(Next.Type == tokeoFind)
+                if(Next.Token == tokeoFind)
                     return Next;
-                else if(endTokens != null && endTokens.Contains(Next.Type))
+                else if(endTokens != null && endTokens.Contains(Next.Token))
                     return null;
                 else
                     return Next.FindNextOnSameLine(tokeoFind);
             } else
                 return null;
         }
+
+        public CodeSegment FindThisOrNext(Token tokeoFind, List<Token> endTokens) {
+            if(this.Token == tokeoFind)
+                return this;
+            else if(endTokens != null && endTokens.Contains(this.Token))
+                return null;
+            else
+                return this.FindNextOnSameLine(tokeoFind);
+        }
+
 
 
         
@@ -141,7 +151,7 @@ namespace SmartDevelop.TokenizerBase
         /// <param name="allowNewlinesbetween">Should the search go over newlines</param>
         /// <returns>The cloasing codesegment or NULL if nothing was found</returns>
         public CodeSegment FindClosingBracked(bool allowNewlinesbetween) {
-            if(!TokenHelper.IsOpenBracketToken(this.Type))
+            if(!TokenHelper.IsOpenBracketToken(this.Token))
                 throw new NotSupportedException("Must be called on open barcket type");
 
             int openBracketCounter = 1;
@@ -149,15 +159,15 @@ namespace SmartDevelop.TokenizerBase
             CodeSegment previous = this;
             CodeSegment closingSegment = null;
 
-            Token openbracket = this.Type;
-            Token closingbracket = TokenHelper.GetClosingToken(this.Type);
+            Token openbracket = this.Token;
+            Token closingbracket = TokenHelper.GetClosingToken(this.Token);
 
             while((current = previous.Next) != null) {
-                if(current.Type == Token.NewLine && !allowNewlinesbetween)
+                if(current.Token == Token.NewLine && !allowNewlinesbetween)
                     break;
-                else if(current.Type == openbracket)
+                else if(current.Token == openbracket)
                     openBracketCounter++;
-                else if(current.Type == closingbracket) {
+                else if(current.Token == closingbracket) {
                     openBracketCounter--;
                     if(openBracketCounter == 0) {
                         closingSegment = current;
@@ -179,7 +189,7 @@ namespace SmartDevelop.TokenizerBase
         /// <summary>
         /// Underlying Token
         /// </summary>
-        public Token Type {
+        public Token Token {
             get { return _type; }
         }
 

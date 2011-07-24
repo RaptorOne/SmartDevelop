@@ -42,7 +42,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeCompleting\ICodeContextService.cs" />
+    <Compile Include="CodeContexts\CodeContext.cs" />
     <Compile Include="CodeLanguages\CodeItemType.cs" />
     <Compile Include="CodeLanguages\CodeKeyWord.cs" />
     <Compile Include="CodeLanguages\CodeLanguage.cs" />
@@ -50,6 +50,12 @@
     <Compile Include="CodeLanguages\ICodeLanguageService.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
     <Compile Include="DOM\CodeDOMServiceIA.cs" />
+    <Compile Include="DOM\Ranges\CodeRange.cs" />
+    <Compile Include="DOM\Ranges\CodeRangeManager.cs" />
+    <Compile Include="DOM\ShuntingYardExpressionParser.cs" />
+    <Compile Include="DOM\Types\CodeMemberMethodEx.cs" />
+    <Compile Include="DOM\Types\CodeTypeDeclarationEx.cs" />
+    <Compile Include="DOM\Types\ICodeObjectEx.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCode.cs" />

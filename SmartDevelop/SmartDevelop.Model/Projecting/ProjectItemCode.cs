@@ -186,7 +186,6 @@ namespace SmartDevelop.Model.Projecting
             if(_documentdirty && !_tokenizer.IsBusy) {
                 _documentdirty = false;
                 _tokenizer.TokenizeAsync();
-                OnRequestTextInvalidation();
             }
         }
 

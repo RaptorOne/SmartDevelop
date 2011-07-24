@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AHK\BuildInMembers.cs" />
-    <Compile Include="AsciiHelper.cs" />
+    <Compile Include="CodeSegmentRange.cs" />
     <Compile Include="IA\Indentation\IAIndentationStrategy.cs" />
     <Compile Include="IA\Indentation\DocumentAccessor.cs" />
     <Compile Include="IA\Indentation\IndentationReformatter.cs" />
@@ -50,6 +50,10 @@
     <Compile Include="TokenHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns\Archimedes.Patterns.csproj">
+      <Project>{5C5031E6-C6A4-4D8F-A473-CDB08DB8E282}</Project>
+      <Name>Archimedes.Patterns</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lib\AvalonEdit\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>

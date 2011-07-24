@@ -19,6 +19,8 @@ using System.CodeDom;
 using System.Text;
 using SmartDevelop.ViewModel.BackgroundRenderer;
 using SmartDevelop.ViewModel.TextTransformators;
+using SmartDevelop.Model.CodeContexts;
+using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -196,13 +198,18 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         static List<char> whitespaces = new List<char> { ' ', '\t', '\n', '\r' };
-        static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t' };
+        static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
         CompletionWindow _completionWindow;
 
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
 
-            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(e.Text[0])) {
+            char currentChar = e.Text[0];
+            char carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
+
+
+            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar) 
+                && (AsciiHelper.IsAsciiLiteralLetter(currentChar) && !AsciiHelper.IsAsciiNum(currentChar)) ) {
                 // this is just for first debugging purposes
                 // as this code belongs to a completion service which handles and caches those completion items
 
@@ -210,30 +217,15 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 if(e.Text == ".") {
 
                     // do type lookup & list avaiable members
-                    //completionWindow = new CompletionWindow(_texteditor.TextArea);
-                    //IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+                    //var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
 
-
-                    //foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
-                    //    if(m is CodeMemberMethod){
-                    //        var info = new StringBuilder();
-                    //        var method = m as CodeMemberMethod;
-
-                    //        foreach(CodeCommentStatement com in method.Comments) {
-                    //            if(com.Comment.DocComment)
-                    //                info.AppendLine(com.Comment.Text);
-                    //        }
-                    //        data.Add(new CompletionItemMethod(method.Name, string.Format("{0}\n{1}", info, GetParamInfo(method.Parameters))));
-                    //    }
+                    //foreach(var m in ctx.EnclosingType.Members) {
+                    //    data.Add(CompletionItem.Build(m));
                     //}
-                    //completionWindow.Show();
 
-                    //completionWindow.Closed += delegate
-                    //{
-                    //    completionWindow = null;
-                    //};
-                } else if(_completionWindow == null && e.Text != "\n" && 
-                    (_texteditor.Document.TextLength > _texteditor.CaretOffset && whitespaces.Contains(_texteditor.Document.GetCharAt(_texteditor.CaretOffset)))) {
+                   
+                } else if(_completionWindow == null && e.Text != "\n" &&
+                    (_texteditor.Document.TextLength > _texteditor.CaretOffset && whitespaces.Contains(carretChar))) {
                     // show avaiable global Methods & build in Methods + commands
 
                     _completionWindow = new CompletionWindow(_texteditor.TextArea);
@@ -243,19 +235,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         data.Add(item);
                     }
 
-                    foreach(var m in _projectitem.Project.DOMService.RootType.Members) {
-
-                        if(m is CodeMemberMethod) {
-                            var method = m as CodeMemberMethod;
-                            data.Add(new CompletionItemMethod(method.Name, string.Format("Method {0}\n{1}", GetDocumentCommentString(method.Comments), GetParamInfo(method.Parameters))));
-                        }
-
-                        if(m is CodeTypeDeclaration && ((CodeTypeDeclaration)m).IsClass) {
-                            var classdecl = ((CodeTypeDeclaration)m);
-                            data.Add(new CompletionItemClass(classdecl.Name, string.Format("class {0}\n{1}", classdecl.Name, GetDocumentCommentString(classdecl.Comments))));
-                        }
-
+                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
+                    foreach(var m in ctx.GetVisibleMembers()) {
+                        data.Add(CompletionItem.Build(m));
                     }
+
                     _completionWindow.Show();
 
                     _completionWindow.Closed += delegate
@@ -266,14 +250,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             }
         }
 
-        string GetDocumentCommentString(CodeCommentStatementCollection comments) {
-            var info = new StringBuilder();
-            foreach(CodeCommentStatement com in comments) {
-                if(com.Comment.DocComment)
-                    info.AppendLine(com.Comment.Text);
-            }
-            return info.ToString();
-        }
+
 
         IEnumerable<CompletionItem> GetStaticCompletionItems() {
             var it = CompletionCache.Instance[_projectitem.CodeLanguage];
@@ -287,13 +264,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             return it.GetAllStaticCompletionItems();
         }
 
-        string GetParamInfo(CodeParameterDeclarationExpressionCollection parsams){
-            string str = "";
-            foreach(CodeParameterDeclarationExpression p in parsams) {
-                str += p.Name + ", ";
-            }
-            return str;
-        }
+
 
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
             if(e.Text.Length > 0 && _completionWindow != null) {
@@ -317,7 +288,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
-                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Type, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
+                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;
                 _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
