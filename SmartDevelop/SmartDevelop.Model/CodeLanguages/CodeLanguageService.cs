@@ -20,7 +20,7 @@ namespace SmartDevelop.Model.CodeLanguages
             lang.LanguageKeywords.AddRange(new CodeKeyWord[]
                 { 
                     new CodeKeyWord("if"), new CodeKeyWord("else"),
-                    new CodeKeyWord("class"), new CodeKeyWord("var"), new CodeKeyWord("new"), new CodeKeyWord("this"),
+                    new CodeKeyWord("class"), new CodeKeyWord("var"), new CodeKeyWord("new"), new CodeKeyWord("this"), new CodeKeyWord("extends"),
                     new CodeKeyWord("return"), new CodeKeyWord("break"), new CodeKeyWord("continue"),
                     new CodeKeyWord("global"), new CodeKeyWord("static"), new CodeKeyWord("local")
                 });

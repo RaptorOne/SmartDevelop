@@ -46,7 +46,6 @@ namespace SmartDevelop.Model.Projecting
             if(ItemAdded != null)
                 ItemAdded(this, new ProjectItemEventArgs(item));
 
-
             if(item is ProjectItemCode) {
                 ((ProjectItemCode)item).TokenizerUpdated += OnCodeFileTokenizerUpdated;
             }
@@ -102,16 +101,9 @@ namespace SmartDevelop.Model.Projecting
         #region Event Handlers
 
         void OnCodeFileTokenizerUpdated(object sender, EventArgs e) {
-
                 _domservice.CompileTokenFile((ProjectItemCode)sender, _domservice.RootType);
-                //var i = _domservice.RootType.Members.Count;
-
-                //var str = "";
-                //foreach(CodeMemberMethod m in _domservice.RootType.Members)
-                //    str += m.Name + "\n";
-
-                //var sa = str;
         }
+
 
 
         #endregion

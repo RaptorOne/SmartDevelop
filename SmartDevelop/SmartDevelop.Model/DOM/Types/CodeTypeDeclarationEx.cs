@@ -23,5 +23,15 @@ namespace SmartDevelop.Model.DOM.Types
             get;
             set;
         }
+
+        public IEnumerable<CodeTypeMember> GetInheritedMembers() {
+            List<CodeTypeMember> members = new List<CodeTypeMember>();
+            members.AddRange(this.Members.Cast<CodeTypeMember>());
+            foreach(CodeTypeReferenceEx t in BaseTypes) {
+                var type = t.FindTypeDeclaration(this.Parent);
+                members.AddRange(type.GetInheritedMembers());
+            }
+            return members;
+        }
     }
 }

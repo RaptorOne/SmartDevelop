@@ -21,6 +21,10 @@ using SmartDevelop.ViewModel.BackgroundRenderer;
 using SmartDevelop.ViewModel.TextTransformators;
 using SmartDevelop.Model.CodeContexts;
 using Archimedes.Patterns.Utils;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Windows;
+using SmartDevelop.Model.DOM.Types;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -207,29 +211,52 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             char currentChar = e.Text[0];
             char carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
 
+            
 
-            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar) 
-                && (AsciiHelper.IsAsciiLiteralLetter(currentChar) && !AsciiHelper.IsAsciiNum(currentChar)) ) {
+            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar)  ) {
                 // this is just for first debugging purposes
                 // as this code belongs to a completion service which handles and caches those completion items
 
                 // Open code completion after the user has pressed dot:
                 if(e.Text == ".") {
 
+                    if(_completionWindow != null)
+                        _completionWindow.Close();
+
+                    IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
+
+                    //ensure we have a updated tokenizer
+                    _projectitem.EnsureTokenizerHasWorked();
+
                     // do type lookup & list avaiable members
-                    //var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
+                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset - 1, true);
+                    if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
+                        foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
+                            data.Add(CompletionItem.Build(m));
+                        }
+                    } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
+                        foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
+                            var td = basetype.FindTypeDeclaration(ctx.EnclosingType);
+                            if(td != null) {
+                                foreach(var m in td.GetInheritedMembers())
+                                    data.Add(CompletionItem.Build(m));
+                            }
+                        }
+                    }
+                    _completionWindow.Show();
 
-                    //foreach(var m in ctx.EnclosingType.Members) {
-                    //    data.Add(CompletionItem.Build(m));
-                    //}
-
-                   
                 } else if(_completionWindow == null && e.Text != "\n" &&
-                    (_texteditor.Document.TextLength > _texteditor.CaretOffset && whitespaces.Contains(carretChar))) {
+                    (_texteditor.Document.TextLength > _texteditor.CaretOffset) &&
+                    (AsciiHelper.IsAsciiLiteralLetter(currentChar) && !AsciiHelper.IsAsciiNum(currentChar))) { // && !whitespaces.Contains(carretChar)
                     // show avaiable global Methods & build in Methods + commands
 
-                    _completionWindow = new CompletionWindow(_texteditor.TextArea);
-                    IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
+                    var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+                    if(segment == null || (segment.Token == TokenizerBase.Token.MultiLineComment || segment.Token == TokenizerBase.Token.SingleLineComment))
+                        return;
+                    
+
+
+                    IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
 
                     foreach(var item in GetStaticCompletionItems()) {
                         data.Add(item);
@@ -250,7 +277,14 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             }
         }
 
-
+        CompletionWindow GetCompletionNewWindow() {
+            _completionWindow = new CompletionWindow(_texteditor.TextArea);
+            _completionWindow.Closed += delegate
+            {
+                _completionWindow = null;
+            };
+            return _completionWindow;
+        }
 
         IEnumerable<CompletionItem> GetStaticCompletionItems() {
             var it = CompletionCache.Instance[_projectitem.CodeLanguage];

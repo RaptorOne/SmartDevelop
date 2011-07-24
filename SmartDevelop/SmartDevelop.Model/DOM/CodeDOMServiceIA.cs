@@ -88,18 +88,27 @@ namespace SmartDevelop.Model.DOM
                     var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
                     if(classNameSegment != null) {
 
-                        var classBodyStart = classNameSegment.NextOmit(whitespacetoken);
-                        if(classBodyStart != null) {
-                            if(classBodyStart.Token != Token.BlockOpen) {
-                                // unexpected token
-                                // block open was expected!!
-                            } else {
+                        var next = classNameSegment.NextOmit(whitespacetoken);
+                        if(next != null) {
+
+                            CodeTypeReferenceEx basecls = null;
+                            if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
+                                var refclass = next.NextOmit(whitespacetoken);
+                                refclass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refclass.TokenString);
+                                next = refclass.NextOmit(whitespacetoken);
+                            }
+
+                            if(next.Token == Token.BlockOpen) {
+                                CodeSegment classBodyStart = next;
 
                                 var type = new CodeTypeDeclarationEx(classNameSegment.TokenString)
                                 {
                                     IsClass = true
                                 };
                                 classNameSegment.CodeDOMObject = type;
+
+                                if(basecls != null)
+                                    type.BaseTypes.Add(basecls);
 
                                 // Add it to the CodeDOM Tree
                                 CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
@@ -121,6 +130,7 @@ namespace SmartDevelop.Model.DOM
                                 i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
                                 continue;
                             }
+                    
                         }
                     }
                 }
@@ -151,7 +161,7 @@ namespace SmartDevelop.Model.DOM
                                     {
                                         Name = methodSegment.TokenString,
                                         LinePragma = new CodeLinePragma(codeitem.FilePath, methodSegment.LineNumber),
-                                        ReturnType = new CodeTypeReference(typeof(object))
+                                        ReturnType = new CodeTypeReferenceEx(typeof(object))
                                     };
                                     methodSegment.CodeDOMObject = method;
 
@@ -269,52 +279,60 @@ namespace SmartDevelop.Model.DOM
         }
 
         static readonly List<Token> LocalExpressionEndTokens = new List<Token>() { Token.NewLine, Token.ParameterDelemiter };
-
+        
 
         CodeExpression ParseExpression(CodeSegment tokenSegment, out CodeSegment nextToParse) {
-
-            nextToParse = null;
+            CodeExpression expression = null;
+            nextToParse = tokenSegment.Next;
 
             //simply parse for Method Invokes
-            var nextidentifier = tokenSegment.FindThisOrNext(Token.Identifier, LocalExpressionEndTokens);
+            if(tokenSegment.Token == Token.Identifier && tokenSegment.Next != null
+                    && tokenSegment.Next.Token == Token.LiteralBracketOpen) {
 
-            if(nextidentifier != null) {
-                if(nextidentifier.Next != null
-                    && nextidentifier.Next.Token == Token.LiteralBracketOpen) {
-                    var invokeExpression = new CodeMethodInvokeExpression();
+                var invokeExpression = new CodeMethodInvokeExpression();
 
+                // var method = _codeDOMTraveler.FindBestMethod(nextidentifier.TokenString, null, RootType); //<-- todo emit correct type
 
-                    // var method = _codeDOMTraveler.FindBestMethod(nextidentifier.TokenString, null, RootType); //<-- todo emit correct type
+                var methodRef = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), tokenSegment.TokenString);
 
-                    var methodRef = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), nextidentifier.TokenString);
+                invokeExpression.Method = methodRef;
+                tokenSegment.CodeDOMObject = methodRef;
 
-                    invokeExpression.Method = methodRef;
-                    nextidentifier.CodeDOMObject = methodRef;
+                nextToParse = tokenSegment.Next.Next;
+                expression = invokeExpression;
+            } else if(tokenSegment.Token == Token.KeyWord) {
+                // parse for new Object Expressions
+                if(tokenSegment.TokenString.Equals("new", StringComparison.InvariantCultureIgnoreCase)) {
+                    var newObjectInvoke = tokenSegment.NextOmit(whitespacetoken);
+                    if(newObjectInvoke != null && newObjectInvoke.Token == Token.Identifier) {
 
-                    var paramOrClose = nextidentifier.Next.Next;
-                    if(paramOrClose != null) {
-                        if(paramOrClose.Token == Token.LiteralBracketClosed) {
-                            // method(void)
-                        } else {
-                            // method with one or more params
-                        }
-                    } else {
-                        // missing closing bracket...
+                        var objectinstangicing = new CodeObjectCreateExpression();
+                        objectinstangicing.CreateType = new CodeTypeReferenceEx(newObjectInvoke.TokenString);
+                        tokenSegment.CodeDOMObject = objectinstangicing;
+                        newObjectInvoke.CodeDOMObject = objectinstangicing.CreateType;
+
+                        expression = objectinstangicing;
+                        nextToParse = newObjectInvoke.Next;
                     }
-
-                    nextToParse = nextidentifier.Next.Next;
-                    if(!(nextToParse != null && nextToParse.LineNumber == tokenSegment.LineNumber)) {
-                        nextToParse = null;
-                    }
-                    return invokeExpression;
-                } else {
-                    if(nextidentifier.Next != null && !LocalExpressionEndTokens.Contains(nextidentifier.Next.Token)) {
-                        return ParseExpression(nextidentifier.Next, out nextToParse);
-                    }
+                } else if(tokenSegment.TokenString.Equals("this", StringComparison.InvariantCultureIgnoreCase)) {
+                    var thisrefExpression = new CodeThisReferenceExpression();
+                    tokenSegment.CodeDOMObject = thisrefExpression;
+                    expression = thisrefExpression;
+                }else if(tokenSegment.TokenString.Equals("base", StringComparison.InvariantCultureIgnoreCase)) {
+                    var baserefExpression = new CodeBaseReferenceExpression();
+                    tokenSegment.CodeDOMObject = baserefExpression;
+                    expression = baserefExpression;
                 }
+
+                
             }
-            return null;
+
+            if(!(nextToParse != null && nextToParse.LineNumber == tokenSegment.LineNumber)) {
+                nextToParse = null;
+            }
+            return expression;
         }
+
 
 
     }

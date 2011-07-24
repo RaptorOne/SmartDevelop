@@ -19,6 +19,12 @@
       </RuleSet>
     </Span>
 
+
+    <Rule foreground="CadetBlue" fontWeight="bold">
+      (?&lt;=class)[\s]+[\w]+
+    </Rule>
+    
+    
     <Keywords fontWeight="bold" foreground="deepskyblue">
       <Word>if</Word>
       <Word>else</Word>
@@ -34,11 +40,15 @@
       <Word>loop</Word>
       <Word>while</Word>
 
-      <Word>class</Word>
+      
       <Word>var</Word>
       <Word>this</Word>
       <Word>new</Word>
+      <Word>extends</Word>
+      <Word>class</Word>
+      <Word>base</Word>
       
+
       <!-- ... -->
     </Keywords>
 
@@ -200,6 +210,7 @@
       )
       ([eE][+-]?[0-9]+)? # optional exponent
     </Rule>
-    
+
+
   </RuleSet>
 </SyntaxDefinition>

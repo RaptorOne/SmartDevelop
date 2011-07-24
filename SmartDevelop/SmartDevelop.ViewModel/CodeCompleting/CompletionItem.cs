@@ -7,6 +7,7 @@ using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System.CodeDom;
+using System.Windows.Input;
 
 namespace SmartDevelop.ViewModel.CodeCompleting
 {
@@ -77,7 +78,16 @@ namespace SmartDevelop.ViewModel.CodeCompleting
         }
 
         public virtual void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs) {
-            textArea.Document.Replace(SubSegment(completionSegment), this.Text);
+            var last = textArea.Document.GetCharAt(completionSegment.Offset-1);
+            var e = insertionRequestEventArgs as TextCompositionEventArgs;
+            if(e != null && e.Text == ".")
+                return;
+
+            ISegment replaceSegment = completionSegment;
+            if(last != '.') {
+                replaceSegment = SubSegment(completionSegment);
+            }
+            textArea.Document.Replace(replaceSegment, this.Text);
         }
 
         ISegment SubSegment(ISegment segment) {

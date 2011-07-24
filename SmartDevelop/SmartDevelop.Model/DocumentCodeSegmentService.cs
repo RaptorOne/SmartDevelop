@@ -94,11 +94,10 @@ namespace SmartDevelop.Model.Tokening
             return t;
         }
 
-        //public CodeSegment QueryCodeSegmentAt(int line, int col) {
-        //    var tokenline = QueryCodeTokenLine(line);
-            
-
-        //}
+        public CodeSegment QueryCodeSegmentAt(int line, int col) {
+            var tokenline = QueryCodeTokenLine(line);
+            return tokenline.GetSegmentAt(col);
+        }
 
         /// <summary>
         /// Get the Line with Line-Number x
@@ -139,6 +138,16 @@ namespace SmartDevelop.Model.Tokening
 
         public override string ToString() {
             return string.Format("L{0}, [{1}] {{2}}", Line, CodeSegments[0], CodeSegments.Count);
+        }
+
+        public CodeSegment GetSegmentAt(int col) {
+            if(CodeSegments != null) {
+                foreach(var s in CodeSegments)
+                    if(s.ColumnStart == col || (s.ColumnStart < col && (s.Next == null || s.Next.ColumnStart > col))) {
+                        return s;
+                    }
+            }
+            return null;
         }
     }
 }

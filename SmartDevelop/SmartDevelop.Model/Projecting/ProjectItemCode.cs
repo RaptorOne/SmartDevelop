@@ -10,6 +10,7 @@ using System.IO;
 using SmartDevelop.Model.Tokening;
 using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
+using SmartDevelop.TokenizerBase;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -28,7 +29,7 @@ namespace SmartDevelop.Model.Projecting
         CodeItemType _type = CodeItemType.None;
         CodeLanguage _language;
 
-        SimpleTokinizerIA _tokenizer;
+        Tokenizer _tokenizer;
         DocumentCodeSegmentService _codeSegmentService;
         bool _documentdirty = false;
         bool _isModified = false;
@@ -177,12 +178,29 @@ namespace SmartDevelop.Model.Projecting
             get { return _codeSegmentService; }
         }
 
+        /// <summary>
+        /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
+        /// </summary>
+        public void EnsureTokenizerHasWorked() {
+            while(_tokenizer.IsBusy) {
+                Thread.Sleep(10);
+            }
+
+            if(_documentdirty)
+                _tokenizer.TokenizeSync();
+        }
+
+
         void OnCodedocumentChanged(object sender, EventArgs e){
             _documentdirty = true;
             HasUnsavedChanges = true;
         }
 
         void CheckUpdateTokenRepresentation(object sender, EventArgs e) {
+            UpdateTokenizer();
+        }
+
+        void UpdateTokenizer() {
             if(_documentdirty && !_tokenizer.IsBusy) {
                 _documentdirty = false;
                 _tokenizer.TokenizeAsync();

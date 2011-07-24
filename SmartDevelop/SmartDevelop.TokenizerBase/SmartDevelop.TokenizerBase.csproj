@@ -48,6 +48,7 @@
     <Compile Include="IA\SimpleTokinizerIA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenHelper.cs" />
+    <Compile Include="Tokenizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns\Archimedes.Patterns.csproj">

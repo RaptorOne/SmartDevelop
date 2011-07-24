@@ -55,6 +55,7 @@
     <Compile Include="DOM\ShuntingYardExpressionParser.cs" />
     <Compile Include="DOM\Types\CodeMemberMethodEx.cs" />
     <Compile Include="DOM\Types\CodeTypeDeclarationEx.cs" />
+    <Compile Include="DOM\Types\CodeTypeReferenceEx.cs" />
     <Compile Include="DOM\Types\ICodeObjectEx.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />

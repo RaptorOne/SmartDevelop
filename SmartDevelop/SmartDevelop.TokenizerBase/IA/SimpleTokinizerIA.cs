@@ -39,7 +39,9 @@ namespace SmartDevelop.TokenizerBase.IA
         }
     }
 
-    public class SimpleTokinizerIA
+
+
+    public class SimpleTokinizerIA : Tokenizer
     {
         #region Constants
 
@@ -72,6 +74,8 @@ namespace SmartDevelop.TokenizerBase.IA
                 "this",
                 "var",
                 "new",
+                "extends",
+                "base",
 
                 "true",
                 "false"
@@ -91,8 +95,6 @@ namespace SmartDevelop.TokenizerBase.IA
 
 
         #endregion
-
-        public event EventHandler Finished;
 
         #region Fields
 
@@ -125,9 +127,8 @@ namespace SmartDevelop.TokenizerBase.IA
             _tokenizerworker.WorkerSupportsCancellation = true;
 
             _tokenizerworker.RunWorkerCompleted += (s, e) => {
-                    if(Finished != null)
-                        Finished(this, EventArgs.Empty);
-                };
+                OnFinished();
+            };
         }
 
         #endregion
@@ -137,7 +138,7 @@ namespace SmartDevelop.TokenizerBase.IA
         /// <summary>
         /// Starts Tokenizing async
         /// </summary>
-        public void TokenizeAsync() {
+        public override void TokenizeAsync() {
             if(_tokenizerworker.IsBusy) {
                 _tokenizerworker.CancelAsync();
                 while(true) {
@@ -155,17 +156,24 @@ namespace SmartDevelop.TokenizerBase.IA
         /// <summary>
         /// Starts Tokenizing sync
         /// </summary>
-        public void TokenizeSync() {
-            _text = _document.Text;
-            _textlen = _text.Length;
-            TokinizeWorker(null, new DoWorkEventArgs(null));
+        public override void TokenizeSync() {
+            if(!_tokenizerworker.IsBusy) {
+                _syncTokenizerBusy = true;
+
+                _text = _document.Text;
+                _textlen = _text.Length;
+                TokinizeWorker(null, new DoWorkEventArgs(null));
+
+                _syncTokenizerBusy = false;
+                OnFinished();
+            }
         }
 
         /// <summary>
         /// Get imutalble List of segments
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<CodeSegment> GetSegmentsSnapshot() {
+        public override IEnumerable<CodeSegment> GetSegmentsSnapshot() {
             lock(__codesegmentsSaveLock) {
                 return new List<CodeSegment>(_codesegmentsSave);
             }
@@ -175,11 +183,20 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #region Properties
 
+        bool _syncTokenizerBusy = false;
+
         /// <summary>
         /// Is tokenizing running now?
         /// </summary>
-        public bool IsBusy {
-            get { return _tokenizerworker.IsBusy; }
+        public override bool IsBusy {
+            get {
+                if(_syncTokenizerBusy)
+                    return true;
+
+                lock(_tokenizerworker) {
+                    return _tokenizerworker.IsBusy;
+                }
+            }
         }
 
         #endregion

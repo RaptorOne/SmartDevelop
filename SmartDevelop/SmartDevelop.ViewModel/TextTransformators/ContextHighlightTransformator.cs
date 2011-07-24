@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows;
 using SmartDevelop.Model.Projecting;
 using System.CodeDom;
+using SmartDevelop.TokenizerBase;
 
 namespace SmartDevelop.ViewModel.TextTransformators
 {
@@ -52,27 +53,32 @@ namespace SmartDevelop.ViewModel.TextTransformators
                     }catch{
 
                     }
-                } else if(segment.CodeDOMObject is CodeTypeDeclaration && ((CodeTypeDeclaration)segment.CodeDOMObject).IsClass) {
+                } else if(segment.Token != Token.KeyWord && segment.CodeDOMObject is CodeTypeReference) {
 
-                    try {
+                    var ctx = _codeProject.Project.DOMService.GetCodeContext(_codeProject, segment.Range.Offset);
+                    var memb = from m in ctx.GetVisibleMembers()
+                               let myclass = m as CodeTypeDeclaration
+                               where myclass != null && myclass.Name.Equals(segment.TokenString)
+                               select m;
 
-                    base.ChangeLinePart(
-                    segment.Range.Offset, // startOffset
-                    segment.Range.EndOffset, // endOffset
-                    (VisualLineElement element) => {
-                        Typeface tf = element.TextRunProperties.Typeface;
-                        element.TextRunProperties.SetForegroundBrush(_classtypeBrush);
-                        element.TextRunProperties.SetTypeface(new Typeface(
-                            tf.FontFamily,
-                            FontStyles.Normal,
-                            FontWeights.Bold,
-                            tf.Stretch
-                        ));
-                    });
+                    if(memb.Any()) {
+                        try {
+                            base.ChangeLinePart(
+                            segment.Range.Offset, // startOffset
+                            segment.Range.EndOffset, // endOffset
+                            (VisualLineElement element) => {
+                                Typeface tf = element.TextRunProperties.Typeface;
+                                element.TextRunProperties.SetForegroundBrush(_classtypeBrush);
+                                element.TextRunProperties.SetTypeface(new Typeface(
+                                    tf.FontFamily,
+                                    FontStyles.Normal,
+                                    FontWeights.Bold,
+                                    tf.Stretch
+                                ));
+                            });
+                        } catch {
 
-
-                    } catch {
-
+                        }
                     }
                 }
             }

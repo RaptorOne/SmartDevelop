@@ -64,11 +64,11 @@ namespace SmartDevelop.Model.DOM
 
         
 
-        public CodeContext GetCodeContext(ProjectItemCode codeitem, TextLocation location) {
+        public CodeContext GetCodeContext(ProjectItemCode codeitem, TextLocation location, bool includeCurrentSegment = false) {
             return GetCodeContext(codeitem, codeitem.Document.GetOffset(location));
         }
 
-        public virtual CodeContext GetCodeContext(ProjectItemCode codeitem, int offset) {
+        public virtual CodeContext GetCodeContext(ProjectItemCode codeitem, int offset, bool includeCurrentSegment = false) {
             var context = new CodeContext(this);
 
             if(CodeRanges.ContainsKey(codeitem)) {
@@ -87,6 +87,9 @@ namespace SmartDevelop.Model.DOM
                     }
                 }
             }
+
+            if(includeCurrentSegment)
+                context.Segment = codeitem.SegmentService.QueryCodeSegmentAt(offset);
 
             if(context.EnclosingType == null)
                 context.EnclosingType = this.RootType;
