@@ -103,8 +103,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             var renderer = new CurrentLineHighlightRenderer(_texteditor, projectitem);
             _texteditor.TextArea.TextView.BackgroundRenderers.Add(renderer);
 
-            //var contextTransformer = new ContextHighlightTransformator(projectitem);
-            //_texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
+            var contextTransformer = new ContextHighlightTransformator(projectitem);
+            _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
 
             projectitem.RequestTextInvalidation += (s, e) => {
                 _texteditor.TextArea.TextView.Redraw();

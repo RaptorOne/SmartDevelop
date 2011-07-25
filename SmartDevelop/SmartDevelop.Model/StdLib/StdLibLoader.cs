@@ -12,18 +12,21 @@ namespace SmartDevelop.Model.StdLib
     public static class StdLibLoader
     {
         // todo put those in config
-        const string AHK_STDLIB = @"C:\Program Files\AutoHotkey\LibDEBUG";
-        const string AHK_STDLIB_x64 = @"C:\Program Files (x86)\AutoHotkey\LibDEBUG";
+        const string AHK_STDLIB = @"C:\Program Files\AutoHotkey\Lib";
+        const string AHK_STDLIB_x64 = @"C:\Program Files (x86)\AutoHotkey\Lib";
        
         public static SmartCodeProject LoadStLib() {
 
             var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
             SmartCodeProject stdlib = new SmartCodeProject("Std Lib", serviceLang.GetById("ahk-v1.1")); // TODO 
-
+            
             foreach(var file in Directory.GetFiles(Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64)) {
-                var p = ProjectItemCode.FromFile(file, stdlib);
-                if(p != null)
-                    stdlib.Add(p);
+
+                if(stdlib.Language.Extensions.Contains(Path.GetExtension(file))) {
+                    var p = ProjectItemCode.FromFile(file, stdlib);
+                    if(p != null)
+                        stdlib.Add(p);
+                }
             }
             return stdlib;
         }

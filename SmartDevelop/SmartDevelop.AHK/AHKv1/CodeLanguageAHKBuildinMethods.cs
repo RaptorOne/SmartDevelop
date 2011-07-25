@@ -200,7 +200,6 @@ namespace SmartDevelop.AHK.AHKv1
 
             #endregion
 
-
             #region Low Level Methods
 
 
@@ -284,17 +283,6 @@ namespace SmartDevelop.AHK.AHKv1
             members.Add(method);
 
 
-
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "Trim",
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String "));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "OmitChars"));
-            members.Add(method);
-
             method = new CodeMemberMethodExAHK(true)
             {
                 Name = "RegisterCallback",
@@ -339,6 +327,154 @@ namespace SmartDevelop.AHK.AHKv1
 
             #endregion
 
+            #region Keys
+ 
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "GetKeyState",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "KeyName "));
+            method.Comments.Add(new CodeCommentStatement("this function returns true (1) if the key is down and false (0) if it is up. ", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            members.Add(method);
+
+            #endregion
+
+            #region String Methods
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "Trim",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String "));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "OmitChars"));
+            members.Add(method);
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "InStr",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Needle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "CaseSensitive"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Occurrence"));
+            method.Comments.Add(new CodeCommentStatement("Searches a string", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            members.Add(method);
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "RegExMatch",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "NeedleRegEx"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "UnquotedOutputVar"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
+            method.Comments.Add(new CodeCommentStatement("Regual Expression Match", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            members.Add(method);
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "RegExReplace",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "NeedleRegEx"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "Replacement"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "OutputVarCount"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Limit"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.Comments.Add(new CodeCommentStatement("Regual Expression Match", true));
+            members.Add(method);
+
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "SubStr",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Length"));
+            method.Comments.Add(new CodeCommentStatement("Searches a string", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            members.Add(method);
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "StrLen",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
+            method.Comments.Add(new CodeCommentStatement("Returns the Lenght of the string", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            members.Add(method);
+
+            #endregion
+
+            #region Window Methods
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "WinActive",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeText"));
+            method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), Func() returns 0. Otherwise, it returns a reference to the function.", true));
+            method.ReturnType = new CodeTypeReference(typeof(object));
+            members.Add(method);
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "WinExist",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeText"));
+            method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), Func() returns 0. Otherwise, it returns a reference to the function.", true));
+            method.ReturnType = new CodeTypeReference(typeof(object));
+            members.Add(method);
+
+
+            #endregion
+
+            
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "FileExist",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "FilePath"));
+            method.Comments.Add(new CodeCommentStatement("Checks if the given filepath exists", true));
+            method.ReturnType = new CodeTypeReference(typeof(string));
+            members.Add(method);
+
+
             method = new CodeMemberMethodExAHK(true)
             {
                 Name = "Func",
@@ -365,6 +501,10 @@ namespace SmartDevelop.AHK.AHKv1
             method.Comments.Add(new CodeCommentStatement("Calls a function inside a DLL, such as a standard Windows API function.", true));
             method.ReturnType = new CodeTypeReference(typeof(int));
             members.Add(method);
+
+
+
+
 
             #region Object Methods
 

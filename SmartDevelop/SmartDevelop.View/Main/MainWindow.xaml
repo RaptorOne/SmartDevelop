@@ -13,8 +13,8 @@
         <StackPanel>
             <Menu>
                 <MenuItem Header="File">
-                    <MenuItem Header="New"/>
-                    <MenuItem Header="Open"/>
+                    <MenuItem Header="New" Command="{Binding NewFileCommand}"/>
+                    <MenuItem Header="Open" Command="{Binding OpenFileCommand}" />
                 </MenuItem>
             </Menu>
 

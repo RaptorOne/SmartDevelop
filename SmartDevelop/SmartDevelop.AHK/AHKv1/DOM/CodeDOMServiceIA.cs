@@ -22,11 +22,15 @@ namespace SmartDevelop.Model.DOM
     /// </summary>
     public class CodeDOMServiceIA : CodeDOMService
     {
-        Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
+        #region Fields
 
+        Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
         CodeMemberMethodEx _autoexec;
-        //CodeTypeDeclarationEx _superBase;
-        CodeTypeReferenceEx _superBase;
+        CodeTypeDeclarationEx _superBase;
+
+        #endregion
+
+        #region Constructor
 
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
@@ -44,7 +48,7 @@ namespace SmartDevelop.Model.DOM
             #region Base Object
 
             var baseobj = new CodeTypeDeclarationEx("Object") { IsClass = true, IsBuildInType = true };
-            _superBase = new CodeTypeReferenceEx("Object");
+            /*_superBase = new CodeTypeReferenceEx("Object", );*/
             baseobj.Comments.Add(new CodeCommentStatement("Base Object of all other Custom Objects", true));
 
             CodeMemberMethodExAHK method;
@@ -194,6 +198,14 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
+        #endregion
+
+
+
+        CodeLinePragma CreatePragma(CodeSegment segment, string filename) {
+            return new CodeLinePragma() { LineNumber = segment.LineNumber, FileName = filename };
+        }
+
         public override void CompileTokenFile(Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
 
             #region Clean Up
@@ -226,7 +238,8 @@ namespace SmartDevelop.Model.DOM
             Stack<CodeTypeDeclarationEx> parentHirarchy = new Stack<CodeTypeDeclarationEx>();
             int bcc = 0;
             parentHirarchy.Push(initialparent);
-            
+
+            #region Parse
 
             for(int i = 0; i < linecnt; i++) {
 
@@ -246,11 +259,12 @@ namespace SmartDevelop.Model.DOM
 
                         var next = classNameSegment.NextOmit(whitespacetokenNewLines);
                         if(next != null) {
-
+                            CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
                             CodeTypeReferenceEx basecls = null;
+
                             if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
                                 var refclass = next.NextOmit(whitespacetokenNewLines);
-                                refclass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refclass.TokenString);
+                                refclass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refclass.TokenString, thisparent);
                                 next = refclass.NextOmit(whitespacetokenNewLines);
                             }
 
@@ -259,17 +273,18 @@ namespace SmartDevelop.Model.DOM
 
                                 var type = new CodeTypeDeclarationEx(classNameSegment.TokenString)
                                 {
-                                    IsClass = true
+                                    IsClass = true,
+                                    LinePragma = CreatePragma(classNameSegment, codeitem.FilePath)
                                 };
                                 classNameSegment.CodeDOMObject = type;
 
                                 if(basecls != null)
                                     type.BaseTypes.Add(basecls);
                                 else
-                                    type.BaseTypes.Add(_superBase);
+                                    type.BaseTypes.Add(new CodeTypeReferenceEx("Object", thisparent) { ResolvedTypeDeclaration = _superBase });
 
                                 // Add it to the CodeDOM Tree
-                                CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
+                                
                                 thisparent.Members.Add(type);
                                 type.Parent = thisparent;
 
@@ -347,7 +362,7 @@ namespace SmartDevelop.Model.DOM
                     if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
                         var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
                         if(methodSignatureEnd != null) {
-                            var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLines);
+                            var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLinesComments);
                             if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
                                 // jup we have a method definition here.
                                 // Method body starts at startMethodBody
@@ -360,7 +375,7 @@ namespace SmartDevelop.Model.DOM
                                     var method = new CodeMemberMethodEx()
                                     {
                                         Name = methodSegment.TokenString,
-                                        LinePragma = new CodeLinePragma(codeitem.FilePath, methodSegment.LineNumber),
+                                        LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
                                         ReturnType = new CodeTypeReferenceEx(typeof(object))
                                     };
                                     methodSegment.CodeDOMObject = method;
@@ -401,12 +416,14 @@ namespace SmartDevelop.Model.DOM
 
                                     #endregion
 
+                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
+
                                     // get method statements
                                     method.Statements.AddRange(
-                                        CollectAllCodeStatements(codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+                                        CollectAllCodeStatements(thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
                                     // add it to the code DOM Tree
-                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
+                                    
                                     thisparent.Members.Add(method);
                                     method.DefiningType = thisparent;
 
@@ -429,6 +446,8 @@ namespace SmartDevelop.Model.DOM
 
                 if(codeLineMap.ContainsKey(i)) {
                     var lineBlock = codeLineMap[i];
+                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
+
                     foreach(var segment in lineBlock.CodeSegments) {
 
                         if(segment.Token == Token.BlockOpen) {
@@ -440,14 +459,55 @@ namespace SmartDevelop.Model.DOM
                                     parentHirarchy.Pop();
                             }
                         }
+
                         _autoexec.Statements.AddRange(
-                                        CollectAllCodeStatements(codeLineMap, i, i));
+                                        CollectAllCodeStatements(thisparent, codeLineMap, i, i));
                     }
                 } else
                     continue;
+            }
 
+            #endregion
+
+            AnalyzeAST(codeitem.SegmentService);
+        }
+
+
+        void AnalyzeAST(DocumentCodeSegmentService segmentService) {
+            var segments = segmentService.GetSegments();
+            foreach(var segment in segments) {
+
+                #region Resolve CodeTypeReferencees
+
+                if(segment.CodeDOMObject is CodeTypeReferenceEx) {
+                    var codeTypeRef = segment.CodeDOMObject as CodeTypeReferenceEx;
+                    if(codeTypeRef.ResolvedTypeDeclaration == null) {
+                        var refi = codeTypeRef.ResolveTypeDeclarationCache();
+                        if(refi == null) {
+                            segment.ErrorContext = new CodeError() { Message = "Can't Resolve this type!" };
+                        }
+                    }
+                }
+
+                #endregion
+
+                #region Resolve Code Method Invoke Referencees
+
+                if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+                    var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                    if(methodRef.ResolvedMethodMember == null) {
+                        var refi = methodRef.ResolveMethodDeclarationCache();
+                        if(refi == null) {
+                            segment.ErrorContext = new CodeError() { Message = "Can't find this Method!" };
+                        }
+                    }
+                }
+
+                #endregion
             }
         }
+
+
 
 
         /// <summary>
@@ -457,7 +517,7 @@ namespace SmartDevelop.Model.DOM
         /// <param name="startLine"></param>
         /// <param name="endLine"></param>
         /// <returns></returns>
-        public CodeStatementCollection CollectAllCodeStatements(Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
+        public CodeStatementCollection CollectAllCodeStatements(CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
             CodeTokenLine line;
             var codeStatements = new CodeStatementCollection();
 
@@ -470,7 +530,7 @@ namespace SmartDevelop.Model.DOM
                 CodeSegment toParse = line.CodeSegments.First();
                 CodeSegment next;
                 while(toParse != null) {
-                    var ex = ParseExpression(toParse, out next);
+                    var ex = ParseExpression(toParse, out next, enclosingType);
                     codeStatements.Add(ex);
                     toParse = next;
                 }
@@ -480,9 +540,9 @@ namespace SmartDevelop.Model.DOM
         }
 
         static readonly List<Token> LocalExpressionEndTokens = new List<Token>() { Token.NewLine, Token.ParameterDelemiter };
-        
 
-        CodeExpression ParseExpression(CodeSegment tokenSegment, out CodeSegment nextToParse) {
+
+        CodeExpression ParseExpression(CodeSegment tokenSegment, out CodeSegment nextToParse, CodeTypeDeclarationEx enclosingType) {
             CodeExpression expression = null;
             nextToParse = tokenSegment.Next;
 
@@ -490,11 +550,28 @@ namespace SmartDevelop.Model.DOM
             if(tokenSegment.Token == Token.Identifier && tokenSegment.Next != null
                     && tokenSegment.Next.Token == Token.LiteralBracketOpen) {
 
+                CodeTypeDeclarationEx methodContext = enclosingType;
+                if(tokenSegment.Previous != null && tokenSegment.Previous.Previous != null
+                    && tokenSegment.Previous.Token == Token.MemberInvoke) {
+
+                    var invoker = tokenSegment.Previous.Previous;
+
+                    if(invoker.CodeDOMObject is CodeBaseReferenceExpression) {
+                        //adjust context
+                        methodContext = null;
+                        foreach(CodeTypeReferenceEx bt in enclosingType.BaseTypes) {
+                            var typedeclaration = bt.ResolveTypeDeclarationCache();
+                            if(typedeclaration != null && typedeclaration.IsClass) {
+                                methodContext = typedeclaration;
+                                break;
+                            }
+                        }
+
+                    }
+                }
+
                 var invokeExpression = new CodeMethodInvokeExpression();
-
-                // var method = _codeDOMTraveler.FindBestMethod(nextidentifier.TokenString, null, RootType); //<-- todo emit correct type
-
-                var methodRef = new CodeMethodReferenceExpressionEx(null, tokenSegment.TokenString);
+                var methodRef = new CodeMethodReferenceExpressionEx(null, tokenSegment.TokenString, methodContext);
 
                 invokeExpression.Method = methodRef;
                 tokenSegment.CodeDOMObject = methodRef;
@@ -508,7 +585,7 @@ namespace SmartDevelop.Model.DOM
                     if(newObjectInvoke != null && newObjectInvoke.Token == Token.Identifier) {
 
                         var objectinstangicing = new CodeObjectCreateExpression();
-                        objectinstangicing.CreateType = new CodeTypeReferenceEx(newObjectInvoke.TokenString);
+                        objectinstangicing.CreateType = new CodeTypeReferenceEx(newObjectInvoke.TokenString, enclosingType);
                         tokenSegment.CodeDOMObject = objectinstangicing;
                         newObjectInvoke.CodeDOMObject = objectinstangicing.CreateType;
 
@@ -525,7 +602,6 @@ namespace SmartDevelop.Model.DOM
                     expression = baserefExpression;
                 }
 
-                
             }
 
             if(!(nextToParse != null && nextToParse.LineNumber == tokenSegment.LineNumber)) {

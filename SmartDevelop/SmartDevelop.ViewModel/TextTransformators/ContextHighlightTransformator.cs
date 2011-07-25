@@ -24,12 +24,15 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
 
         protected override void ColorizeLine(ICSharpCode.AvalonEdit.Document.DocumentLine line) {
-            int lineStartOffset = line.Offset;
-            string text = CurrentContext.Document.GetText(line);
+
             var codeline = _codeProject.SegmentService.QueryCodeTokenLine(line.LineNumber);
 
             if(codeline.IsEmpty)
                 return;
+
+            int lineStartOffset = line.Offset;
+            string text = CurrentContext.Document.GetText(line);
+
 
             foreach(var segment in codeline.CodeSegments) {
 
@@ -38,12 +41,8 @@ namespace SmartDevelop.ViewModel.TextTransformators
                     HandleSegmentError(segment);
                 } else if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
                    
-
                         var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
-                        var ctx = _codeProject.Project.DOMService.GetCodeContext(_codeProject, segment.Range.Offset);
-                        var method = methodRef.FindCached(ctx);
-
-                        if(method != null) {
+                        if(methodRef.ResolvedMethodMember != null) {
                             try {
                                 base.ChangeLinePart(
                                 segment.Range.Offset, // startOffset
@@ -64,21 +63,11 @@ namespace SmartDevelop.ViewModel.TextTransformators
                             } catch {
 
                             }
-                        } else {
-                            segment.ErrorContext = new CodeError() {  Message="Methodreference not found."};
-                            HandleSegmentError(segment);
-                        }
-                            
+                        } 
 
-                } else if(segment.Token != Token.KeyWord && segment.CodeDOMObject is CodeTypeReferenceEx) {
+                } else if(segment.CodeDOMObject is CodeTypeReferenceEx) {
 
-                    var ctx = _codeProject.Project.DOMService.GetCodeContext(_codeProject, segment.Range.Offset);
-                    var memb = from m in ctx.GetVisibleMembers()
-                               let myclass = m as CodeTypeDeclaration
-                               where myclass != null && myclass.Name.Equals(segment.TokenString)
-                               select m;
-
-                    if(memb.Any()) {
+                    if(((CodeTypeReferenceEx)segment.CodeDOMObject).ResolvedTypeDeclaration != null) {
                         try {
                             base.ChangeLinePart(
                             segment.Range.Offset, // startOffset

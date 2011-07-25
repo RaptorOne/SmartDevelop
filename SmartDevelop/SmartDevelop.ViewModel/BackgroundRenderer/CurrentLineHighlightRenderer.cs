@@ -15,11 +15,17 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
 
     public class CurrentLineHighlightRenderer : IBackgroundRenderer
     {
+        #region Fields
+
         TextEditor _editor;
         Pen _borderPen = null; /*new Pen(new SolidColorBrush(Colors.Red), 1);*/
         Brush _lineSelection = new SolidColorBrush(Color.FromArgb(0x33, 0xFF, 0xCC, 0x33));
         Brush _braketMatch = new SolidColorBrush(Colors.Green);
+        Brush _braketMatchFail = new SolidColorBrush(Colors.Pink);
         ProjectItemCode _projectitem;
+        int lastLine = -1;
+
+        #endregion
 
         public CurrentLineHighlightRenderer(TextEditor editor, ProjectItemCode projectitem) {
             _editor = editor;
@@ -31,8 +37,6 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
         public KnownLayer Layer {
             get { return KnownLayer.Text; }
         }
-
-        int lastLine = -1;
 
         public void Draw(TextView textView, DrawingContext drawingContext) {
             textView.EnsureVisualLines();
@@ -56,13 +60,15 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
                 var offset = _editor.TextArea.Caret.Offset;
                 var seg = _projectitem.SegmentService.QueryCodeSegmentAt(offset);
                 if(TokenHelper.BRAKETS.ContainsValue(seg.Token)) {
+                    var other = seg.FindOtherBracked(true);
 
+                    var col = other != null ? _braketMatch : _braketMatchFail;
                     var braketsegment = new TextSegment { StartOffset = seg.Range.Offset, EndOffset = seg.Range.EndOffset };
                     foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, braketsegment)) {
-                        drawingContext.DrawRectangle(_braketMatch, _borderPen, r);
+                        drawingContext.DrawRectangle(col, _borderPen, r);
                     }
 
-                    var other = seg.FindOtherBracked(true);
+                    
                     if(other != null) {
                         braketsegment = new TextSegment { StartOffset = other.Range.Offset, EndOffset = other.Range.EndOffset };
                         foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, braketsegment)) {

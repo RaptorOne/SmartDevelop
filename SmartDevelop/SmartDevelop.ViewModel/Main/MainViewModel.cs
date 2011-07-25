@@ -35,6 +35,8 @@ namespace SmartDevelop.ViewModel.Main
             get { return _solutionVM; }
         }
 
+        #region Commands
+
         ICommand _openFileCommand;
         public ICommand OpenFileCommand {
             get {
@@ -80,7 +82,6 @@ namespace SmartDevelop.ViewModel.Main
             get { return null; }
         }
 
-            
-
+        #endregion
     }
 }

@@ -3,17 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.CodeDom;
+using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.Model.DOM.Types
 {
     public class CodeTypeReferenceEx : CodeTypeReference
     {
+        #region
+
         string _name;
         Type _type;
 
-        public CodeTypeReferenceEx(string name)
+        #endregion
+
+        public CodeTypeReferenceEx(string name, CodeTypeDeclarationEx enclosingType)
             : base(name) {
                 _name = name;
+                _enclosingType = enclosingType;
         }
 
         public CodeTypeReferenceEx(Type type)
@@ -28,9 +34,21 @@ namespace SmartDevelop.Model.DOM.Types
 
         CodeTypeDeclarationEx _typeDeclaration;
 
-        public CodeTypeDeclarationEx FindTypeDeclaration(CodeTypeDeclarationEx context) {
-            if(_typeDeclaration == null) {
-                CodeTypeDeclarationEx typedecl = context;
+        public CodeTypeDeclarationEx ResolvedTypeDeclaration {
+            get { return _typeDeclaration; }
+            set { _typeDeclaration = value; }
+        }
+
+        CodeTypeDeclarationEx _enclosingType;
+        public CodeTypeDeclarationEx EnclosingType {
+            get { return _enclosingType; }
+            //set { _enclosingType = value; }
+        }
+
+        public CodeTypeDeclarationEx ResolveTypeDeclarationCache() {
+
+            if(_typeDeclaration == null && EnclosingType != null) {
+                CodeTypeDeclarationEx typedecl = EnclosingType;
                 while(typedecl != null) {
                     var type = typedecl.Members.Cast<CodeTypeMember>().ToList().Find(
                     (x) => {
@@ -43,9 +61,12 @@ namespace SmartDevelop.Model.DOM.Types
                     } else
                         typedecl = typedecl.Parent;
                 }
-
             }
             return _typeDeclaration;
+        }
+
+        public override string ToString() {
+            return string.Format("TypeReference: {0} --> {1}", this.TypeName, this.ResolvedTypeDeclaration);
         }
 
     }

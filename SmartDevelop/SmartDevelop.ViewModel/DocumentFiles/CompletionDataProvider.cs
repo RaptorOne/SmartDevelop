@@ -53,8 +53,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             if(tokenLine.IsEmpty)
                 return;
 
-
             var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+            if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
+                return;
 
             if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar)) {
                 // this is just for first debugging purposes
@@ -79,7 +80,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         }
                     } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
                         foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
-                            var td = basetype.FindTypeDeclaration(ctx.EnclosingType);
+                            
+                            var td = basetype.ResolveTypeDeclarationCache();
                             if(td != null) {
                                 foreach(var m in td.GetInheritedMembers())
                                     data.Add(CompletionItem.Build(m));
@@ -119,7 +121,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 if(segment != null) {
                     var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
-                    if(s.Token == Token.KeyWord && s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase)) {
+                    if(s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase) || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
                         var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
 
                         IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;

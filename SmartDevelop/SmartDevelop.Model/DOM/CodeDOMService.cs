@@ -22,6 +22,8 @@ namespace SmartDevelop.Model.DOM
 
         SmartCodeProject _project;
         CodeTypeDeclarationEx _scriptRoot;
+
+        protected static List<Token> whitespacetokenNewLinesComments = new List<Token> { Token.WhiteSpace, Token.NewLine, Token.MultiLineComment, Token.SingleLineComment };
         protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
         protected static List<Token> whitespacetokens = new List<Token> { Token.WhiteSpace };
         

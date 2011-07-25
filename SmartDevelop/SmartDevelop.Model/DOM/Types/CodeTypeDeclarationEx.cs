@@ -11,6 +11,7 @@ namespace SmartDevelop.Model.DOM.Types
         public CodeTypeDeclarationEx() : base() { }
         public CodeTypeDeclarationEx(string name) : base(name) { }
         public CodeTypeDeclarationEx(string name, bool buildin) : base(name) { IsBuildInType = buildin; }
+
         /// <summary>
         /// Gets the parent of this type if it is nested otherwise returns null
         /// </summary>
@@ -25,21 +26,32 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         public IEnumerable<CodeTypeMember> GetInheritedMembers() {
+
             List<CodeTypeMember> members = new List<CodeTypeMember>();
             members.AddRange(this.Members.Cast<CodeTypeMember>());
+
             foreach(CodeTypeReferenceEx t in BaseTypes) {
-                var type = t.FindTypeDeclaration(this.Parent);
-                if(type != null) {
-                    members.AddRange(type.GetInheritedMembers());
+
+                if(t.ResolvedTypeDeclaration == null)
+                    t.ResolveTypeDeclarationCache();
+
+                if(t.ResolvedTypeDeclaration != null) {
+                    members.AddRange(t.ResolvedTypeDeclaration.GetInheritedMembers());
                 }
             }
+
             return members;
+
         }
 
 
         public bool IsBuildInType {
             get;
             set;
+        }
+
+        public override string ToString() {
+            return string.Format("TypeDeclaration: {0}", this.Name);
         }
     }
 }
