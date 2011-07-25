@@ -54,6 +54,7 @@
     <Compile Include="CodeCompleting\CompletionItemProperty.cs" />
     <Compile Include="CodeCompleting\CompletionItemField.cs" />
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
+    <Compile Include="DocumentFiles\CompletionDataProvider.cs" />
     <Compile Include="Folding\IAFoldingStrategy.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

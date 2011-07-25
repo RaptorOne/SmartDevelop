@@ -32,16 +32,20 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
             get { return KnownLayer.Text; }
         }
 
+        int lastLine = -1;
 
         public void Draw(TextView textView, DrawingContext drawingContext) {
             textView.EnsureVisualLines();
 
             #region Highlight Current Line
-
-            var line = _editor.Document.GetLineByOffset(_editor.CaretOffset);
-            var segment = new TextSegment { StartOffset = line.Offset, EndOffset = line.EndOffset };
-            foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, segment)) {
-                drawingContext.DrawRoundedRectangle(_lineSelection, _borderPen, new Rect(r.Location, new Size(textView.ActualWidth, r.Height)), 3, 3);
+            
+            
+            if(lastLine != _editor.TextArea.Caret.Line) {
+                var line = _editor.Document.GetLineByOffset(_editor.CaretOffset);
+                var segment = new TextSegment { StartOffset = line.Offset, EndOffset = line.EndOffset };
+                foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, segment)) {
+                    drawingContext.DrawRoundedRectangle(_lineSelection, _borderPen, new Rect(r.Location, new Size(textView.ActualWidth, r.Height)), 3, 3);
+                }
             }
 
             #endregion

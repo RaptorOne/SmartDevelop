@@ -268,6 +268,44 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     #endregion
 
+                } else if(!IsInAnyComment() && !traditionalMode && IsMultilineTraditionalStringStart(i)){
+
+                    #region Handle Multiline strings
+                    // for now extract the wohle thing as one token.
+
+                    EndActiveToken(i);
+                    _activeToken = Token.TraditionalString;
+
+
+                    // lets find the end of multiline string section,
+                    // as we dont want to parse the whole string chunk
+                    // to speed things up
+                    bool endingboundsFound = false;
+                    bool matchDirty = true;
+                    while(i < _textlen) {
+                        if(_text[i] == '\n') {
+                            _currentLine++;
+                            matchDirty = false;
+                        }else if(_text[i] == ')' && !matchDirty) {
+                            endingboundsFound = true;
+                            break;
+                        } else if(!IsWhiteSpace(i)) {
+                            matchDirty = true;
+                        }
+                        i++;
+                    }
+
+                    if(!endingboundsFound) {
+                        EndActiveToken(i);
+                        return; // we are done ;)
+                    } else {
+                        i += 2;
+                        _currentColumn = 0;
+                        EndActiveToken(i);
+                    }
+
+                    #endregion
+
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
                     if(!traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
@@ -440,6 +478,23 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         bool IsMultiLineCommentStart(int index) {
             return (_activeToken != Token.LiteralString) && (_text[index] == '/' && _text.Next(index) == '*');
+        }
+
+        bool IsMultilineTraditionalStringStart(int index) {
+            if((_activeToken != Token.LiteralString) && (_text[index] == '(')){
+
+                while(true){
+                    if(--index > 0){
+                        if(_text[index] == '\n')
+                            return true;
+                        else if(!IsWhiteSpace(index)){
+                            break;
+                        }
+                    }else
+                        break;
+                }
+            }
+            return false;
         }
 
         bool IsMultiLineCommentEnd(int index) {

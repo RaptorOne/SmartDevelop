@@ -38,7 +38,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         FoldingManager _foldingManager;
         AbstractFoldingStrategy _foldingStrategy;
         readonly IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
-        
+        CompletionDataProvider _completionDataProvider;
         bool foldingDirty = true;
 
         #endregion
@@ -80,16 +80,22 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.SyntaxHighlighting = projectitem.CodeLanguage.GetHighlighter();
             //_foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
-
             if(_foldingStrategy != null) {
                 if(_foldingManager == null)
                     _foldingManager = FoldingManager.Install(_texteditor.TextArea);
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
 
+
+            _completionDataProvider = new CompletionDataProvider(_texteditor, _projectitem);
+
+
             _texteditor.MouseHover += TextEditorMouseHover;
             _texteditor.MouseHoverStopped += TextEditorMouseHoverStopped;
-            _texteditor.TextArea.TextEntered += OnTextEntered;
+
+            _texteditor.TextArea.TextEntered += (s, e) => {
+                _completionDataProvider.OnTextEntered(s, e);
+                };
             _texteditor.TextArea.TextEntering += OnTextEntering;
 
             _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
@@ -97,8 +103,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             var renderer = new CurrentLineHighlightRenderer(_texteditor, projectitem);
             _texteditor.TextArea.TextView.BackgroundRenderers.Add(renderer);
 
-            var contextTransformer = new ContextHighlightTransformator(projectitem);
-            _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
+            //var contextTransformer = new ContextHighlightTransformator(projectitem);
+            //_texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
 
             projectitem.RequestTextInvalidation += (s, e) => {
                 _texteditor.TextArea.TextView.Redraw();
@@ -207,131 +213,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         static List<char> whitespaces = new List<char> { ' ', '\t' };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
-        CompletionWindow _completionWindow;
-
-        void OnTextEntered(object sender, TextCompositionEventArgs e) {
-
-            char currentChar = e.Text[0];
-            char carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
-
-            
-
-            if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar)  ) {
-                // this is just for first debugging purposes
-                // as this code belongs to a completion service which handles and caches those completion items
-
-                // Open code completion after the user has pressed dot:
-                if(e.Text == ".") {
-
-                    if(_completionWindow != null)
-                        _completionWindow.Close();
-
-                    IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
-
-                    //ensure we have a updated tokenizer
-                    _projectitem.EnsureTokenizerHasWorked();
-
-                    // do type lookup & list avaiable members
-                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset - 1, true);
-                    if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
-                        foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
-                            data.Add(CompletionItem.Build(m));
-                        }
-                    } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
-                        foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
-                            var td = basetype.FindTypeDeclaration(ctx.EnclosingType);
-                            if(td != null) {
-                                foreach(var m in td.GetInheritedMembers())
-                                    data.Add(CompletionItem.Build(m));
-                            }
-                        }
-                    }
-                    _completionWindow.Show();
-
-                } else if(_completionWindow == null && e.Text != "\n" &&
-                    (_texteditor.Document.TextLength > _texteditor.CaretOffset) &&
-                    (AsciiHelper.IsAsciiLiteralLetter(currentChar) && !AsciiHelper.IsAsciiNum(currentChar))) { // && !whitespaces.Contains(carretChar)
-                    // show avaiable global Methods & build in Methods + commands
-
-                    var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
-                    if(segment == null) {
-                        return;
-                    } else {
-                        if(segment.Token == TokenizerBase.Token.MultiLineComment || segment.Token == TokenizerBase.Token.SingleLineComment)
-                            return;
-                    }
-
-
-                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
-
-                    IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
-                    foreach(var item in GetStaticCompletionItems()) {
-                        data.Add(item);
-                    }
-
-                    bool any = false;
-                    foreach(var m in ctx.GetVisibleMembers()) {
-                        data.Add(CompletionItem.Build(m));
-                        any = true;
-                    }
-                    if(any) {
-                        _completionWindow.Show();
-                    }
-                }
-            } else if(whitespaces.Contains(currentChar)) {
-                var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
-                if(segment != null) {
-                    var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
-                    if(s.Token == Token.KeyWord && s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase)) {
-                        var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
-
-                        IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
-                        bool any = false;
-                        foreach(var m in ctx.GetVisibleMembers()) {
-                            if(m is CodeTypeDeclaration) {
-                                data.Add(CompletionItem.Build(m));
-                                any = true;
-                            }
-                        }
-                        if(any) {
-                            _completionWindow.Show();
-                        }
-
-
-                    }
-                }
-            }
-        }
-
-        CompletionWindow GetCompletionNewWindow() {
-            _completionWindow = new CompletionWindow(_texteditor.TextArea);
-            _completionWindow.Closed += delegate
-            {
-                _completionWindow = null;
-            };
-            return _completionWindow;
-        }
-
-        IEnumerable<CompletionItem> GetStaticCompletionItems() {
-            var it = CompletionCache.Instance[_projectitem.CodeLanguage];
-            if(it == null) {
-                it = new CompletionCache.LanguageCompletionCache();
-                foreach(var keyword in _projectitem.CodeLanguage.LanguageKeywords) {
-                    it.AddStatic(new CompletionItemKeyword(keyword));
-                }
-                CompletionCache.Instance[_projectitem.CodeLanguage] = it;
-            }
-            return it.GetAllStaticCompletionItems();
-        }
-
-
-
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
-            if(e.Text.Length > 0 && _completionWindow != null) {
+            if(e.Text.Length > 0 && _completionDataProvider.CompletionWindow != null) {
                 if(!char.IsLetterOrDigit(e.Text[0])) {
                     // Whenever a non-letter is typed while the completion window is open,
                     // insert the currently selected element.
-                    _completionWindow.CompletionList.RequestInsertion(e);
+                    _completionDataProvider.CompletionWindow.CompletionList.RequestInsertion(e);
                 }
             }
             _toolTip.IsOpen = false;

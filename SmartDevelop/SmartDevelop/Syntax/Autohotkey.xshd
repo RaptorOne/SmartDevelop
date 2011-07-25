@@ -26,7 +26,7 @@
       (?&lt;=class)[\s]+[\w]+
     </Rule>
 
-    <Span color="String" multiline="true" begin="^[\s]*\(" end="\)" />
+    <Span color="String" multiline="true" begin="^[\s]*\(" end="^[\s]*\)" />
 
 
 
