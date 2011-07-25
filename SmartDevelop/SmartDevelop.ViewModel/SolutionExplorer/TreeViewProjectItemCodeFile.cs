@@ -15,6 +15,7 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             : base(parent){
                 _codeitem = codeitem;
                 ImageSource = @"../Images/ironAHK.ico";
+
         }
 
         #region Properties
@@ -25,6 +26,12 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
             set {
                 _codeitem.Name = value;
+            }
+        }
+
+        public override object DomainModel {
+            get {
+                return _codeitem;
             }
         }
 

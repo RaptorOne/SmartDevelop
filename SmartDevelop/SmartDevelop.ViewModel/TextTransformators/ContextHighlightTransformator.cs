@@ -8,6 +8,7 @@ using System.Windows;
 using SmartDevelop.Model.Projecting;
 using System.CodeDom;
 using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.DOM.Types;
 
 namespace SmartDevelop.ViewModel.TextTransformators
 {
@@ -34,46 +35,42 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
 
                 if(segment.HasError) {
+                    HandleSegmentError(segment);
+                } else if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+                   
 
-                    try {
-                        base.ChangeLinePart(
-                        segment.Range.Offset, // startOffset
-                        segment.Range.EndOffset, // endOffset
-                        (VisualLineElement element) => {
-                            // This lambda gets called once for every VisualLineElement
-                            // between the specified offsets.
-                            Typeface tf = element.TextRunProperties.Typeface;
-                            // Replace the typeface with a modified version of
-                            // the same typeface
-                            element.TextRunProperties.SetBackgroundBrush(_errorBrush);
-                        });
-                    } catch {
+                        var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                        var ctx = _codeProject.Project.DOMService.GetCodeContext(_codeProject, segment.Range.Offset);
+                        var method = methodRef.FindCached(ctx);
 
-                    }
+                        if(method != null) {
+                            try {
+                                base.ChangeLinePart(
+                                segment.Range.Offset, // startOffset
+                                segment.Range.EndOffset, // endOffset
+                                (VisualLineElement element) => {
+                                    // This lambda gets called once for every VisualLineElement
+                                    // between the specified offsets.
+                                    Typeface tf = element.TextRunProperties.Typeface;
+                                    // Replace the typeface with a modified version of
+                                    // the same typeface
+                                    element.TextRunProperties.SetTypeface(new Typeface(
+                                        tf.FontFamily,
+                                        FontStyles.Italic,
+                                        FontWeights.Bold,
+                                        tf.Stretch
+                                    ));
+                                });
+                            } catch {
 
+                            }
+                        } else {
+                            segment.ErrorContext = new CodeError() {  Message="Methodreference not found."};
+                            HandleSegmentError(segment);
+                        }
+                            
 
-                }else  if(segment.CodeDOMObject is CodeMethodReferenceExpression) {
-                    try {
-                        base.ChangeLinePart(
-                        segment.Range.Offset, // startOffset
-                        segment.Range.EndOffset, // endOffset
-                        (VisualLineElement element) => {
-                            // This lambda gets called once for every VisualLineElement
-                            // between the specified offsets.
-                            Typeface tf = element.TextRunProperties.Typeface;
-                            // Replace the typeface with a modified version of
-                            // the same typeface
-                            element.TextRunProperties.SetTypeface(new Typeface(
-                                tf.FontFamily,
-                                FontStyles.Italic,
-                                FontWeights.Bold,
-                                tf.Stretch
-                            ));
-                        });
-                    }catch{
-
-                    }
-                } else if(segment.Token != Token.KeyWord && segment.CodeDOMObject is CodeTypeReference) {
+                } else if(segment.Token != Token.KeyWord && segment.CodeDOMObject is CodeTypeReferenceEx) {
 
                     var ctx = _codeProject.Project.DOMService.GetCodeContext(_codeProject, segment.Range.Offset);
                     var memb = from m in ctx.GetVisibleMembers()
@@ -103,6 +100,23 @@ namespace SmartDevelop.ViewModel.TextTransformators
                 }
             }
 
+        }
+
+        void HandleSegmentError(CodeSegment segment) {
+            try {
+                base.ChangeLinePart(
+                segment.Range.Offset, // startOffset
+                segment.Range.EndOffset, // endOffset
+                (VisualLineElement element) => {
+                    // This lambda gets called once for every VisualLineElement
+                    // between the specified offsets.
+                    Typeface tf = element.TextRunProperties.Typeface;
+                    // Replace the typeface with a modified version of
+                    // the same typeface
+                    element.TextRunProperties.SetBackgroundBrush(_errorBrush);
+                });
+            } catch {
+            }
         }
     }
 }

@@ -45,10 +45,6 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         #region Event Handlers
 
-        void AddProject(SmartCodeProject p) {
-            _solutionRoot.Children.Add(LoadProject(p));
-        }
-
         void OnProjectAdded(object sender, ProjectEventArgs e) {
             AddProject(e.Project);
         }
@@ -57,13 +53,18 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         }
 
+
+
+        void AddProject(SmartCodeProject p) {
+            _solutionRoot.Children.Add(LoadProject(p));
+        }
+
+
         #endregion
 
         TreeViewProjectItem LoadProject(SmartCodeProject p){
             var projecttree = new TreeViewProjectItemProject(p, _solutionRoot);
-            foreach(var item in p.GetAllItems<ProjectItemCode>()) {
-                projecttree.Children.Add(new TreeViewProjectItemCodeFile(item, projecttree));
-            }
+
             return projecttree;
         }
     }

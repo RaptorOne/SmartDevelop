@@ -12,7 +12,9 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         public TreeViewProjectItem() : base() { }
         public TreeViewProjectItem(TreeViewProjectItem parent) : base(parent) { }
-        public TreeViewProjectItem(TreeViewProjectItem parent, bool lazyload) : base(parent, lazyload) {
+
+        public TreeViewProjectItem(TreeViewProjectItem parent, bool lazyload) 
+            : base(parent, lazyload) {
             throw new NotImplementedException("LazyLoading");
         }
 
@@ -25,6 +27,10 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
                 _imageSource = value;
                 OnPropertyChanged(() => ImageSource);
             }
+        }
+
+        public virtual object DomainModel {
+            get { return null; }
         }
 
 

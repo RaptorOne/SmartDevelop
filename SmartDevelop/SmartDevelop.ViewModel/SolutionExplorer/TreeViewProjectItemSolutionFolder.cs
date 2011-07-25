@@ -25,5 +25,12 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
                 _solution.Name = value;
             }
         }
+
+        public override object DomainModel {
+            get {
+                return _solution;
+            }
+        }
+
     }
 }

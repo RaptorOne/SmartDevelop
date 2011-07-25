@@ -12,7 +12,34 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         public TreeViewProjectItemProject(SmartCodeProject project, TreeViewProjectItem parent)
             : base(parent) {
                 ImageSource = @"../Images/project-folder.ico";
-                _project = project; 
+                _project = project;
+
+
+                _project.ItemAdded += (s, e) => {
+                        var codeitem = e.Project as ProjectItemCode;
+                        if(codeitem != null) {
+                            Add(codeitem);
+                        }
+                    };
+
+                ImportExisting();
+        }
+
+        void ImportExisting() {
+            foreach(var item in _project.GetAllItems<ProjectItemCode>()) {
+                Add(item);
+            }
+        }
+
+        public override object DomainModel {
+            get {
+                return _project;
+            }
+        }
+
+
+        void Add(ProjectItemCode codeItem) {
+            this.Children.Add(new TreeViewProjectItemCodeFile(codeItem, this));
         }
 
         public override string DisplayName {

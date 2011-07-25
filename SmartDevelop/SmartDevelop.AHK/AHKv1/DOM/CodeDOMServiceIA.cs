@@ -10,6 +10,7 @@ using SmartDevelop.Model.DOM.Types;
 using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
+using System.Collections;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -93,6 +94,96 @@ namespace SmartDevelop.Model.DOM
             baseobj.Members.Add(method);
 
             #endregion
+
+            #region Object.MinIndex
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "MinIndex",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            #region Object.MaxIndex
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "MaxIndex",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            #region Object.SetCapacity
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "SetCapacity",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
+            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            #region Object.GetCapacity
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "GetCapacity",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+            method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
+            method.ReturnType = new CodeTypeReference(typeof(int));
+            baseobj.Members.Add(method);
+
+            #endregion 
+
+            #region Object.HasKey
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "HasKey",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+            method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            baseobj.Members.Add(method);
+
+            #endregion 
+
+            #region Object._NewEnum
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "_NewEnum",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            
+            method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
+            method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
+            baseobj.Members.Add(method);
+
+            #endregion 
+             
 
             RootType.Members.Add(baseobj);
 
@@ -403,7 +494,7 @@ namespace SmartDevelop.Model.DOM
 
                 // var method = _codeDOMTraveler.FindBestMethod(nextidentifier.TokenString, null, RootType); //<-- todo emit correct type
 
-                var methodRef = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), tokenSegment.TokenString);
+                var methodRef = new CodeMethodReferenceExpressionEx(null, tokenSegment.TokenString);
 
                 invokeExpression.Method = methodRef;
                 tokenSegment.CodeDOMObject = methodRef;

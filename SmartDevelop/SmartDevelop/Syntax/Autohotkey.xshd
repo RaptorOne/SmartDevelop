@@ -16,7 +16,7 @@
       <Begin>"</Begin>
       <End>"</End>
       <RuleSet>
-        <!-- nested span for escape sequences -->
+        <!-- nested span for escape sequences  (?&lt;=\()[\w|\s|?|%]*[\s]+\)-->
         <Span begin="\\" end="." />
       </RuleSet>
     </Span>
@@ -25,8 +25,11 @@
     <Rule foreground="CadetBlue" fontWeight="bold">
       (?&lt;=class)[\s]+[\w]+
     </Rule>
-    
-    
+
+    <Span color="String" multiline="true" begin="^[\s]*\(" end="\)" />
+
+
+
     <Keywords fontWeight="bold" foreground="deepskyblue">
       <Word>if</Word>
       <Word>else</Word>
