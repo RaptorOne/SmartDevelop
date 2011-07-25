@@ -7,22 +7,20 @@ using System.Windows.Media.Imaging;
 
 namespace SmartDevelop.ViewModel.CodeCompleting
 {
-    public class CompletionItemMethod : CompletionItem
+    public class CompletionItemProperty : CompletionItem
     {
         static ImageSource _imgsource;
 
 
-        public CompletionItemMethod(string text, string description) 
-            : base(text, description) {
-                
-        }
+        public CompletionItemProperty(string text, string description) 
+            : base(text, description) { }
 
         public override System.Windows.Media.ImageSource Image {
             get {
                 if(_imgsource == null) {
                     BitmapImage logo = new BitmapImage();
                     logo.BeginInit();
-                    logo.UriSource = new Uri("pack://application:,,,/SmartDevelop.View;component/Images/MemberMethod.png");
+                    logo.UriSource = new Uri("pack://application:,,,/SmartDevelop.View;component/Images/MemberProperty.png");
                     logo.EndInit();
                     _imgsource = logo;
                 }

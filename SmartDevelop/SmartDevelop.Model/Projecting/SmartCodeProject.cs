@@ -7,6 +7,7 @@ using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
 using SmartDevelop.Model.CodeContexts;
+using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -18,6 +19,7 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         readonly CodeDOMService _domservice;
+        readonly CodeLanguage _language;
 
         #endregion
 
@@ -30,11 +32,15 @@ namespace SmartDevelop.Model.Projecting
 
         #region Constructor
 
-        public SmartCodeProject(string name) 
+        public SmartCodeProject(string name, CodeLanguage language) 
             : base(null) {
-            Name = name;
 
-            _domservice = new CodeDOMServiceIA(this); /* ToDo: choose Domservice depending of the language */ 
+                ThrowUtil.ThrowIfNull(language);
+
+            Name = name;
+            _language = language;
+            _domservice = language.CreateDOMService(this);
+            
         }
 
         #endregion
@@ -77,6 +83,10 @@ namespace SmartDevelop.Model.Projecting
 
         public CodeDOMService DOMService {
             get { return _domservice; }
+        }
+
+        public CodeLanguage Language {
+            get { return _language; }
         }
 
 

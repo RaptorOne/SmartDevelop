@@ -8,5 +8,6 @@ namespace SmartDevelop.Model.DOM.Types
     public interface ICodeObjectEx
     {
         bool IsHidden { get; }
+        bool IsBuildInType { get; }
     }
 }

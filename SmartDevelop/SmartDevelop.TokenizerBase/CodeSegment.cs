@@ -8,7 +8,7 @@ namespace SmartDevelop.TokenizerBase
 {
     /// <summary>
     /// Represents a CodeSegment
-    /// A CodeSegment is a Code-Token with exact definde document location. It gets automatically extended when the DOM Parser has found its context
+    /// A CodeSegment is a Code-Token with exact defined document location. It gets automatically extended when the DOM Parser has found its context
     /// </summary>
     public class CodeSegment
     {
@@ -143,10 +143,21 @@ namespace SmartDevelop.TokenizerBase
 
 
 
-        
+        #region Braket Finder Helper
+
+
+        public CodeSegment FindOtherBracked(bool allowNewlinesbetween) {
+            if(TokenHelper.IsOpenBracketToken(this.Token)) {
+                return FindClosingBracked(allowNewlinesbetween);
+            } else if(TokenHelper.IsClosedBracketToken(this.Token)) {
+                return FindOpenBracked(allowNewlinesbetween);
+            } else
+                throw new NotSupportedException("Must be called on a Bracked Token Code Segment!");
+        }
+
 
         /// <summary>
-        /// Very handy Method to find the Closing Bracket Codesegment of this Segment
+        /// Very handy Method to find the Closing Bracket Codesegment of this Open Braket Segment
         /// </summary>
         /// <param name="allowNewlinesbetween">Should the search go over newlines</param>
         /// <returns>The cloasing codesegment or NULL if nothing was found</returns>
@@ -179,8 +190,41 @@ namespace SmartDevelop.TokenizerBase
             return closingSegment;
         }
 
+        /// <summary>
+        /// Very handy Method to find the Open Bracket Codesegment of this Close Braket Segment
+        /// </summary>
+        /// <param name="allowNewlinesbetween">Should the search go over newlines</param>
+        /// <returns>The cloasing codesegment or NULL if nothing was found</returns>
+        public CodeSegment FindOpenBracked(bool allowNewlinesbetween) {
+            if(!TokenHelper.IsClosedBracketToken(this.Token))
+                throw new NotSupportedException("Must be called on closed barcket type");
 
+            int openBracketCounter = 1;
+            CodeSegment current;
+            CodeSegment previous = this;
+            CodeSegment closingSegment = null;
 
+            Token closingbracket = this.Token;
+            Token openbracket = TokenHelper.GetOpenToken(this.Token);
+
+            while((current = previous.Previous) != null) {
+                if(current.Token == Token.NewLine && !allowNewlinesbetween)
+                    break;
+                else if(current.Token == closingbracket)
+                    openBracketCounter++;
+                else if(current.Token == openbracket) {
+                    openBracketCounter--;
+                    if(openBracketCounter == 0) {
+                        closingSegment = current;
+                        break;
+                    }
+                }
+                previous = current;
+            }
+            return closingSegment;
+        }
+
+        #endregion
 
         #endregion
 
@@ -221,15 +265,25 @@ namespace SmartDevelop.TokenizerBase
             get { return _codesegment; }
         }
 
-        public override string ToString() {
-            return string.Format("{0}::{1}", _type, _tokenstring);
-        }
-
-
+        /// <summary>
+        /// The CodeDOM Member which represents this Token in the AST
+        /// </summary>
         public CodeObject CodeDOMObject {
             get { return _codeDOMObject; }
             set { _codeDOMObject = value; }
         }
+
+        CodeError _erorContext = null;
+
+        public CodeError ErrorContext {
+            get { return _erorContext; }
+            set { _erorContext = value; }
+        }
+
+        public bool HasError {
+            get { return ErrorContext != null && ErrorContext.HasError; }
+        }
+
 
 
         /// <summary>
@@ -237,7 +291,7 @@ namespace SmartDevelop.TokenizerBase
         /// </summary>
         public CodeSegment Next {
             get { return _next; }
-            internal set { _next = value; }
+            set { _next = value; }
         }
 
         /// <summary>
@@ -256,6 +310,10 @@ namespace SmartDevelop.TokenizerBase
             get {
                 return new CodeSegment(Token.Unknown, "", new SimpleSegment(), 0, 0, null);
             }
+        }
+
+        public override string ToString() {
+            return string.Format("{0}::{1}", _type, _tokenstring);
         }
     }
 }

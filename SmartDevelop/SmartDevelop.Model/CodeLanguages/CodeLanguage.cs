@@ -2,18 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SmartDevelop.TokenizerBase;
+using ICSharpCode.AvalonEdit.Document;
+using SmartDevelop.Model.DOM;
+using SmartDevelop.Model.Projecting;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Folding;
+using System.CodeDom;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
-    public class CodeLanguage : IEquatable<CodeLanguage>
+    public abstract class CodeLanguage : IEquatable<CodeLanguage>
     {
         List<CodeKeyWord> _languageKeywords = new List<CodeKeyWord>();
+        List<CodeTypeMember> _buildInMembers = new List<CodeTypeMember>();
 
         #region Constructor
-
-        public CodeLanguage() {
-
-        }
 
         public CodeLanguage(string id) {
             LanguageID = id;
@@ -33,6 +37,23 @@ namespace SmartDevelop.Model.CodeLanguages
             get { return _languageKeywords; }
         }
 
+        public virtual List<CodeTypeMember> BuildInMembers {
+            get { return _buildInMembers; }
+        }
+
+        public abstract string[] Extensions {
+                get;
+        }
+
+        public abstract Tokenizer CreateTokenizer(ITextSource source);
+
+        public abstract CodeDOMService CreateDOMService(SmartCodeProject codeProject);
+
+        public virtual ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighter() {
+            return HighlightingManager.Instance.GetDefinition(this.LanguageID);
+        }
+
+        public abstract AbstractFoldingStrategy CreateFoldingStrategy();
 
         #region IEquatable
 

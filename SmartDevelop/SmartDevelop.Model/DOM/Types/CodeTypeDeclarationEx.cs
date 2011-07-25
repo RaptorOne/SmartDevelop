@@ -10,7 +10,7 @@ namespace SmartDevelop.Model.DOM.Types
     {
         public CodeTypeDeclarationEx() : base() { }
         public CodeTypeDeclarationEx(string name) : base(name) { }
-
+        public CodeTypeDeclarationEx(string name, bool buildin) : base(name) { IsBuildInType = buildin; }
         /// <summary>
         /// Gets the parent of this type if it is nested otherwise returns null
         /// </summary>
@@ -29,9 +29,17 @@ namespace SmartDevelop.Model.DOM.Types
             members.AddRange(this.Members.Cast<CodeTypeMember>());
             foreach(CodeTypeReferenceEx t in BaseTypes) {
                 var type = t.FindTypeDeclaration(this.Parent);
-                members.AddRange(type.GetInheritedMembers());
+                if(type != null) {
+                    members.AddRange(type.GetInheritedMembers());
+                }
             }
             return members;
+        }
+
+
+        public bool IsBuildInType {
+            get;
+            set;
         }
     }
 }

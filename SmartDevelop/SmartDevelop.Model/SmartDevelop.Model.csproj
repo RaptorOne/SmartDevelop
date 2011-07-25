@@ -49,7 +49,7 @@
     <Compile Include="CodeLanguages\CodeLanguageService.cs" />
     <Compile Include="CodeLanguages\ICodeLanguageService.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
-    <Compile Include="DOM\CodeDOMServiceIA.cs" />
+    <Compile Include="DOM\DOMMathEx.cs" />
     <Compile Include="DOM\Ranges\CodeRange.cs" />
     <Compile Include="DOM\Ranges\CodeRangeManager.cs" />
     <Compile Include="DOM\ShuntingYardExpressionParser.cs" />

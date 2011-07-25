@@ -7,7 +7,9 @@
 
   <!-- This is the main ruleset. -->
   <RuleSet ignoreCase="true">
+    
     <Span color="Comment" begin=";" />
+    
     <Span color="Comment" multiline="true" begin="/\*" end="\*/" />
 
     <Span color="String">
@@ -36,7 +38,8 @@
 
       <Word>true</Word>
       <Word>false</Word>
-      
+
+      <Word>for</Word>
       <Word>loop</Word>
       <Word>while</Word>
 

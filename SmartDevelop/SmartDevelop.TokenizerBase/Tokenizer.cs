@@ -13,6 +13,9 @@ namespace SmartDevelop.TokenizerBase
     {
         #region Events
 
+        /// <summary>
+        /// Raised when the Tokenizer has finished
+        /// </summary>
         public event EventHandler Finished;
 
         #endregion
@@ -37,8 +40,10 @@ namespace SmartDevelop.TokenizerBase
 
         #endregion
 
+        /// <summary>
+        /// Indicates that the Tokenizer is currently Busy
+        /// </summary>
         public abstract bool IsBusy { get; }
-
 
         protected virtual void OnFinished() {
             if(Finished != null)

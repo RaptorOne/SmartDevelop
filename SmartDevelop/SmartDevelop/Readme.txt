@@ -1,6 +1,6 @@
 SmartDevelop the tiny but intelligent Script IDE, with powerful Intelli-Sense support.
 
-Copyright (c) 2011, Pascal Büttiker
+Copyright (c) 2011, Pascal Büttiker and other Contributors
 All rights reserved.
 
 

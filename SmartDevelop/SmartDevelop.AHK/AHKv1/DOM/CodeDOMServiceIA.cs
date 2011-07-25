@@ -9,6 +9,7 @@ using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.DOM.Types;
 using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
+using SmartDevelop.AHK.AHKv1.DOM.Types;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -23,6 +24,8 @@ namespace SmartDevelop.Model.DOM
         Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
 
         CodeMemberMethodEx _autoexec;
+        //CodeTypeDeclarationEx _superBase;
+        CodeTypeReferenceEx _superBase;
 
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
@@ -36,6 +39,68 @@ namespace SmartDevelop.Model.DOM
                 LinePragma = new CodeLinePragma("all", 0),
                 IsHidden = true
             });
+
+            #region Base Object
+
+            var baseobj = new CodeTypeDeclarationEx("Object") { IsClass = true, IsBuildInType = true };
+            _superBase = new CodeTypeReferenceEx("Object");
+            baseobj.Comments.Add(new CodeCommentStatement("Base Object of all other Custom Objects", true));
+
+            CodeMemberMethodExAHK method;
+
+            #region Object.Insert
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "Insert",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
+            method.Comments.Add(new CodeCommentStatement("Inserts key-value pairs into the object, automatically adjusting existing keys if appropriate.", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            #region Object.Remove
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "Remove",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
+            method.Comments.Add(new CodeCommentStatement("Removes key-value pairs from an object.", true));
+            method.ReturnType = new CodeTypeReference(typeof(bool));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            #region Object.Clone
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "Clone",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
+            method.ReturnType = new CodeTypeReference(typeof(object));
+            baseobj.Members.Add(method);
+
+            #endregion
+
+            RootType.Members.Add(baseobj);
+
+            #endregion
+
+            foreach(var m in project.Language.BuildInMembers) {
+                RootType.Members.Add(m);
+            }
         }
 
         public override void CompileTokenFile(Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
@@ -46,8 +111,8 @@ namespace SmartDevelop.Model.DOM
 
             var oldMembers = (from CodeTypeMember m in RootType.Members
                               where (m.LinePragma == null || m.LinePragma.FileName == codeitem.FilePath)
-                              let meth = m as CodeMemberMethodEx
-                              where meth == null || !meth.IsHidden
+                              let meth = m as ICodeObjectEx
+                              where meth == null || (!meth.IsHidden && !meth.IsBuildInType)
                               select m).ToList();
             foreach(var m in oldMembers)
                 RootType.Members.Remove(m);
@@ -83,19 +148,19 @@ namespace SmartDevelop.Model.DOM
 
                 #region Parse Class Definition
 
-                var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetoken);
+                var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
                 if(classkeywordSegment != null && classkeywordSegment.Token == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
                     var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
                     if(classNameSegment != null) {
 
-                        var next = classNameSegment.NextOmit(whitespacetoken);
+                        var next = classNameSegment.NextOmit(whitespacetokenNewLines);
                         if(next != null) {
 
                             CodeTypeReferenceEx basecls = null;
                             if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
-                                var refclass = next.NextOmit(whitespacetoken);
+                                var refclass = next.NextOmit(whitespacetokenNewLines);
                                 refclass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refclass.TokenString);
-                                next = refclass.NextOmit(whitespacetoken);
+                                next = refclass.NextOmit(whitespacetokenNewLines);
                             }
 
                             if(next.Token == Token.BlockOpen) {
@@ -109,6 +174,8 @@ namespace SmartDevelop.Model.DOM
 
                                 if(basecls != null)
                                     type.BaseTypes.Add(basecls);
+                                else
+                                    type.BaseTypes.Add(_superBase);
 
                                 // Add it to the CodeDOM Tree
                                 CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
@@ -137,17 +204,59 @@ namespace SmartDevelop.Model.DOM
                 
                 #endregion
 
+
+                // is class property / field
+
+                #region Parse Class Properties / Fields
+
+                var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
+                if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
+                    var property = decl.NextOmit(whitespacetokens);
+
+                    if(parentHirarchy.Count > 1) {
+                        // we must be in a class to have method properties
+                        if(property != null && property.Token == Token.Identifier) {
+                            // this is a class field declaration
+
+                            var propertyType = new CodeTypeReference(typeof(object));
+                            var memberprop = new CodeMemberProperty()
+                            {
+                                Name = property.TokenString,
+                                Attributes = MemberAttributes.Public,
+                                Type = propertyType
+                            };
+                            property.CodeDOMObject = memberprop;
+                            decl.CodeDOMObject = propertyType;
+                            parentHirarchy.Peek().Members.Add(memberprop);
+                        } else {
+                            var err = new CodeError() { Message = "unexpected Token -> Expected Identifier!" };
+                            property.ErrorContext = err;
+                        }
+                    } else {
+                        var err = new CodeError() { Message = "unexpected class field declaration -> not in class body" };
+                        if(property != null)
+                            property.ErrorContext = err;
+                        decl.ErrorContext = err;
+                    }
+
+
+
+                }
+
+                #endregion
+
+
                 // is method definition?:
 
                 #region Analyze for Method Definition
 
-                var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetoken);
+                var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
                 if(methodSegment != null && methodSegment.Token == Token.Identifier) {
                     var methodSignatureStart = methodSegment.Next;
                     if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
                         var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
                         if(methodSignatureEnd != null) {
-                            var startMethodBody = methodSignatureEnd.NextOmit(whitespacetoken);
+                            var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLines);
                             if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
                                 // jup we have a method definition here.
                                 // Method body starts at startMethodBody
@@ -167,7 +276,7 @@ namespace SmartDevelop.Model.DOM
 
 
                                     // extract Method Comment
-                                    var comment = methodSegment.PreviousOmit(whitespacetoken);
+                                    var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
                                     if(comment != null && comment.Token == Token.MultiLineComment) {
                                         method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
                                     } else if(comment != null && comment.Token == Token.SingleLineComment) {
@@ -236,7 +345,8 @@ namespace SmartDevelop.Model.DOM
                         } else if(segment.Token == Token.BlockClosed) {
                             bcc--;
                             if(parentHirarchy.Count - 2 == bcc) {
-                                parentHirarchy.Pop();
+                                if(parentHirarchy.Any())
+                                    parentHirarchy.Pop();
                             }
                         }
                         _autoexec.Statements.AddRange(
@@ -303,7 +413,7 @@ namespace SmartDevelop.Model.DOM
             } else if(tokenSegment.Token == Token.KeyWord) {
                 // parse for new Object Expressions
                 if(tokenSegment.TokenString.Equals("new", StringComparison.InvariantCultureIgnoreCase)) {
-                    var newObjectInvoke = tokenSegment.NextOmit(whitespacetoken);
+                    var newObjectInvoke = tokenSegment.NextOmit(whitespacetokenNewLines);
                     if(newObjectInvoke != null && newObjectInvoke.Token == Token.Identifier) {
 
                         var objectinstangicing = new CodeObjectCreateExpression();

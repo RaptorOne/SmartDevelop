@@ -31,6 +31,17 @@ namespace SmartDevelop.ViewModel.CodeCompleting
                 return new CompletionItemClass(classdecl.Name, string.Format("class {0}\n{1}", classdecl.Name, GetDocumentCommentString(classdecl.Comments)));
             }
 
+            if(m is CodeMemberProperty) {
+                var prop = ((CodeMemberProperty)m);
+                return new CompletionItemProperty(prop.Name, string.Format("class {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+            }
+
+            if(m is CodeMemberField) {
+                var prop = ((CodeMemberField)m);
+                return new CompletionItemField(prop.Name, string.Format("class {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+            }
+
+
             return new CompletionItem(m.ToString(), "");
         }
 
@@ -84,7 +95,7 @@ namespace SmartDevelop.ViewModel.CodeCompleting
                 return;
 
             ISegment replaceSegment = completionSegment;
-            if(last != '.') {
+            if(last != '.' && last != ' ') {
                 replaceSegment = SubSegment(completionSegment);
             }
             textArea.Document.Replace(replaceSegment, this.Text);

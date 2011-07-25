@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using SmartDevelop.Model.DOM.Types;
+using SmartDevelop.TokenizerBase;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -76,7 +77,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _texteditor.Document = _projectitem.Document;
             
             _texteditor.Document.TextChanged += OnDocumentTextChanged;
-            _texteditor.SyntaxHighlighting = SyntaxHighlighterFinder.Find(projectitem.Type);
+
+            _texteditor.SyntaxHighlighting = projectitem.CodeLanguage.GetHighlighter();
             //_foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
 
             if(_foldingStrategy != null) {
@@ -201,7 +203,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             OnPropertyChanged(() => DisplayName);
         }
 
-        static List<char> whitespaces = new List<char> { ' ', '\t', '\n', '\r' };
+        static List<char> whitespacesNewLine = new List<char> { ' ', '\t', '\n', '\r' };
+        static List<char> whitespaces = new List<char> { ' ', '\t' };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
         CompletionWindow _completionWindow;
@@ -251,28 +254,51 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     // show avaiable global Methods & build in Methods + commands
 
                     var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
-                    if(segment == null || (segment.Token == TokenizerBase.Token.MultiLineComment || segment.Token == TokenizerBase.Token.SingleLineComment))
+                    if(segment == null) {
                         return;
-                    
+                    } else {
+                        if(segment.Token == TokenizerBase.Token.MultiLineComment || segment.Token == TokenizerBase.Token.SingleLineComment)
+                            return;
+                    }
 
+
+                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
 
                     IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
-
                     foreach(var item in GetStaticCompletionItems()) {
                         data.Add(item);
                     }
 
-                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
+                    bool any = false;
                     foreach(var m in ctx.GetVisibleMembers()) {
                         data.Add(CompletionItem.Build(m));
+                        any = true;
                     }
+                    if(any) {
+                        _completionWindow.Show();
+                    }
+                }
+            } else if(whitespaces.Contains(currentChar)) {
+                var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+                if(segment != null) {
+                    var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
+                    if(s.Token == Token.KeyWord && s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase)) {
+                        var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
 
-                    _completionWindow.Show();
+                        IList<ICompletionData> data = GetCompletionNewWindow().CompletionList.CompletionData;
+                        bool any = false;
+                        foreach(var m in ctx.GetVisibleMembers()) {
+                            if(m is CodeTypeDeclaration) {
+                                data.Add(CompletionItem.Build(m));
+                                any = true;
+                            }
+                        }
+                        if(any) {
+                            _completionWindow.Show();
+                        }
 
-                    _completionWindow.Closed += delegate
-                    {
-                        _completionWindow = null;
-                    };
+
+                    }
                 }
             }
         }
@@ -322,7 +348,14 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
 
-                var msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
+                string msg;
+
+                if(segment.HasError) {
+                    msg = segment.ErrorContext.Message;
+                } else
+                 msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
+                
+                
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;
                 _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;

@@ -85,6 +85,15 @@ namespace SmartDevelop.TokenizerBase
         /// </summary>
         Operator_Power = 29,
 
+        /// <summary>
+        /// <<
+        /// </summary>
+        Operator_ShiftLeft,
+
+        /// <summary>
+        /// >>
+        /// </summary>
+        Operator_ShiftRight,
 
         Operator_GreaterThan,
         Operator_GreaterThanOrEqual,

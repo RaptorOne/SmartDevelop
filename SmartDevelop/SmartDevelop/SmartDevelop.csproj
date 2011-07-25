@@ -125,6 +125,10 @@
       <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
       <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SmartDevelop.AHK\SmartDevelop.AHK.csproj">
+      <Project>{B5F31A39-DAB3-42D6-8770-EC54F3958962}</Project>
+      <Name>SmartDevelop.AHK</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SmartDevelop.Model\SmartDevelop.Model.csproj">
       <Project>{9F35A6BC-F9FA-46DD-9D1E-36EC665215EA}</Project>
       <Name>SmartDevelop.Model</Name>

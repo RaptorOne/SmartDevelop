@@ -15,7 +15,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
     {
         ProjectItemCode _codeProject;
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
-
+        Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
 
         public ContextHighlightTransformator(ProjectItemCode codeProject) {
             _codeProject = codeProject;
@@ -32,7 +32,27 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
             foreach(var segment in codeline.CodeSegments) {
 
-                if(segment.CodeDOMObject is CodeMethodReferenceExpression) {
+
+                if(segment.HasError) {
+
+                    try {
+                        base.ChangeLinePart(
+                        segment.Range.Offset, // startOffset
+                        segment.Range.EndOffset, // endOffset
+                        (VisualLineElement element) => {
+                            // This lambda gets called once for every VisualLineElement
+                            // between the specified offsets.
+                            Typeface tf = element.TextRunProperties.Typeface;
+                            // Replace the typeface with a modified version of
+                            // the same typeface
+                            element.TextRunProperties.SetBackgroundBrush(_errorBrush);
+                        });
+                    } catch {
+
+                    }
+
+
+                }else  if(segment.CodeDOMObject is CodeMethodReferenceExpression) {
                     try {
                         base.ChangeLinePart(
                         segment.Range.Offset, // startOffset

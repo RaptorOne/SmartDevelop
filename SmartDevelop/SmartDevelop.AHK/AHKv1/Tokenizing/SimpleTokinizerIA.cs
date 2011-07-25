@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using ICSharpCode.AvalonEdit.Document;
@@ -6,8 +7,10 @@ using System.ComponentModel;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Archimedes.Patterns.Utils;
+using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.CodeLanguages;
 
-namespace SmartDevelop.TokenizerBase.IA
+namespace SmartDevelop.AHK.AHKv1.Tokenizing
 {
 
     static class StringExtensions
@@ -41,7 +44,7 @@ namespace SmartDevelop.TokenizerBase.IA
 
 
 
-    public class SimpleTokinizerIA : Tokenizer
+    public class SimpleTokinizerIA : SmartDevelop.TokenizerBase.Tokenizer
     {
         #region Constants
 
@@ -52,47 +55,12 @@ namespace SmartDevelop.TokenizerBase.IA
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
 
-        static Dictionary<char, Token> BRAKETS = new Dictionary<char, Token>();
+        
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' , '?' };
-        static List<string> KEYWORDS = new List<string> 
-            { 
-                "if",
-                "else",
-                "loop",
-                "break",
-                "continue",
-                "while",
-                "for",
-                "return",
-                "is",
-                "global",
-                "local",
-                "static",
-
-                "class",
-                "this",
-                "var",
-                "new",
-                "extends",
-                "base",
-
-                "true",
-                "false"
-                //etc
-            };
+        readonly List<string> KEYWORDS;
 
         static TokenMapIA OPERATOR_TOKEN = new TokenMapIA();
-
-        static SimpleTokinizerIA(){
-            BRAKETS.Add('(', Token.LiteralBracketOpen);
-            BRAKETS.Add(')', Token.LiteralBracketClosed);
-            BRAKETS.Add('{', Token.BlockOpen);
-            BRAKETS.Add('}', Token.BlockClosed);
-            BRAKETS.Add('[', Token.IndexerBracketOpen);
-            BRAKETS.Add(']', Token.IndexerBracketClosed);
-        }
-
 
         #endregion
 
@@ -119,8 +87,13 @@ namespace SmartDevelop.TokenizerBase.IA
 
         #region Constructor
 
-        public SimpleTokinizerIA(ITextSource document) {
+        public SimpleTokinizerIA(ITextSource document, CodeLanguage language)
+         {
             _document = document;
+
+            KEYWORDS = (from w in language.LanguageKeywords
+                       select w.Name).ToList();
+
 
             _tokenizerworker = new BackgroundWorker();
             _tokenizerworker.DoWork += TokinizeWorker;
@@ -237,7 +210,7 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 // end one sign regions -> braktes/lines
                 // ensure that we differ from the token before in those cases
-                if((ensureNewToken || BRAKETS.ContainsValue(_activeToken) 
+                if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken) 
                     || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
                     || _activeToken == Token.MemberInvoke
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
@@ -297,8 +270,8 @@ namespace SmartDevelop.TokenizerBase.IA
 
                 } else if(!inliteralString && !IsInAnyComment()) {
                     //expressions
-                    if(!traditionalMode && BRAKETS.ContainsKey(currentChar)) {
-                        _currentToken = BRAKETS[currentChar];
+                    if(!traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
+                        _currentToken = TokenHelper.BRAKETS[currentChar];
                     } else if(currentChar == SINGLELINE_COMMENT) {
                         _currentToken = Token.SingleLineComment;
                     } else if(!traditionalMode && IsWhiteSpace(i)) {
@@ -460,7 +433,9 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         bool IsLieralStringMarker(int index) {
-            return (_text[index] == LITERALSTR && !IsInAnyComment());
+            return (_text[index] == LITERALSTR && !IsInAnyComment() 
+                && _text.Previous(index) != LITERALSTR_ESCAPE
+                && !(_text[index] == LITERALSTR_ESCAPE && _text.Next(index) == LITERALSTR));
         }
 
         bool IsMultiLineCommentStart(int index) {
@@ -480,7 +455,7 @@ namespace SmartDevelop.TokenizerBase.IA
         }
 
         bool IsSingleCharToken(Token token) {
-            return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || BRAKETS.ContainsValue(token);
+            return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || TokenHelper.BRAKETS.ContainsValue(token);
         }
 
         bool IsReservedKeyWordStart(int index) {

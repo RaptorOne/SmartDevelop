@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SmartDevelop.TokenizerBase;
 
-namespace SmartDevelop.TokenizerBase.IA
+namespace SmartDevelop.AHK.AHKv1.Tokenizing
 {
     public class TokenMapIA
     {
@@ -23,6 +24,10 @@ namespace SmartDevelop.TokenizerBase.IA
                 { "//", Token.Operator_AssignModulus },
                 { "|", Token.Operator_BitwiseOr },
                 { "&", Token.Operator_BitwiseAnd },
+
+                { "<<", Token.Operator_ShiftLeft },
+                { ">>", Token.Operator_ShiftRight },
+
 
                 { "&&", Token.Operator_BooleanAnd},
                 { "||", Token.Operator_BooleanOr},

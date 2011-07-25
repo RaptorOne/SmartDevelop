@@ -25,10 +25,9 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         readonly TextDocument _codedocument;
-        
-        CodeItemType _type = CodeItemType.None;
-        CodeLanguage _language;
 
+        readonly ICodeLanguageService _languageService = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
+        CodeLanguage _language;
         Tokenizer _tokenizer;
         DocumentCodeSegmentService _codeSegmentService;
         bool _documentdirty = false;
@@ -59,7 +58,8 @@ namespace SmartDevelop.Model.Projecting
             if(!File.Exists(filepath))
                 return null;
 
-            ProjectItemCode newp = new ProjectItemCode(CodeItemTypeFromExtension(Path.GetExtension(filepath)), parent);
+            var language = ServiceLocator.Instance.Resolve<ICodeLanguageService>().GetByExtension(Path.GetExtension(filepath));
+            ProjectItemCode newp = new ProjectItemCode(language, parent);
             newp.FilePath = filepath;
             try
             {
@@ -76,17 +76,21 @@ namespace SmartDevelop.Model.Projecting
             newp.HasUnsavedChanges = false;
             newp.Document.UndoStack.ClearAll();
             return newp;
-        }     
+        }
 
-        ProjectItemCode(CodeItemType type, ProjectItem parent) 
+        ProjectItemCode(CodeLanguage languageId, ProjectItem parent) 
             : base(parent) {
+
+            if(languageId == null)
+                throw new ArgumentNullException("languageId");
+
             _codedocument = new TextDocument();
             Encoding = Encoding.UTF8;
-
+            _language = languageId; 
             _codedocument.Changed += OnCodedocumentChanged;
 
             _codeSegmentService = new DocumentCodeSegmentService(this);
-            _tokenizer = new SimpleTokinizerIA(_codedocument);
+            _tokenizer = _language.CreateTokenizer(_codedocument);
 
             _tokenizer.Finished += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
@@ -95,10 +99,9 @@ namespace SmartDevelop.Model.Projecting
                 }
                 OnRequestTextInvalidation();
             };
-            _type = type;
 
-            var languageService = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
-            _language = languageService.GetById("ahk-dialect"); /* ToDo: load by given id*/
+
+            
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
             tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
@@ -162,10 +165,6 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        public CodeItemType Type {
-            get { return _type; }
-        }
-
         public CodeLanguage CodeLanguage {
             get { return _language; }
         }
@@ -225,19 +224,8 @@ namespace SmartDevelop.Model.Projecting
         }
 
         public override string ToString() {
-            return string.Format("{0} ({1})", this.Name, Type);
-        }
+            return string.Format("{0} ({1})", this.Name);
 
-
-        public static CodeItemType CodeItemTypeFromExtension(string ext) {
-            switch(ext.ToLowerInvariant()) {
-                case ".ia":
-                    return CodeItemType.IA;
-                case ".ahk":
-                    return CodeItemType.AHK;
-                default:
-                    return CodeItemType.None;
-            }
         }
     }
 }

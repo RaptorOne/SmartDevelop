@@ -7,6 +7,9 @@ namespace SmartDevelop.Model.CodeLanguages
     public interface ICodeLanguageService
     {
         CodeLanguage GetById(string languageid);
+
+        CodeLanguage GetByExtension(string extension);
+
         void Register(CodeLanguage language);
     }
 }

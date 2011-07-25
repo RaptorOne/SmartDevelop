@@ -16,6 +16,7 @@ using SmartDevelop.ViewModel.Main;
 using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.View.Main;
 using SmartDevelop.Model.CodeLanguages;
+using SmartDevelop.AHK.AHKv1;
 
 namespace SmartDevelop
 {
@@ -66,7 +67,7 @@ namespace SmartDevelop
             
 
             SetupViewModelViewMappings();
-            LoadSyntaxHighlighner();
+            LoadLanguages();
         }
 
         void SetupViewModelViewMappings() {
@@ -77,7 +78,19 @@ namespace SmartDevelop
 
         #endregion
 
-        void LoadSyntaxHighlighner() {
+        void LoadLanguages() {
+
+            var langserv = _serviceLocator.Resolve<ICodeLanguageService>();
+            // here we actually load all plugins dynamically
+            // and serach the assemblys for classes which implement "CodeLanguage"
+            // to register them to the known languages
+
+            // for the time being, we staticaly link to the plugin assembly 
+            // and register the languages manually
+            langserv.Register(new CodeLanguageAHKv1());
+
+
+            
             IHighlightingDefinition customHighlighting;
 
             // ToDo: Load syntaxfiles dynamically....
@@ -89,7 +102,7 @@ namespace SmartDevelop
                 customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
                     HighlightingLoader.Load(reader, HighlightingManager.Instance);
             }
-            HighlightingManager.Instance.RegisterHighlighting("AHK", new string[] { ".ahk" }, customHighlighting);
+            HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);
 
             #endregion
 
@@ -118,6 +131,7 @@ namespace SmartDevelop
             HighlightingManager.Instance.RegisterHighlighting("IA", new string[] { ".ia" }, customHighlighting);
 
             #endregion
+             
         }
 
     }

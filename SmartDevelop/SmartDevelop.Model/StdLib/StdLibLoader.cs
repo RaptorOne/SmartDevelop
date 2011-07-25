@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
 using System.IO;
+using Archimedes.Patterns.Services;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.Model.StdLib
 {
@@ -14,7 +16,9 @@ namespace SmartDevelop.Model.StdLib
         const string AHK_STDLIB_x64 = @"C:\Program Files (x86)\AutoHotkey\LibDEBUG";
        
         public static SmartCodeProject LoadStLib() {
-            SmartCodeProject stdlib = new SmartCodeProject("Std Lib");
+
+            var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
+            SmartCodeProject stdlib = new SmartCodeProject("Std Lib", serviceLang.GetById("ahk-v1.1")); // TODO 
 
             foreach(var file in Directory.GetFiles(Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64)) {
                 var p = ProjectItemCode.FromFile(file, stdlib);

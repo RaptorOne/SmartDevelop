@@ -50,8 +50,9 @@
     <Compile Include="CodeCompleting\CompletionItemMethod.cs" />
     <Compile Include="CodeCompleting\CompletionItemKeyword.cs" />
     <Compile Include="CodeCompleting\CompletionItemClass.cs" />
+    <Compile Include="CodeCompleting\CompletionItemProperty.cs" />
+    <Compile Include="CodeCompleting\CompletionItemField.cs" />
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
-    <Compile Include="DocumentFiles\SyntaxHighlighterFinder.cs" />
     <Compile Include="Folding\IAFoldingStrategy.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -22,7 +22,9 @@ namespace SmartDevelop.Model.DOM
 
         SmartCodeProject _project;
         CodeTypeDeclarationEx _scriptRoot;
-        protected static List<Token> whitespacetoken = new List<Token> { Token.WhiteSpace, Token.NewLine };
+        protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
+        protected static List<Token> whitespacetokens = new List<Token> { Token.WhiteSpace };
+        
         protected Dictionary<ProjectItemCode, CodeRangeManager> CodeRanges = new Dictionary<ProjectItemCode, CodeRangeManager>();
 
         #endregion
