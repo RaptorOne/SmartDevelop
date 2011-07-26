@@ -7,7 +7,7 @@ using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeTypeReferenceEx : CodeTypeReference
+    public class CodeTypeReferenceEx : CodeTypeReference, IEquatable<CodeTypeReferenceEx>
     {
         #region
 
@@ -69,5 +69,19 @@ namespace SmartDevelop.Model.DOM.Types
             return string.Format("TypeReference: {0} --> {1}", this.TypeName, this.ResolvedTypeDeclaration);
         }
 
+
+        public bool Equals(CodeTypeReferenceEx other) {
+            if(other == null)
+                return false;
+            return other.TypeName.Equals(this.TypeName, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public override bool Equals(object obj) {
+            return Equals(obj as CodeTypeReferenceEx);
+        }
+
+        public override int GetHashCode() {
+            return this.TypeName.GetHashCode();
+        }
     }
 }

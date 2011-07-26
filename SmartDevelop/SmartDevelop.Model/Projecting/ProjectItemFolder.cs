@@ -10,6 +10,7 @@ namespace SmartDevelop.Model.Projecting
         string _name;
         public ProjectItemFolder(string name, ProjectItem parent) 
             : base(parent) {
+                _name = name;
         }
 
         public override string Name {
@@ -19,6 +20,11 @@ namespace SmartDevelop.Model.Projecting
             set {
                 _name = value;
             }
+        }
+
+        public string FolderPath {
+            get;
+            set;
         }
     }
 }

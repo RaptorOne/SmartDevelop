@@ -73,6 +73,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
+            _texteditor.ShowLineNumbers = true;
 
             _texteditor.Document = _projectitem.Document;
             
@@ -108,6 +109,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             projectitem.RequestTextInvalidation += (s, e) => {
                 _texteditor.TextArea.TextView.Redraw();
+            };
+
+            _projectitem.RequestShowDocument += (s, e) => {
+                if(ShowCommand.CanExecute(null))
+                    ShowCommand.Execute(null);
             };
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
@@ -195,10 +201,31 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #endregion
 
+        ICommand _findDeclarationCommand;
+        public ICommand FindDeclarationCommand {
+            get {
+                if(_findDeclarationCommand == null) {
+                    _findDeclarationCommand = new RelayCommand(
+                        x => FindDeclaration(),
+                        x => CanFindDeclaration);
+                }
+                return _findDeclarationCommand;
+            }
+        }
+
+        void FindDeclaration() {
+            
+        }
+
+        bool CanFindDeclaration {
+            get {
+                return true;
+            }
+        }
+
         #endregion
 
         #region Event Handlers
-
 
 
         void OnDocumentTextChanged(object sender, EventArgs e) {
@@ -225,6 +252,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             // Do not set e.Handled=true.
             // We still want to insert the character that was typed.
         }
+
+        #region ToolTip
 
         ToolTip _toolTip = new ToolTip();
 
@@ -255,6 +284,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _toolTip.IsOpen = false;
         }
 
+        #endregion
+
+        #region FoldingTimer
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
             if(foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
@@ -262,6 +294,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
         }
+
+        #endregion
 
         #endregion
 

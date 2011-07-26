@@ -17,6 +17,7 @@ using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.View.Main;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.AHK.AHKv1;
+using SmartDevelop.Model.StdLib;
 
 namespace SmartDevelop
 {
@@ -30,6 +31,7 @@ namespace SmartDevelop
         MainViewModel _mainVM;
         MainWindow _mainView;
         ServiceLocator _serviceLocator = ServiceLocator.Instance;
+        SmartSolution _solution;
 
         #endregion
 
@@ -38,19 +40,23 @@ namespace SmartDevelop
         void Application_Startup(object sender, StartupEventArgs e) {
 
             RegisterServices();
-
-            _mainVM = new MainViewModel(new SmartSolution());
+            _solution = new SmartSolution();
+            _mainVM = new MainViewModel(_solution);
 
             _mainView = new MainWindow();
             _mainView.DataContext = _mainVM;
             _mainView.WindowState = WindowState.Maximized;
-            _mainView.Show();
-
             _mainView.Loaded += OnMainWindowLoaded;
+            _mainView.Show();
         }
 
         void OnMainWindowLoaded(object sender, EventArgs e) {
             _mainVM.SetDockManager(_mainView.DockManger);
+            AddDemoProject();
+        }
+
+        void AddDemoProject() {
+            _solution.Add(StdLibLoader.LoadStLib());
         }
 
 

@@ -11,6 +11,7 @@ using SmartDevelop.Model.Tokening;
 using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
 using SmartDevelop.TokenizerBase;
+using Archimedes.Patterns;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -35,10 +36,7 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        /// <summary>
-        /// Raised when the background tokenizer has refreshed the tokens 
-        /// </summary>
-        public event EventHandler TokenizerUpdated;
+        public event EventHandler RequestShowDocument;
 
         /// <summary>
         /// 
@@ -78,7 +76,7 @@ namespace SmartDevelop.Model.Projecting
             return newp;
         }
 
-        ProjectItemCode(CodeLanguage languageId, ProjectItem parent) 
+        public ProjectItemCode(CodeLanguage languageId, ProjectItem parent) 
             : base(parent) {
 
             if(languageId == null)
@@ -94,14 +92,11 @@ namespace SmartDevelop.Model.Projecting
 
             _tokenizer.Finished += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
-                if(TokenizerUpdated != null) {
-                    TokenizerUpdated(this, EventArgs.Empty);
-                }
+
+                // notify that we have a new token base to parse
+                OnTokenizerUpdated(this, new EventArgs<ProjectItemCode>(this));
                 OnRequestTextInvalidation();
             };
-
-
-            
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
             tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
@@ -114,6 +109,11 @@ namespace SmartDevelop.Model.Projecting
         public string FilePath {
             get;
             set;
+        }
+
+        public void OnRequestShowDocument() {
+            if(RequestShowDocument != null)
+                RequestShowDocument(this, EventArgs.Empty);
         }
 
         public override string Name {

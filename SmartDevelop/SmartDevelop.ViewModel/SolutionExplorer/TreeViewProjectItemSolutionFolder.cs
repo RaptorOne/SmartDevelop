@@ -11,8 +11,8 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         SmartSolution _solution;
 
 
-        public TreeViewProjectItemSolutionFolder(SmartSolution solution, TreeViewProjectItem parent)
-            : base(parent) {
+        public TreeViewProjectItemSolutionFolder(SmartSolution solution)
+            : base() {
                 _solution = solution;
                 ImageSource = @"../Images/blocks.ico";
         }
@@ -26,11 +26,11 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
         }
 
-        public override object DomainModel {
-            get {
-                return _solution;
-            }
-        }
+        //public override object DomainModel {
+        //    get {
+        //        return _solution;
+        //    }
+        //}
 
     }
 }

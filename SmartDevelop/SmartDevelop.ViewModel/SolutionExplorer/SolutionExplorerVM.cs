@@ -18,7 +18,7 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
            
             _smartSolution = solution;
             
-            _solutionRoot = new TreeViewProjectItemSolutionFolder(_smartSolution, null);
+            _solutionRoot = new TreeViewProjectItemSolutionFolder(_smartSolution);
             _solutions.Add(_solutionRoot);
             _smartSolution.ProjectAdded += OnProjectAdded;
             _smartSolution.ProjectRemoved += OnProjectRemoved;

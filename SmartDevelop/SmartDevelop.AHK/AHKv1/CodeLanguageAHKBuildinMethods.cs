@@ -502,10 +502,6 @@ namespace SmartDevelop.AHK.AHKv1
             method.ReturnType = new CodeTypeReference(typeof(int));
             members.Add(method);
 
-
-
-
-
             #region Object Methods
 
             method = new CodeMemberMethodExAHK(true)

@@ -25,7 +25,7 @@ namespace SmartDevelop.Model.Projecting
         #endregion
 
         public SmartSolution() {
-            this.Add(StdLibLoader.LoadStLib());
+           
         }
 
         /// <summary>

@@ -45,17 +45,24 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         public void OnTextEntered(object sender, TextCompositionEventArgs e) {
+            char currentChar;
+            char carretChar;
+            CodeSegment segment;
 
-            char currentChar = e.Text[0];
-            char carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
+            try {
+                currentChar = e.Text[0];
+                carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
 
-            var tokenLine = _projectitem.SegmentService.QueryCodeTokenLine(_texteditor.TextArea.Caret.Line);
-            if(tokenLine.IsEmpty)
+                var tokenLine = _projectitem.SegmentService.QueryCodeTokenLine(_texteditor.TextArea.Caret.Line);
+                if(tokenLine.IsEmpty)
+                    return;
+
+                segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+                if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
+                    return;
+            } catch {
                 return;
-
-            var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
-            if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
-                return;
+            }
 
             if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar)) {
                 // this is just for first debugging purposes
@@ -121,7 +128,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 if(segment != null) {
                     var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
-                    if(s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase) || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
+                    if(s != null && s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase) || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
                         var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
 
                         IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;

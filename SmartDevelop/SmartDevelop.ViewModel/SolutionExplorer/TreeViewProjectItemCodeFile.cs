@@ -11,8 +11,8 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
     public class TreeViewProjectItemCodeFile : TreeViewProjectItem
     {
         readonly ProjectItemCode _codeitem;
-        public TreeViewProjectItemCodeFile(ProjectItemCode codeitem, TreeViewProjectItem parent) 
-            : base(parent){
+        public TreeViewProjectItemCodeFile(ProjectItemCode codeitem, TreeViewProjectItem parent)
+            : base(codeitem, parent) {
                 _codeitem = codeitem;
                 ImageSource = @"../Images/ironAHK.ico";
 
@@ -20,20 +20,15 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         #region Properties
 
-        public override string DisplayName {
-            get {
-                return _codeitem.Name;
-            }
-            set {
-                _codeitem.Name = value;
-            }
-        }
+        //public override string DisplayName {
+        //    get {
+        //        return _codeitem.Name;
+        //    }
+        //    set {
+        //        _codeitem.Name = value;
+        //    }
+        //}
 
-        public override object DomainModel {
-            get {
-                return _codeitem;
-            }
-        }
 
         #endregion
 

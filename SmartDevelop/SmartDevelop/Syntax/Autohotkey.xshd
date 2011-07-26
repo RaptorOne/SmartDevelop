@@ -45,7 +45,9 @@
       <Word>for</Word>
       <Word>loop</Word>
       <Word>while</Word>
-
+      <Word>break</Word>
+      <Word>continue</Word>
+      <Word>in</Word>
       
       <Word>var</Word>
       <Word>this</Word>

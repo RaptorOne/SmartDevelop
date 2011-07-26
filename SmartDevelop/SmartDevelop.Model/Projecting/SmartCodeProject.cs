@@ -8,6 +8,7 @@ using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
 using SmartDevelop.Model.CodeContexts;
 using Archimedes.Patterns.Utils;
+using Archimedes.Patterns;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -23,13 +24,6 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        #region Events
-
-        public event EventHandler<ProjectItemEventArgs> ItemAdded;
-        public event EventHandler<ProjectItemEventArgs> ItemRemoved;
-
-        #endregion
-
         #region Constructor
 
         public SmartCodeProject(string name, CodeLanguage language) 
@@ -41,40 +35,6 @@ namespace SmartDevelop.Model.Projecting
             _language = language;
             _domservice = language.CreateDOMService(this);
             
-        }
-
-        #endregion
-
-        #region ProjectItem Access
-
-        public void Add(ProjectItem item) {
-            Children.Add(item);
-            if(ItemAdded != null)
-                ItemAdded(this, new ProjectItemEventArgs(item));
-
-            if(item is ProjectItemCode) {
-                ((ProjectItemCode)item).TokenizerUpdated += OnCodeFileTokenizerUpdated;
-            }
-        }
-
-        public void Remove(ProjectItem item) {
-            if(item is ProjectItemCode) {
-                ((ProjectItemCode)item).TokenizerUpdated -= OnCodeFileTokenizerUpdated;
-            }
-            Children.Remove(item);
-            if(ItemRemoved != null)
-                ItemRemoved(this, new ProjectItemEventArgs(item));
-        }
-
-        public IEnumerable<ProjectItem> GetAllItems() {
-            return new List<ProjectItem>(Children);
-        }
-
-        public IEnumerable<T> GetAllItems<T>()
-            where T : ProjectItem {
-                return from i in Children
-                   where i is T
-                   select i as T;
         }
 
         #endregion
@@ -110,25 +70,14 @@ namespace SmartDevelop.Model.Projecting
 
         #region Event Handlers
 
-        void OnCodeFileTokenizerUpdated(object sender, EventArgs e) {
-                _domservice.CompileTokenFile((ProjectItemCode)sender, _domservice.RootType);
+        protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCode> codeProjectEventArgs) {
+            _domservice.CompileTokenFile(codeProjectEventArgs.Value, _domservice.RootType);
+            base.OnTokenizerUpdated(sender, codeProjectEventArgs);
         }
-
-
 
         #endregion
     }
 
-    public class ProjectItemEventArgs : EventArgs
-    {
-        readonly ProjectItem _p;
 
-        public ProjectItemEventArgs(ProjectItem p) {
-            _p = p;
-        }
-        public ProjectItem Project {
-            get { return _p; }
-        }
-    }
 
 }

@@ -12,7 +12,13 @@
     </UserControl.InputBindings>
     
     
-            <Grid>
-        <ContentControl Name="editorContainer" Content="{Binding Editor}" />
+     <Grid>
+        <ContentControl Name="editorContainer" Content="{Binding Editor}">
+            <ContentControl.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Declaration" Command="{Binding FindDeclarationCommand}"/>
+                </ContextMenu>
+            </ContentControl.ContextMenu>
+        </ContentControl>
     </Grid>
 </UserControl>

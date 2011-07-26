@@ -213,9 +213,8 @@ namespace SmartDevelop.Model.DOM
             //remove all old members which are from this code file:
 
             var oldMembers = (from CodeTypeMember m in RootType.Members
-                              where (m.LinePragma == null || m.LinePragma.FileName == codeitem.FilePath)
                               let meth = m as ICodeObjectEx
-                              where meth == null || (!meth.IsHidden && !meth.IsBuildInType)
+                              where (meth == null || (!meth.IsHidden && !meth.IsBuildInType && codeitem.Equals(meth.CodeDocumentItem)))
                               select m).ToList();
             foreach(var m in oldMembers)
                 RootType.Members.Remove(m);
@@ -241,7 +240,7 @@ namespace SmartDevelop.Model.DOM
 
             #region Parse
 
-            for(int i = 0; i < linecnt; i++) {
+            for(int i = 0; i <= linecnt; i++) {
 
                 if(codeLineMap.ContainsKey(i))
                     line = codeLineMap[i];
@@ -261,11 +260,11 @@ namespace SmartDevelop.Model.DOM
                         if(next != null) {
                             CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
                             CodeTypeReferenceEx basecls = null;
-
+                            CodeSegment refBaseClass = null;
                             if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
-                                var refclass = next.NextOmit(whitespacetokenNewLines);
-                                refclass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refclass.TokenString, thisparent);
-                                next = refclass.NextOmit(whitespacetokenNewLines);
+                                refBaseClass = next.NextOmit(whitespacetokenNewLines);
+                                refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(refBaseClass.TokenString, thisparent);
+                                next = refBaseClass.NextOmit(whitespacetokenNewLines);
                             }
 
                             if(next.Token == Token.BlockOpen) {
@@ -274,19 +273,40 @@ namespace SmartDevelop.Model.DOM
                                 var type = new CodeTypeDeclarationEx(classNameSegment.TokenString)
                                 {
                                     IsClass = true,
-                                    LinePragma = CreatePragma(classNameSegment, codeitem.FilePath)
+                                    LinePragma = CreatePragma(classNameSegment, codeitem.FilePath),
+                                    CodeDocumentItem = codeitem
                                 };
                                 classNameSegment.CodeDOMObject = type;
 
-                                if(basecls != null)
-                                    type.BaseTypes.Add(basecls);
-                                else
-                                    type.BaseTypes.Add(new CodeTypeReferenceEx("Object", thisparent) { ResolvedTypeDeclaration = _superBase });
 
-                                // Add it to the CodeDOM Tree
-                                
-                                thisparent.Members.Add(type);
-                                type.Parent = thisparent;
+                                // check if this type was alread defined in this scope
+                                if(thisparent.GetInheritedMembers().Contains(type)) {
+                                    classNameSegment.ErrorContext = new CodeError() { Message = "oh my dear, this class already exisits in the current scope!" };
+                                } else {
+
+                                    #region Check & Resolve Baseclass
+
+                                    if(basecls != null) {
+                                        //check if we have a circual interhance tree
+                                        var baseclassImpl = basecls.ResolveTypeDeclarationCache();
+                                        if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(classNameSegment.TokenString, thisparent))) {
+                                            //circular dependency detected!!
+                                            refBaseClass.ErrorContext = new CodeError() { Message = "Woops you just produced a circular dependency in your inheritance tree!" };
+                                        } else {
+                                            if(basecls != null)
+                                                type.BaseTypes.Add(basecls);
+                                            else
+                                                type.BaseTypes.Add(new CodeTypeReferenceEx("Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                        }
+                                    }
+
+                                    #endregion
+
+                                    // Add it to the CodeDOM Tree
+                                    thisparent.Members.Add(type);
+                                    type.Parent = thisparent;
+
+                                }
 
                                 // Create a CodeRange Item
                                 int startOffset = classBodyStart.Range.Offset;
@@ -295,7 +315,6 @@ namespace SmartDevelop.Model.DOM
                                     int length = (classBodyEnd.Range.Offset - startOffset);
                                     currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
                                 }
-
 
                                 parentHirarchy.Push(type);
                                 bcc++;
@@ -370,63 +389,74 @@ namespace SmartDevelop.Model.DOM
                                 var endMethodBody = startMethodBody.FindClosingBracked(true);
                                 if(endMethodBody != null) {
 
+                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
+                                    bool hasDeclarationError = false;
+
                                     #region Generate Method Definition DOM
 
                                     var method = new CodeMemberMethodEx()
                                     {
                                         Name = methodSegment.TokenString,
                                         LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
+                                        CodeDocumentItem = codeitem,
                                         ReturnType = new CodeTypeReferenceEx(typeof(object))
                                     };
                                     methodSegment.CodeDOMObject = method;
 
+                                    //check if this method is not already defined elsewere in current scope
 
-                                    // extract Method Comment
-                                    var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
-                                    if(comment != null && comment.Token == Token.MultiLineComment) {
-                                        method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
-                                    } else if(comment != null && comment.Token == Token.SingleLineComment) {
+                                    if(thisparent.GetInheritedMembers().Contains(method)) {
+                                        methodSegment.ErrorContext = new CodeError() { Message = string.Format("The Methodename '{0}' is already used in the current scope!", method.Name) };
+                                        hasDeclarationError = true;
+                                    } else {
 
-                                        //todo: collect all above singleline comments
-                                    }
 
-                                    // extract method params
-                                    paramstack.Clear();
-                                    CodeSegment previous = methodSignatureStart;
+                                        // extract Method Comment
+                                        var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
+                                        if(comment != null && comment.Token == Token.MultiLineComment) {
+                                            method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
+                                        } else if(comment != null && comment.Token == Token.SingleLineComment) {
 
-                                    // get method properties:
-                                    while(true){
-                                        var current = previous.Next;
-                                        if(current.Token == Token.Identifier) {
-                                            paramstack.Push(current);
-                                        } else if(current.Token == Token.ParameterDelemiter || current.Token == Token.LiteralBracketClosed) {
-                                            // end of param reached:
-                                            if(paramstack.Count == 1) {
-                                                // thread one param as the untyped argument, type of Object
-                                                method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object), paramstack.Pop().TokenString));
-                                            } else if(paramstack.Count > 1) {
-                                                // thread two param as the type and argument
-                                                method.Parameters.Add(new CodeParameterDeclarationExpression(paramstack.Pop().TokenString, paramstack.Pop().TokenString));
-                                            }
-                                            if(current.Token == Token.LiteralBracketClosed)
-                                                break;
+                                            //todo: collect all above singleline comments
                                         }
-                                        previous = current;
+
+                                        // extract method params
+                                        paramstack.Clear();
+                                        CodeSegment previous = methodSignatureStart;
+
+                                        // get method properties:
+                                        while(true) {
+                                            var current = previous.Next;
+                                            if(current.Token == Token.Identifier) {
+                                                paramstack.Push(current);
+                                            } else if(current.Token == Token.ParameterDelemiter || current.Token == Token.LiteralBracketClosed) {
+                                                // end of param reached:
+                                                if(paramstack.Count == 1) {
+                                                    // thread one param as the untyped argument, type of Object
+                                                    method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object), paramstack.Pop().TokenString));
+                                                } else if(paramstack.Count > 1) {
+                                                    // thread two param as the type and argument
+                                                    method.Parameters.Add(new CodeParameterDeclarationExpression(paramstack.Pop().TokenString, paramstack.Pop().TokenString));
+                                                }
+                                                if(current.Token == Token.LiteralBracketClosed)
+                                                    break;
+                                            }
+                                            previous = current;
+                                        }
                                     }
-
                                     #endregion
-
-                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
 
                                     // get method statements
                                     method.Statements.AddRange(
                                         CollectAllCodeStatements(thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
-                                    // add it to the code DOM Tree
-                                    
-                                    thisparent.Members.Add(method);
-                                    method.DefiningType = thisparent;
 
+                                    // add it to the code DOM Tree
+                                    if(!hasDeclarationError) {
+                                        thisparent.Members.Add(method);
+                                        method.DefiningType = thisparent;
+                                    }
+                                
 
                                     // Create a CodeRange Item
                                     int startOffset = startMethodBody.Range.Offset;
