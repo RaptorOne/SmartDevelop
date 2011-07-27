@@ -54,10 +54,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char PARAMDELEMITER = ',';
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
-
+        const char VARIABLEDEREF = '%';
         
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
-        static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '-', '|' , '?' };
+        static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '^' , '-', '|' , '?' };
         readonly List<string> KEYWORDS;
 
         static TokenMapIA OPERATOR_TOKEN = new TokenMapIA();
@@ -321,6 +321,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     } else if(!traditionalMode && currentChar == STRINGCONCAT) {
                         _currentToken = Token.StringConcat;
 
+
+                    } else if(currentChar == VARIABLEDEREF) {
+                        _currentToken = Token.Deref;
                     //}else if(!traditionalMode && IsVariableAsignStart(i)){
 
                     } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
@@ -352,23 +355,23 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             }
         }
 
-        #region Helpermethods
+        #endregion
+
 
         static char[] trimchars = { ' ', '\t', '\n', '\r' };
-
         CodeSegment _previous = null;
 
         void EndActiveToken(int index) {
             int l = index - _currentRangeStart;
             if(l > 0) {
                 var str = _text.Substring(_currentRangeStart, l).Trim(trimchars);
-                if(!(_activeToken == Token.Unknown && str.Length == 0)){
+                if(!(_activeToken == Token.Unknown && str.Length == 0)) {
 
                     Token? tokenToStore = null;
-                    
 
-                    if(_activeToken == Token.Unknown){
-                        
+
+                    if(_activeToken == Token.Unknown) {
+
                         if(IsNumber(str)) {
                             _activeToken = Token.Number;
                         } else if(IsHexNumber(str)) {
@@ -380,7 +383,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         }
                     }
 
-                    if(_activeToken == Token.OperatorFlow){
+                    if(_activeToken == Token.OperatorFlow) {
                         // toDo:
                         // handle AHK specail cases like:
                         // := AND = Asign
@@ -408,9 +411,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _currentColStart = _currentColumn;
         }
 
-        bool IsNumber(string str) {
+
+        #region Helpermethods
+
+        public static bool IsNumber(string str) {
             bool isNum = true;
-                //check for number:
+            //check for number:
             foreach(char c in str)
                 if(!AsciiHelper.IsAsciiNum(c)) {
                     isNum = false;
@@ -419,11 +425,11 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return isNum;
         }
 
-        bool IsNumber(char c) {
+        public static  bool IsNumber(char c) {
             return AsciiHelper.IsAsciiNum(c);
         }
 
-        bool IsHexNumber(string str) {
+        public static bool IsHexNumber(string str) {
             if(str.Length > 2 && str.Substring(0, 2) == "0x") {
                 foreach(char c in str.Substring(2)) {
                     if(!AsciiHelper.IsAsciiHexNum(c)) {
@@ -436,7 +442,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         bool IsWhiteSpace(int index) {
-            return (_text[index] == ' ') ||( _text[index] == '\t');
+            return (_text[index] == ' ') || (_text[index] == '\t');
         }
 
         /// <summary>
@@ -454,24 +460,28 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 if(command.Length == 0)
                     return false;
 
-                char c;
-                bool fail = false;
-                for(int scanPtr = index + command.Length; _textlen > scanPtr; scanPtr++) {
-                    c = _text[scanPtr];
-                    if(c == '(' || OPERATORS.Contains(c)) {
-                        fail = true;
-                        break;
+                int cindex = index + command.Length;
+                if(cindex < _text.Length) {
+                    char c = _text[cindex];
+                    // the next char must be a whitespace or param delemiter
+                    if(c == ' ' || c == '\t' || c == '\r' || c == ','){
+                        // now, we expect a lot but not-> =, :=, 
+                        //get next char which is not an whitespace
+                        char nextChar = NextCharOnThisLineOmitWhiteSpace(cindex);
+                        if(!(nextChar == ':' || nextChar == '=')) {
+                            return true;
+                        }
+                    } else {
+                        return false;
                     }
-                    if(AsciiHelper.IsAsciiLiteralLetter(c) || ALLOWED_SPECAILCHARS.Contains(c))
-                        break;
-                }
-                return !fail;
+                } else
+                    return true;
             }
             return false;
         }
 
         bool IsLieralStringMarker(int index) {
-            return (_text[index] == LITERALSTR && !IsInAnyComment() 
+            return (_text[index] == LITERALSTR && !IsInAnyComment()
                 && _text.Previous(index) != LITERALSTR_ESCAPE
                 && !(_text[index] == LITERALSTR_ESCAPE && _text.Next(index) == LITERALSTR));
         }
@@ -481,16 +491,16 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         bool IsMultilineTraditionalStringStart(int index) {
-            if((_activeToken != Token.LiteralString) && (_text[index] == '(')){
+            if((_activeToken != Token.LiteralString) && (_text[index] == '(')) {
 
-                while(true){
-                    if(--index > 0){
+                while(true) {
+                    if(--index > 0) {
                         if(_text[index] == '\n')
                             return true;
-                        else if(!IsWhiteSpace(index)){
+                        else if(!IsWhiteSpace(index)) {
                             break;
                         }
-                    }else
+                    } else
                         break;
                 }
             }
@@ -509,7 +519,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return _activeToken == Token.SingleLineComment || _activeToken == Token.MultiLineComment;
         }
 
-        bool IsSingleCharToken(Token token) {
+        public static bool IsSingleCharToken(Token token) {
             return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || TokenHelper.BRAKETS.ContainsValue(token);
         }
 
@@ -521,12 +531,16 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return ExtractWord(start, null);
         }
         string ExtractWord(int start, List<char> allowedspecailChars) {
+            return ExtractWord(ref _text, start, allowedspecailChars);
+        }
+
+        public static string ExtractWord(ref string text, int start, List<char> allowedspecailChars) {
             var sb = new StringBuilder();
             char c;
 
-            for(int sprt = start; sprt < _textlen; sprt++) {
-                c = _text[sprt];
-                if(!IsWhiteChar(sprt) && (AsciiHelper.IsAsciiLiteralLetter(c) || (allowedspecailChars != null && allowedspecailChars.Contains(c)))) {
+            for(int sprt = start; sprt < text.Length; sprt++) {
+                c = text[sprt];
+                if(!IsWhiteChar(c) && (AsciiHelper.IsAsciiLiteralLetter(c) || (allowedspecailChars != null && allowedspecailChars.Contains(c)))) {
                     sb.Append(c);
                 } else
                     break;
@@ -548,11 +562,25 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return cleanPrefixSpace;
         }
 
+        char NextCharOnThisLineOmitWhiteSpace(int index) {
+            char c;
+            while(true) {
+                c = _text.Next(index++);
+                if(c == '\n' || c == '\0')
+                    break;
+                else if(c != ' ' && c != '\t')
+                    break;
+            }
+            return c;
+        }
+
         bool IsWhiteChar(int index) {
             return _text[index] == ' ' || _text[index] == '\t';
         }
 
-        #endregion
+        public static bool IsWhiteChar(char c) {
+            return c == ' ' || c == '\t';
+        }
 
         #endregion
     }

@@ -8,11 +8,11 @@ using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeMethodReferenceExpressionEx : CodeMethodReferenceExpression, ICodeContext
+    public class CodePropertyReferenceExpressionEx : CodePropertyReferenceExpression, ICodeContext
     {
         #region Fields
 
-        CodeMemberMethodEx _methodref;
+        CodeMemberProperty _propertyDecl;
         SmartCodeProject _project;
         Projecting.ProjectItemCode _codeDocumentItem;
 
@@ -20,8 +20,8 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Constructor
 
-        public CodeMethodReferenceExpressionEx(ProjectItemCode codeDocumentItem, CodeExpression target, string methodName, CodeTypeDeclarationEx enclosingType) 
-            : base(target, methodName) {
+        public CodePropertyReferenceExpressionEx(ProjectItemCode codeDocumentItem, CodeExpression target, string propertyName, CodeTypeDeclarationEx enclosingType) 
+            : base(target, propertyName) {
                 _enclosingType = enclosingType;
                 _codeDocumentItem = codeDocumentItem;
         }
@@ -30,9 +30,9 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Properties
 
-        public CodeMemberMethodEx ResolvedMethodMember {
-            get { return _methodref; }
-            set { _methodref = value; }
+        public CodeMemberProperty ResolvedPropertyMember {
+            get { return _propertyDecl; }
+            set { _propertyDecl = value; }
         }
 
         CodeTypeDeclarationEx _enclosingType;
@@ -65,8 +65,8 @@ namespace SmartDevelop.Model.DOM.Types
 
         public string CommentInfo {
             get {
-                if(ResolvedMethodMember != null) {
-                    return GetDocumentCommentString(ResolvedMethodMember.Comments);
+                if(ResolvedPropertyMember != null) {
+                    return GetDocumentCommentString(ResolvedPropertyMember.Comments);
                 }
                 return null;
             }
@@ -87,42 +87,40 @@ namespace SmartDevelop.Model.DOM.Types
 
         #endregion
 
-
-
-        public CodeMemberMethodEx ResolveMethodDeclarationCache() {
+        public CodeMemberProperty ResolvePropertyDeclarationCache() {
             var lang = Language;
 
 
-            if(_methodref == null && EnclosingType != null) {
+            if(_propertyDecl == null && EnclosingType != null) {
                 CodeTypeDeclarationEx typedecl = EnclosingType;
 
                 var members = from m in typedecl.GetInheritedMembers()
-                                let memberMethod = m as CodeMemberMethodEx
-                                where memberMethod != null && memberMethod.Name.Equals(this.MethodName, lang.NameComparisation)
+                              let memberMethod = m as CodeMemberProperty
+                                where memberMethod != null && memberMethod.Name.Equals(this.PropertyName, lang.NameComparisation)
                                 select memberMethod;
 
                 if(members.Any())
-                    _methodref = members.First();
+                    _propertyDecl = members.First();
             }
 
-            if(_methodref == null) {
+            if(_propertyDecl == null) {
                 var p = Project;
                 if(p != null && p.DOMService.RootType != EnclosingType) {
 
                     var members = from member in p.DOMService.RootType.Members.Cast<CodeTypeMember>()
-                                  let methodMember = member as CodeMemberMethodEx
-                                  where methodMember != null && methodMember.Name.Equals(this.MethodName, lang.NameComparisation)
+                                  let methodMember = member as CodeMemberProperty
+                                  where methodMember != null && methodMember.Name.Equals(this.PropertyName, lang.NameComparisation)
                                   select methodMember;
 
                     if(members.Any())
-                        _methodref = members.First();
+                        _propertyDecl = members.First();
                 }
             }
-            return _methodref;
+            return _propertyDecl;
         }
 
         public override string ToString() {
-            return "CodeMethodReferenceExpression: " + this.MethodName + "\n" + CommentInfo;
+            return "CodePropertyReferenceExpression: " + this.PropertyName + "\n" + CommentInfo;
         }
 
 

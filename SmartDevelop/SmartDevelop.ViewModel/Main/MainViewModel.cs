@@ -10,32 +10,54 @@ using System.Windows.Input;
 using Archimedes.Patterns.WPF.Commands;
 using System.Linq;
 using System.Windows.Forms;
+using SmartDevelop.ViewModel.Errors;
 
 namespace SmartDevelop.ViewModel.Main
 {
+    /// <summary>
+    /// Main ViewModel
+    /// </summary>
     public class MainViewModel : WorkspaceViewModel
     {
+        #region Fields
+
         DockingManager _dockManager;
         IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
         SolutionExplorerVM _solutionVM;
         SmartSolution _solution;
 
+        #endregion
+
         public MainViewModel(SmartSolution solution) 
         {
+            Globals.MainVM = this;
             _solution = solution;
             _solutionVM = new SolutionExplorerVM(solution);
+            _errorListVM = new ErrorListViewModel(solution.ErrorService);
         }
 
         public void SetDockManager(DockingManager dockmanager) {
             _dockManager = dockmanager;
             ServiceLocator.Instance.Resolve<IAvalonService>().PrimaryDockManager = _dockManager;
         }
+        
+        #region Child VMs
 
         public SolutionExplorerVM SolutionVM {
             get { return _solutionVM; }
         }
 
+        ErrorListViewModel _errorListVM;
+
+        public ErrorListViewModel ErrorListVM {
+            get { return _errorListVM; }
+        }
+
+        #endregion
+
         #region Commands
+
+        #region Open File Command
 
         ICommand _openFileCommand;
         public ICommand OpenFileCommand {
@@ -64,6 +86,9 @@ namespace SmartDevelop.ViewModel.Main
             }
         }
 
+        #endregion
+
+        #region Save Current File Command (ToDo)
 
         ICommand _saveCurrentFileCommand;
         public ICommand SaveCurrentFileCommand {
@@ -78,9 +103,15 @@ namespace SmartDevelop.ViewModel.Main
             }
         }
 
+        #endregion
+
+        #region Save Current File Command (ToDo)
+
         public ICommand SaveAllCommand {
             get { return null; }
         }
+
+        #endregion
 
         #endregion
     }

@@ -34,7 +34,7 @@ namespace SmartDevelop.Model.DOM
         #region Constructor
 
         public CodeDOMService(SmartCodeProject project) {
-            _scriptRoot = new CodeTypeDeclarationEx("Global");
+            _scriptRoot = new CodeTypeDeclarationEx(null, "Global") { Project = project };
             _project = project;
         }
 

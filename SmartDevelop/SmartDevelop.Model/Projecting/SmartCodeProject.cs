@@ -22,19 +22,19 @@ namespace SmartDevelop.Model.Projecting
         readonly CodeDOMService _domservice;
         readonly CodeLanguage _language;
 
+        SmartSolution _solution;
+
         #endregion
 
         #region Constructor
 
-        public SmartCodeProject(string name, CodeLanguage language) 
+        public SmartCodeProject(string name, CodeLanguage language)
             : base(null) {
-
-                ThrowUtil.ThrowIfNull(language);
+            ThrowUtil.ThrowIfNull(language);
 
             Name = name;
             _language = language;
             _domservice = language.CreateDOMService(this);
-            
         }
 
         #endregion
@@ -49,6 +49,14 @@ namespace SmartDevelop.Model.Projecting
             get { return _language; }
         }
 
+
+        /// <summary>
+        /// Gets/Sets the Solution to which this Project belongs
+        /// </summary>
+        public SmartSolution Solution {
+            get { return _solution; }
+            internal set { _solution = value; }
+        }
 
         /// <summary>
         /// Returns itself ;) 

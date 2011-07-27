@@ -33,12 +33,12 @@ namespace SmartDevelop.ViewModel.CodeCompleting
 
             if(m is CodeMemberProperty) {
                 var prop = ((CodeMemberProperty)m);
-                return new CompletionItemProperty(prop.Name, string.Format("class {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+                return new CompletionItemProperty(prop.Name, string.Format("Property {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
             }
 
             if(m is CodeMemberField) {
                 var prop = ((CodeMemberField)m);
-                return new CompletionItemField(prop.Name, string.Format("class {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+                return new CompletionItemField(prop.Name, string.Format("Field {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
             }
 
 

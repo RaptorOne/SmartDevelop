@@ -8,14 +8,16 @@ using SmartDevelop.Model.Projecting;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeTypeDeclarationEx : CodeTypeDeclaration, ICodeMemberEx, IEquatable<CodeTypeDeclarationEx>
+    /// <summary>
+    /// Represents a dynamic Type
+    /// </summary>
+    public class CodeTypeDeclarationDynamic : CodeTypeDeclarationEx, ICodeMemberEx, IEquatable<CodeTypeDeclarationEx>
     {
-
         #region Constructors
 
-        public CodeTypeDeclarationEx() : base() { }
-        public CodeTypeDeclarationEx(ProjectItemCode codeitem, string name) : base(name) { CodeDocumentItem = codeitem; }
-        public CodeTypeDeclarationEx(ProjectItemCode codeitem, string name, bool buildin) : base(name) { IsBuildInType = buildin; CodeDocumentItem = codeitem; }
+        public CodeTypeDeclarationDynamic() : base() {
+            this.Name = "Dynamic";
+        }
 
         #endregion
 
@@ -66,18 +68,8 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Public Methods
 
-        public virtual IEnumerable<CodeTypeMember> GetInheritedMembers() {
+        public override IEnumerable<CodeTypeMember> GetInheritedMembers() {
             List<CodeTypeMember> members = new List<CodeTypeMember>();
-            members.AddRange(this.Members.Cast<CodeTypeMember>());
-
-            foreach(CodeTypeReferenceEx t in BaseTypes) {
-                if(t.ResolvedTypeDeclaration == null)
-                    t.ResolveTypeDeclarationCache();
-
-                if(t.ResolvedTypeDeclaration != null) {
-                    members.AddRange(t.ResolvedTypeDeclaration.GetInheritedMembers());
-                }
-            }
             return members;
         }
 
@@ -87,50 +79,32 @@ namespace SmartDevelop.Model.DOM.Types
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public virtual bool IsSubclassOf(CodeTypeReferenceEx type) {
-            var typerefs = this.BaseTypes.Cast<CodeTypeReferenceEx>().ToList();
-            if(typerefs.Contains(type)) {
-                return true;
-            } else {
-                foreach(CodeTypeReferenceEx bt in typerefs) {
-                    var btdecl = bt.ResolveTypeDeclarationCache();
-                    if(btdecl != null && btdecl.IsSubclassOf(type)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+        public bool IsSubclassOf(CodeTypeReferenceEx type) {
+            return true;
         }
 
 
-        public virtual IEnumerable<CodeTypeReferenceEx> GetBaseTypeHirarchy() {
+        public IEnumerable<CodeTypeReferenceEx> GetBaseTypeHirarchy() {
             List<CodeTypeReferenceEx> types = new List<CodeTypeReferenceEx>();
-            foreach(CodeTypeReferenceEx bt in this.BaseTypes) {
-                types.Add(bt);
-                var btdecl = bt.ResolveTypeDeclarationCache();
-                if(btdecl != null) {
-                    types.AddRange(btdecl.GetBaseTypeHirarchy());
-                }
-            }
             return types;
         }
 
         #endregion
 
         public override string ToString() {
-            return string.Format("TypeDeclaration: {0}", this.Name);
+            return "Dynamic Variable Declaration";
         }
 
         #region IEquatable
 
-        public virtual bool Equals(CodeTypeDeclarationEx other) {
+        public bool Equals(CodeTypeDeclarationDynamic other) {
             if(other == null)
                 return false;
             return this.Name.Equals(other.Name, Language.NameComparisation);
         }
 
         public override bool Equals(object obj) {
-            return Equals(obj as CodeTypeDeclarationEx);
+            return Equals(obj as CodeTypeDeclarationDynamic);
         }
 
         public override int GetHashCode() {
@@ -138,5 +112,8 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         #endregion
+
+        public readonly static CodeTypeDeclarationDynamic Default = new CodeTypeDeclarationDynamic();
+
     }
 }

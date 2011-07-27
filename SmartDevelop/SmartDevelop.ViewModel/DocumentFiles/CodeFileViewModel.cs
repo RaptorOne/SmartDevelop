@@ -3,29 +3,17 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using Archimedes.Patterns.Services;
+using Archimedes.Patterns.WPF.Commands;
 using Archimedes.Patterns.WPF.ViewModels;
 using Archimedes.Services.WPF.WorkBenchServices;
 using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Folding;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase.IA.Indentation;
-using SmartDevelop.ViewModel.Folding;
-using Archimedes.Patterns.WPF.Commands;
-using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
-using SmartDevelop.ViewModel.CodeCompleting;
-using System.CodeDom;
-using System.Text;
 using SmartDevelop.ViewModel.BackgroundRenderer;
 using SmartDevelop.ViewModel.TextTransformators;
-using SmartDevelop.Model.CodeContexts;
-using Archimedes.Patterns.Utils;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Windows;
-using SmartDevelop.Model.DOM.Types;
-using SmartDevelop.TokenizerBase;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -80,7 +68,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _texteditor.Document.TextChanged += OnDocumentTextChanged;
 
             _texteditor.SyntaxHighlighting = projectitem.CodeLanguage.GetHighlighter();
-            //_foldingStrategy = new IAFoldingStrategy(_projectitem.TokenService);
+
+            _foldingStrategy = projectitem.CodeLanguage.CreateFoldingStrategy(projectitem.SegmentService);
             if(_foldingStrategy != null) {
                 if(_foldingManager == null)
                     _foldingManager = FoldingManager.Install(_texteditor.TextArea);
@@ -89,7 +78,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
 
             _completionDataProvider = new CompletionDataProvider(_texteditor, _projectitem);
-
 
             _texteditor.MouseHover += TextEditorMouseHover;
             _texteditor.MouseHoverStopped += TextEditorMouseHoverStopped;
@@ -101,8 +89,10 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
 
-            var renderer = new CurrentLineHighlightRenderer(_texteditor, projectitem);
-            _texteditor.TextArea.TextView.BackgroundRenderers.Add(renderer);
+
+            _texteditor.TextArea.TextView.BackgroundRenderers.Add(new CurrentLineHighlightRenderer(_texteditor, projectitem));
+            _texteditor.TextArea.TextView.BackgroundRenderers.Add(new ErrorBackgroundRenderer(_texteditor, projectitem));
+            
 
             var contextTransformer = new ContextHighlightTransformator(projectitem);
             _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
@@ -189,9 +179,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             get {
                 if(_saveCurrentFileCommand == null) {
                     _saveCurrentFileCommand = new RelayCommand(x => {
-                        _projectitem.Save(_projectitem.FilePath);
+                        _projectitem.QuickSave();
                     }, x => {
-                        return !string.IsNullOrWhiteSpace(_projectitem.FilePath);
+                        return true; /*!string.IsNullOrWhiteSpace(_projectitem.FilePath);*/
                     });
                 }
                 return _saveCurrentFileCommand;
@@ -200,6 +190,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
 
         #endregion
+
+        #region Find Declaration Command (ToDo)
 
         ICommand _findDeclarationCommand;
         public ICommand FindDeclarationCommand {
@@ -214,14 +206,16 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         void FindDeclaration() {
-            
+            // todo
         }
 
         bool CanFindDeclaration {
             get {
-                return true;
+                return true; // todo
             }
         }
+
+        #endregion
 
         #endregion
 
@@ -267,7 +261,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 string msg;
 
                 if(segment.HasError) {
-                    msg = segment.ErrorContext.Message;
+                    msg = segment.ErrorContext.Description;
                 } else
                  msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
                 
@@ -289,15 +283,18 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         #region FoldingTimer
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
-            if(foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
-                foldingDirty = false;
-                _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
+            try {
+                if(foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
+                    foldingDirty = false;
+                    _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
+                }
+            } catch {
+                foldingDirty = true;
             }
         }
 
         #endregion
 
         #endregion
-
     }
 }

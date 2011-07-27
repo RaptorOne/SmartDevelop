@@ -23,7 +23,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 { "/", Token.Operator_Divide },
                 { "//", Token.Operator_AssignModulus },
                 { "|", Token.Operator_BitwiseOr },
+                { "^", Token.Operator_BitwiseXOr },
                 { "&", Token.Operator_BitwiseAnd },
+                { "**", Token.Operator_Power },
 
                 { "<<", Token.Operator_ShiftLeft },
                 { ">>", Token.Operator_ShiftRight },

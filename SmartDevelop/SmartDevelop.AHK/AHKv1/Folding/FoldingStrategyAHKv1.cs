@@ -8,12 +8,12 @@ using SmartDevelop.TokenizerBase.IA;
 using SmartDevelop.Model.Tokening;
 using SmartDevelop.TokenizerBase;
 
-namespace SmartDevelop.ViewModel.Folding
+namespace SmartDevelop.AHK.AHKv1.Folding
 {
     /// <summary>
     /// Allows producing foldings from a document based on braces.
     /// </summary>
-    public class IAFoldingStrategy : AbstractFoldingStrategy
+    public class FoldingStrategyAHKv1 : AbstractFoldingStrategy
     {
         DocumentCodeSegmentService _tokenservice;
         readonly Token _openingBrace;
@@ -23,7 +23,7 @@ namespace SmartDevelop.ViewModel.Folding
         /// <summary>
         /// Creates a new BraceFoldingStrategy.
         /// </summary>
-        public IAFoldingStrategy(DocumentCodeSegmentService tokenservice) {
+        public FoldingStrategyAHKv1(DocumentCodeSegmentService tokenservice) {
             _openingBrace = Token.BlockOpen;
             _closingBrace = Token.BlockClosed;
             _tokenservice = tokenservice;
@@ -66,10 +66,6 @@ namespace SmartDevelop.ViewModel.Folding
             newFoldings.Sort((a, b) => a.StartOffset.CompareTo(b.StartOffset));
             return newFoldings;
         }
-
-
-
-
 
     }
 }

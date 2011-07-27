@@ -53,47 +53,52 @@ namespace SmartDevelop.TokenizerBase
         /// |
         /// </summary>
         Operator_BitwiseOr = 23,
+
+        /// <summary>
+        /// ^
+        /// </summary>
+        Operator_BitwiseXOr = 24,
         
         /// <summary>
         /// &&
         /// </summary>
-        Operator_BooleanAnd = 24,
+        Operator_BooleanAnd = 25,
         
         /// <summary>
         /// ||
         /// </summary>
-        Operator_BooleanOr = 25,
+        Operator_BooleanOr = 26,
 
         /// <summary>
         /// /
         /// </summary>
-        Operator_Divide = 26,
+        Operator_Divide = 27,
 
         /// <summary>
         /// //
         /// </summary>
-        Operator_Modulus = 27,
+        Operator_Modulus = 28,
 
         /// <summary>
         /// *
         /// </summary>
-        Operator_Multiply = 28,
+        Operator_Multiply = 29,
 
         /// <summary>
         /// x**a 
         /// x ^ (a)
         /// </summary>
-        Operator_Power = 29,
+        Operator_Power = 30,
 
         /// <summary>
         /// <<
         /// </summary>
-        Operator_ShiftLeft,
+        Operator_ShiftLeft = 31,
 
         /// <summary>
         /// >>
         /// </summary>
-        Operator_ShiftRight,
+        Operator_ShiftRight = 32,
 
         Operator_GreaterThan,
         Operator_GreaterThanOrEqual,

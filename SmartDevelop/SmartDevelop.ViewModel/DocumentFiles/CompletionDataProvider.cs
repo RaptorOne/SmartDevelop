@@ -16,12 +16,17 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 {
     public class CompletionDataProvider
     {
+        #region Fields
+
         readonly TextEditor _texteditor;
         readonly ProjectItemCode _projectitem;
         CompletionWindow _completionWindow;
 
+        #endregion
+
         static List<char> whitespacesNewLine = new List<char> { ' ', '\t', '\n', '\r' };
         static List<char> whitespaces = new List<char> { ' ', '\t' };
+        static List<Token> t_whitespaces = new List<Token> { Token.WhiteSpace };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
 
@@ -45,12 +50,20 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         public void OnTextEntered(object sender, TextCompositionEventArgs e) {
+            char beforeChar;
             char currentChar;
             char carretChar;
             CodeSegment segment;
 
             try {
                 currentChar = e.Text[0];
+
+                if(_texteditor.CaretOffset > 1){
+                    beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
+                    if(!(beforeChar == ' ' || beforeChar == '\t'))
+                        return;
+                }
+
                 carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
 
                 var tokenLine = _projectitem.SegmentService.QueryCodeTokenLine(_texteditor.TextArea.Caret.Line);
@@ -60,6 +73,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
                 if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
                     return;
+
+                var previousUsabeToken = segment.PreviousOmit(t_whitespaces);
+                if(previousUsabeToken.Token == Token.KeyWord)
+                    return;
+
             } catch {
                 return;
             }

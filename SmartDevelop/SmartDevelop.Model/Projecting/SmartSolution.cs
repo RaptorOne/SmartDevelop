@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SmartDevelop.Model.StdLib;
+using SmartDevelop.Model.Errors;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -13,6 +14,7 @@ namespace SmartDevelop.Model.Projecting
         SmartCodeProject _current;
         List<SmartCodeProject> _projects = new List<SmartCodeProject>();
         string _name = "Default Solution";
+        IErrorService _errorService;
 
         #endregion
 
@@ -25,7 +27,13 @@ namespace SmartDevelop.Model.Projecting
         #endregion
 
         public SmartSolution() {
-           
+            _errorService = new ErrorService();
+        }
+
+        #region Properties
+
+        public IErrorService ErrorService {
+            get { return _errorService; }
         }
 
         /// <summary>
@@ -48,8 +56,13 @@ namespace SmartDevelop.Model.Projecting
             set { _name = value; }
         }
 
+        #endregion
+
+        #region Methods
+
         public void Add(SmartCodeProject p) {
             _projects.Add(p);
+            p.Solution = this;
             if(ProjectAdded != null)
                 ProjectAdded(this, new ProjectEventArgs(p));
 
@@ -59,6 +72,7 @@ namespace SmartDevelop.Model.Projecting
 
         public void Remove(SmartCodeProject p) {
             _projects.Remove(p);
+            p.Solution = null;
             if(ProjectAdded != null)
                 ProjectRemoved(this, new ProjectEventArgs(p));
         }
@@ -67,6 +81,7 @@ namespace SmartDevelop.Model.Projecting
             return new List<SmartCodeProject>(_projects);
         }
 
+        #endregion
     }
 
 

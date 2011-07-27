@@ -6,11 +6,15 @@ using SmartDevelop.Model.Projecting;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public interface ICodeObjectEx
+    public interface ICodeMemberEx : ICodeContext
     {
         bool IsHidden { get; }
         bool IsBuildInType { get; }
+    }
 
-        ProjectItemCode CodeDocumentItem { get; }
+    public interface ICodeContext
+    {
+        ProjectItemCode CodeDocumentItem { get; set; }
+        SmartCodeProject Project { get; set; }
     }
 }

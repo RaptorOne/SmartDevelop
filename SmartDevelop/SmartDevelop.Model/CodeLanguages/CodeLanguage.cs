@@ -9,6 +9,7 @@ using SmartDevelop.Model.Projecting;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Folding;
 using System.CodeDom;
+using SmartDevelop.Model.DOM.Types;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -45,6 +46,17 @@ namespace SmartDevelop.Model.CodeLanguages
                 get;
         }
 
+        /// <summary>
+        /// Specifies that a self reference can be omitted
+        /// eg:
+        /// this.Call()
+        /// Call()
+        /// </summary>
+        public bool SELFREF_CAN_BE_OMITTED = true;
+
+
+        public abstract StringComparison NameComparisation { get; }
+
         public abstract Tokenizer CreateTokenizer(ITextSource source);
 
         public abstract CodeDOMService CreateDOMService(SmartCodeProject codeProject);
@@ -53,7 +65,7 @@ namespace SmartDevelop.Model.CodeLanguages
             return HighlightingManager.Instance.GetDefinition(this.LanguageID);
         }
 
-        public abstract AbstractFoldingStrategy CreateFoldingStrategy();
+        public abstract AbstractFoldingStrategy CreateFoldingStrategy(SmartDevelop.Model.Tokening.DocumentCodeSegmentService segmentService);
 
         #region IEquatable
 

@@ -5,6 +5,7 @@ using System.Text;
 using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
+using SmartDevelop.AHK.AHKv1.Tokenizing;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -13,11 +14,15 @@ namespace SmartDevelop.AHK.AHKv1
     /// </summary>
     public static  class CodeLanguageAHKBuildinMethods
     {
+
+        static List<char> SpecailWordCharacters = new List<char> { '_' };
+
+
         public static IEnumerable<CodeTypeMember> ReadMembers() {
 
             var members = new List<CodeTypeMember>();
 
-            #region Read the build in Members
+            #region Create the build in Members Methods
 
             // for now we add some of the manualy for debug puposes
 
@@ -542,7 +547,309 @@ namespace SmartDevelop.AHK.AHKv1
 
             #endregion
 
+            #region Generate Properties
+
+            foreach(var prop in BuildInProperties()) {
+                var propr = new CodeMemberPropertyEx(true)
+                {
+                    Name = prop.Trim()
+                };
+                members.Add(propr);
+            }
+
+            #endregion
+
+            #region Generate build in Commands
+
+            foreach(var prop in BuildInCommands()) {
+
+                var commandStr = prop.Trim();
+                if(string.IsNullOrWhiteSpace(commandStr))
+                    continue;
+
+                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, 0, SpecailWordCharacters);
+
+                var propr = new CodeMemberMethodExAHK(true)
+                {
+                    Name = commandName,
+                    IsTraditionalCommand = true,
+                    IsDefaultMethodInvoke = false
+                };
+                members.Add(propr);
+            }
+
+            #endregion Generate build in Commands
+
             return members;
         }
+
+        static string[] BuildInProperties() {
+#region Rawstring
+            string propertyrawString =
+@"A_Ahkpath
+A_Ahkversion
+A_Appdata
+A_Appdatacommon
+A_Autotrim
+A_Batchlines
+A_Caretx
+A_Carety
+A_Computername
+A_Controldelay
+A_Cursor
+A_DD
+A_DDD
+A_DDDD
+A_Defaultmousespeed
+A_Desktop
+A_Desktopcommon
+A_Detecthiddentext
+A_Detecthiddenwindows
+A_Endchar
+A_Eventinfo
+A_Exitreason
+A_Formatfloat
+A_Formatinteger
+A_Gui
+A_Guievent
+A_Guicontrol
+A_Guicontrolevent
+A_Guiheight
+A_Guiwidth
+A_Guix
+A_Guiy
+A_Hour
+A_Iconfile
+A_Iconhidden
+A_Iconnumber
+A_Icontip
+A_Index
+A_Ipaddress1
+A_Ipaddress2
+A_Ipaddress3
+A_Ipaddress4
+A_Isadmin
+A_Iscompiled
+A_Issuspended
+A_Keydelay
+A_Language
+A_Lasterror
+A_Linefile
+A_Linenumber
+A_Loopfield
+A_Loopfileattrib
+A_Loopfiledir
+A_Loopfileext
+A_Loopfilefullpath
+A_Loopfilelongpath
+A_Loopfilename
+A_Loopfileshortname
+A_Loopfileshortpath
+A_Loopfilesize
+A_Loopfilesizekb
+A_Loopfilesizemb
+A_Loopfiletimeaccessed
+A_Loopfiletimecreated
+A_Loopfiletimemodified
+A_Loopreadline
+A_Loopregkey
+A_Loopregname
+A_Loopregsubkey
+A_Loopregtimemodified
+A_Loopregtype
+A_Mday
+A_Min
+A_Mm
+A_Mmm
+A_Mmmm
+A_Mon
+A_Mousedelay
+A_Msec
+A_Mydocuments
+A_Now
+A_Nowutc
+A_Numbatchlines
+A_Ostype
+A_Osversion
+A_Priorhotkey
+A_Programfiles
+A_Programs
+A_Programscommon
+A_Screenheight
+A_Screenwidth
+A_Scriptdir
+A_Scriptfullpath
+A_Scriptname
+A_Sec
+A_Space
+A_Startmenu
+A_Startmenucommon
+A_Startup
+A_Startupcommon
+A_Stringcasesense
+A_Tab
+A_Temp
+A_Thishotkey
+A_Thismenu
+A_Thismenuitem
+A_Thismenuitempos
+A_Tickcount
+A_Timeidle
+A_Timeidlephysical
+A_Timesincepriorhotkey
+A_Timesincethishotkey
+A_Titlematchmode
+A_Titlematchmodespeed
+A_Username
+A_Wday
+A_Windelay
+A_Windir
+A_Workingdir
+A_Yday
+A_Year
+A_Yweek
+A_YYYY
+Clipboard
+Clipboardall
+Comspec
+Errorlevel
+Programfiles
+True
+False
+A_Thisfunc
+A_Thislabel
+A_Ispaused
+A_Iscritical
+A_Isunicode
+A_Ptrsize";
+#endregion
+            return propertyrawString.Split('\n');
+        }
+
+        static string[] BuildInCommands() {
+            string str =
+@"
+ImageSearch , OutputVarX, OutputVarY, X1, Y1, X2, Y2, ImageFile
+IniDelete , Filename, Section [, Key]
+IniRead , OutputVar, Filename [, Section, Key, Default]\n(The Section and Key parameters are only optional on AutoHotkey_L)
+IniWrite , Value, Filename, Section [, Key]\n(The Key parameter is only optional on AutoHotkey_L)
+Input [, OutputVar, Options, EndKeys, MatchList]
+InputBox , OutputVar [, Title, Prompt, HIDE, Width, Height, X, Y, Font, Timeout, Default]
+KeyHistory
+KeyWait , KeyName [, Options]
+ListHotkeys
+ListLines
+ListVars
+Loop [, Count]\nLoop, FilePattern [, IncludeFolders?, Recurse?]\nLoop, Parse, InputVar [, Delimiters|CSV, OmitChars]\nLoop, Read, InputFile [, OutputFile]\nLoop, HKLM|HKU|HKCU|HKCR|HKCC [, Key, IncludeSubkeys?, Recurse?]\n{\n	commands\n}\nPerforms a repetition/file/file reading/parsing/registry loop.
+Menu , MenuName, Cmd [, P3, P4, P5]
+MouseClick , WhichButton [, X, Y, ClickCount, Speed, D|U, R]
+MouseClickDrag , WhichButton, X1, Y1, X2, Y2 [, Speed, R]
+MouseGetPos [, OutputVarX, OutputVarY, OutputVarWin, OutputVarControl, 1|2|3]
+MouseMove , X, Y [, Speed, R]
+MsgBox [, Options, Title, Text, Timeout]\nDisplays the specified text in a small window containing one or more buttons  (such as Yes and No).
+OnExit [, Label]
+OutputDebug , Text
+Pause [, On|Off|Toggle, OperateOnUnderlyingThread?]
+PixelGetColor , OutputVar, X, Y [, Alt|Slow|RGB]
+PixelSearch , OutputVarX, OutputVarY, X1, Y1, X2, Y2, ColorID [, Variation, Fast|RGB]
+PostMessage , Msg [, wParam, lParam, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+Process , Cmd, PID-or-Name [, Param3]
+Progress , Param1 [, SubText, MainText, WinTitle, FontName]
+Random , OutputVar [, Min, Max]
+RegDelete , HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
+RegRead , OutputVar, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
+RegWrite , REG_SZ|REG_EXPAND_SZ|REG_MULTI_SZ|REG_DWORD|REG_BINARY, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName, Value]
+Reload
+return [, Expression]
+Run , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
+RunAs [, User, Password, Domain] 
+RunWait , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
+Send , Keys
+SendEvent , Keys
+SendInput , Keys
+SendMessage , Msg [, wParam, lParam, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+SendMode , Event|Play|Input|InputThenPlay
+SendPlay , Keys
+SendRaw , Keys
+SetBatchLines , -1 | 20ms | LineCount
+SetCapsLockState , On|Off|AlwaysOn|AlwaysOff
+SetControlDelay , Delay
+SetDefaultMouseSpeed , Speed
+SetEnv , Var, Value
+SetFormat , float|integer, TotalWidth.DecimalPlaces|hex|d
+SetKeyDelay [, Delay, PressDuration]
+SetMouseDelay , Delay
+SetNumLockState , On|Off|AlwaysOn|AlwaysOff
+SetScrollLockState , On|Off|AlwaysOn|AlwaysOff
+SetStoreCapslockMode , On|Off
+SetTimer , Label [, Period|On|Off]
+SetTitleMatchMode , Fast|Slow|RegEx|1|2|3
+SetWinDelay , Delay
+SetWorkingDir , DirName
+Shutdown , Code
+Sleep , Delay
+Sort , VarName [, Options]
+SoundBeep [, Frequency, Duration]
+SoundGet , OutputVar [, ComponentType, ControlType, DeviceNumber]
+SoundGetWaveVolume , OutputVar [, DeviceNumber]
+SoundPlay , Filename [, wait]
+SoundSet , NewSetting [, ComponentType, ControlType, DeviceNumber]
+SoundSetWaveVolume , Percent [, DeviceNumber]
+SplashImage [, ImageFile, Options, SubText, MainText, WinTitle, FontName]
+SplashTextOff
+SplashTextOn [, Width, Height, Title, Text]
+SplitPath , InputVar [, OutFileName, OutDir, OutExtension, OutNameNoExt, OutDrive]
+StatusBarGetText , OutputVar [, Part#, WinTitle, WinText, ExcludeTitle, ExcludeText]
+StatusBarWait [, BarText, Seconds, Part#, WinTitle, WinText, Interval, ExcludeTitle, ExcludeText]
+StringCaseSense , On|Off|Locale
+StringGetPos , OutputVar, InputVar, SearchText [, L#|R#, Offset]
+StringLeft , OutputVar, InputVar, Count
+StringLen , OutputVar, InputVar
+StringLower , OutputVar, InputVar [, T]
+StringMid , OutputVar, InputVar, StartChar [, Count, L]
+StringReplace , OutputVar, InputVar, SearchText [, ReplaceText, All]
+StringRight , OutputVar, InputVar, Count
+StringSplit , OutputArray, InputVar [, Delimiters, OmitChars]
+StringTrimLeft , OutputVar, InputVar, Count
+StringTrimRight , OutputVar, InputVar, Count
+StringUpper , OutputVar, InputVar [, T]
+Suspend [, On|Off|Toggle|Permit]
+SysGet , OutputVar, Sub-command [, Param3]
+Thread , Setting, P2 [, P3]
+ToolTip [, Text, X, Y, WhichToolTip]
+Transform , OutputVar, Cmd, Value1 [, Value2]
+TrayTip [, Title, Text, Seconds, Options]
+until Expression \n[AutoHotkey_L]
+URLDownloadToFile , URL, Filename
+while Expression
+WinActivate [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinActivateBottom [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinClose [, WinTitle, WinText, SecondsToWait, ExcludeTitle, ExcludeText]
+WinGet , OutputVar [, Cmd, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinGetActiveStats , Title, Width, Height, X, Y
+WinGetActiveTitle , OutputVar
+WinGetClass , OutputVar [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinGetPos [, X, Y, Width, Height, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinGetText , OutputVar [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinGetTitle , OutputVar [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinHide [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinKill [, WinTitle, WinText, SecondsToWait, ExcludeTitle, ExcludeText]
+WinMaximize [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinMenuSelectItem , WinTitle, WinText, Menu [, SubMenu1, SubMenu2, SubMenu3, SubMenu4, SubMenu5, SubMenu6, ExcludeTitle, ExcludeText]
+WinMinimize [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinMinimizeAll
+WinMinimizeAllUndo
+WinMove , WinTitle, WinText, X, Y [, Width, Height, ExcludeTitle, ExcludeText]
+WinRestore [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinSet , AlwaysOnTop|Trans, On|Off|Toggle|Value(0-255) [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinSetTitle , WinTitle, WinText, NewTitle [, ExcludeTitle, ExcludeText]
+WinShow [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+WinWait , WinTitle, WinText, Seconds [, ExcludeTitle, ExcludeText]
+WinWaitActive [, WinTitle, WinText, Seconds, ExcludeTitle, ExcludeText]
+WinWaitClose , WinTitle, WinText, Seconds [, ExcludeTitle, ExcludeText]
+WinWaitNotActive [, WinTitle, WinText, Seconds, ExcludeTitle, ExcludeText]";
+            return str.Split('\n');
+        }
+
     }
 }

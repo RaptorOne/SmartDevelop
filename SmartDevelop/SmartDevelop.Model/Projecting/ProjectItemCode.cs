@@ -12,6 +12,8 @@ using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Services;
 using SmartDevelop.TokenizerBase;
 using Archimedes.Patterns;
+using System.Windows.Forms;
+using Archimedes.Patterns.Utils;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -34,7 +36,11 @@ namespace SmartDevelop.Model.Projecting
         bool _documentdirty = false;
         bool _isModified = false;
 
+        string _name;
+
         #endregion
+
+        #region Events
 
         public event EventHandler RequestShowDocument;
 
@@ -44,6 +50,8 @@ namespace SmartDevelop.Model.Projecting
         public event EventHandler RequestTextInvalidation;
 
         public event EventHandler HasUnsavedChangesChanged;
+
+        #endregion
 
         #region Constructors
 
@@ -119,12 +127,12 @@ namespace SmartDevelop.Model.Projecting
         public override string Name {
             get {
                 if(string.IsNullOrEmpty(FilePath)) {
-                    return "New Item";
+                    return _name ?? "unknown";
                 } else {
                     return Path.GetFileName(FilePath);
                 }
             }
-            set { }
+            set { _name = value; }
         }
 
         #region Save the document
@@ -152,15 +160,25 @@ namespace SmartDevelop.Model.Projecting
         }
 
         /// <summary>
-        /// Saves the text to the file.
+        /// Saves the text to the file and updates filepath and HasUnsavedChanges.
         /// </summary>
         public void Save(string fileName) {
-            if(fileName == null)
-                throw new ArgumentNullException("fileName");
+            ThrowUtil.ThrowIfNull(fileName);
+            if(FilePath != fileName) {
+                FilePath = fileName;
+            }
+            SaveAs(fileName);
+
+            HasUnsavedChanges = false;
+        }
+
+
+        public void SaveAs(string fileName) {
+            ThrowUtil.ThrowIfNull(fileName);
+
             using(FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)) {
                 Save(fs);
             }
-            HasUnsavedChanges = false;
         }
 
         #endregion
@@ -213,10 +231,9 @@ namespace SmartDevelop.Model.Projecting
 
         public bool HasUnsavedChanges { 
             get { return _isModified; } 
-            private set {
+            protected set {
                 if(_isModified == value)
                     return;
-
                 _isModified = value;
                 if(HasUnsavedChangesChanged != null)
                     HasUnsavedChangesChanged(this, EventArgs.Empty);
@@ -226,6 +243,25 @@ namespace SmartDevelop.Model.Projecting
         public override string ToString() {
             return string.Format("{0} ({1})", this.Name);
 
+        }
+
+        public void QuickSave() {
+            if(!string.IsNullOrWhiteSpace(this.FilePath))
+                this.Save(this.FilePath);
+            else {
+
+                var saver = new SaveFileDialog()
+                {
+                    FileName = this.Name,
+                    Filter =  "Code Files|*" + CodeLanguage.Extensions.First(),
+                    Title = "Select a Script File",
+                    AddExtension = true
+                };
+
+                if(saver.ShowDialog() == DialogResult.OK) {
+                    this.Save(saver.FileName);
+                }
+            }
         }
     }
 }

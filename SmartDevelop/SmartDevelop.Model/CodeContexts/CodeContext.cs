@@ -27,7 +27,7 @@ namespace SmartDevelop.Model.CodeContexts
             var members = new List<CodeTypeMember>();
 
             members.AddRange(from m in CodeDOMService.RootType.Members.Cast<CodeTypeMember>() 
-                             let mimp = m as ICodeObjectEx
+                             let mimp = m as ICodeMemberEx
                              where mimp == null || !mimp.IsHidden
                              select m);
 

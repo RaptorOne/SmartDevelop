@@ -2,6 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
+        xmlns:errorsV="clr-namespace:SmartDevelop.View.Errors"
+        xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
         xmlns:my="clr-namespace:SmartDevelop.View.Projecting"
         Title="SmartDevelop" Height="388" Width="642" >
     <Grid>
@@ -75,9 +77,22 @@
                     </ad:DockableContent>
                 </ad:DockablePane>
 
-                <ad:DocumentPane x:Name="mainDocumentPane">
-                    <!-- contains all Documents -->
-                </ad:DocumentPane>
+                <ad:ResizingPanel Orientation="Vertical">
+
+                    <ad:DocumentPane x:Name="mainDocumentPane">
+                        <!-- contains all Documents -->
+                    </ad:DocumentPane>
+
+                    <ad:DockablePane ad:ResizingPanel.ResizeHeight="100">
+                        <ad:DockableContent Title="Errors" x:Name="errorsContent">
+                            <errorsV:ErrorListView DataContext="{Binding Path=ErrorListVM, Source={x:Static localviewModel:Globals.MainVM}}" />
+                        </ad:DockableContent>
+                        <ad:DockableContent Title="Output" x:Name="output">
+                            <TextBox IsReadOnly="True" AcceptsReturn="True"/>
+                        </ad:DockableContent>
+                    </ad:DockablePane>
+
+                </ad:ResizingPanel>
 
                 <ad:DockablePane x:Name="toolsRightPane" ad:ResizingPanel.ResizeWidth="200">
                     <ad:DockableContent x:Name="ProjectExplorerContent" Title="Solution" IsCloseable="False">
@@ -87,6 +102,8 @@
 
             </ad:ResizingPanel>
         </ad:DockingManager>
+        
+        <ToolBar Grid.Row="2"/>
 
     </Grid>
 </Window>

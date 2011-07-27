@@ -7,8 +7,8 @@ namespace SmartDevelop.TokenizerBase
 {
     public class CodeError
     {
-        public string Message { get; set; }
+        public string Description { get; set; }
 
-        public bool HasError { get { return Message != null; } }
+        public bool HasError { get { return Description != null; } }
     }
 }

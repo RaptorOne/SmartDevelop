@@ -34,6 +34,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,10 +55,16 @@
     <Compile Include="DOM\Ranges\CodeRangeManager.cs" />
     <Compile Include="DOM\ShuntingYardExpressionParser.cs" />
     <Compile Include="DOM\Types\CodeMemberMethodEx.cs" />
+    <Compile Include="DOM\Types\CodeMemberPropertyEx.cs" />
     <Compile Include="DOM\Types\CodeMethodReferenceExpressionEx.cs" />
     <Compile Include="DOM\Types\CodeTypeDeclarationEx.cs" />
     <Compile Include="DOM\Types\CodeTypeReferenceEx.cs" />
+    <Compile Include="DOM\Types\CodePropertyReferenceExpressionEx.cs" />
+    <Compile Include="DOM\Types\CodeTypeDeclarationDynamic.cs" />
     <Compile Include="DOM\Types\ICodeObjectEx.cs" />
+    <Compile Include="Errors\ErrorItem.cs" />
+    <Compile Include="Errors\ErrorService.cs" />
+    <Compile Include="Errors\IErrorService.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCode.cs" />

@@ -22,21 +22,21 @@ namespace SmartDevelop.Model.StdLib
             SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language); // TODO 
 
             var stdlibFolder = new ProjectItemFolder("StdLib", demoProject);
-            var dir = (Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64);
-            if(Directory.Exists(dir)) {
-                foreach(var file in Directory.GetFiles(dir)) {
-                    if(demoProject.Language.Extensions.Contains(Path.GetExtension(file))) {
-                        var codeItem = ProjectItemCode.FromFile(file, demoProject);
-                        if(codeItem != null)
-                            stdlibFolder.Add(codeItem);
-                    }
-                }
-            }
+            //var dir = (Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64);
+            //if(Directory.Exists(dir)) {
+            //    foreach(var file in Directory.GetFiles(dir)) {
+            //        if(demoProject.Language.Extensions.Contains(Path.GetExtension(file))) {
+            //            var codeItem = ProjectItemCode.FromFile(file, demoProject);
+            //            if(codeItem != null)
+            //                stdlibFolder.Add(codeItem);
+            //        }
+            //    }
+            //}
             demoProject.Add(stdlibFolder);
 
             var testFolder = new ProjectItemFolder("Test", demoProject);
             demoProject.Add(testFolder);
-            var dp = new ProjectItemCode(language, testFolder);
+            var dp = new ProjectItemCode(language, testFolder) { Name = "DemoFile.ahk" };
             testFolder.Add(dp);
             dp.Document.Text = InitialDemoCode();
 

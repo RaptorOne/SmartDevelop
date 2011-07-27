@@ -37,9 +37,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
             foreach(var segment in codeline.CodeSegments) {
 
 
-                if(segment.HasError) {
-                    HandleSegmentError(segment);
-                } else if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+                if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
                    
                         var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
                         if(methodRef.ResolvedMethodMember != null) {

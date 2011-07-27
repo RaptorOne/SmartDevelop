@@ -95,49 +95,6 @@ namespace SmartDevelop
             // and register the languages manually
             langserv.Register(new CodeLanguageAHKv1());
 
-
-            
-            IHighlightingDefinition customHighlighting;
-
-            // ToDo: Load syntaxfiles dynamically....
-
-            #region AHK
-
-            var sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\Autohotkey.xshd"));
-            using(var reader = new XmlTextReader(sr)) {
-                customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
-                    HighlightingLoader.Load(reader, HighlightingManager.Instance);
-            }
-            HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);
-
-            #endregion
-
-            #region IA
-
-            Brush b = new SolidColorBrush(Colors.GreenYellow);
-            var brushchen = new HighlightingBrushStaticColor(b);
-
-            sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\IronAHK.xshd"));
-            using(var reader = new XmlTextReader(sr)) {
-                customHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.
-                    HighlightingLoader.Load(reader, HighlightingManager.Instance);
-            }
-
-            //Add custom but static highligning rules
-            // test example -->
-            customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
-            {
-                Color = new HighlightingColor()
-                {
-                    Foreground = brushchen
-                },
-                Regex = new System.Text.RegularExpressions.Regex("SubStr")
-            });
-            //<----
-            HighlightingManager.Instance.RegisterHighlighting("IA", new string[] { ".ia" }, customHighlighting);
-
-            #endregion
-             
         }
 
     }
