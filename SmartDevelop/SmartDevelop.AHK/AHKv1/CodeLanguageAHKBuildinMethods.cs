@@ -740,7 +740,6 @@ KeyWait , KeyName [, Options]
 ListHotkeys
 ListLines
 ListVars
-Loop [, Count]\nLoop, FilePattern [, IncludeFolders?, Recurse?]\nLoop, Parse, InputVar [, Delimiters|CSV, OmitChars]\nLoop, Read, InputFile [, OutputFile]\nLoop, HKLM|HKU|HKCU|HKCR|HKCC [, Key, IncludeSubkeys?, Recurse?]\n{\n	commands\n}\nPerforms a repetition/file/file reading/parsing/registry loop.
 Menu , MenuName, Cmd [, P3, P4, P5]
 MouseClick , WhichButton [, X, Y, ClickCount, Speed, D|U, R]
 MouseClickDrag , WhichButton, X1, Y1, X2, Y2 [, Speed, R]
@@ -760,7 +759,6 @@ RegDelete , HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
 RegRead , OutputVar, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
 RegWrite , REG_SZ|REG_EXPAND_SZ|REG_MULTI_SZ|REG_DWORD|REG_BINARY, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName, Value]
 Reload
-return [, Expression]
 Run , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
 RunAs [, User, Password, Domain] 
 RunWait , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
@@ -819,7 +817,6 @@ Thread , Setting, P2 [, P3]
 ToolTip [, Text, X, Y, WhichToolTip]
 Transform , OutputVar, Cmd, Value1 [, Value2]
 TrayTip [, Title, Text, Seconds, Options]
-until Expression \n[AutoHotkey_L]
 URLDownloadToFile , URL, Filename
 while Expression
 WinActivate [, WinTitle, WinText, ExcludeTitle, ExcludeText]
@@ -847,7 +844,74 @@ WinShow [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 WinWait , WinTitle, WinText, Seconds [, ExcludeTitle, ExcludeText]
 WinWaitActive [, WinTitle, WinText, Seconds, ExcludeTitle, ExcludeText]
 WinWaitClose , WinTitle, WinText, Seconds [, ExcludeTitle, ExcludeText]
-WinWaitNotActive [, WinTitle, WinText, Seconds, ExcludeTitle, ExcludeText]";
+WinWaitNotActive [, WinTitle, WinText, Seconds, ExcludeTitle, ExcludeText]
+AutoTrim , On|Off
+BlockInput , On|Off|Send|Mouse|SendAndMouse|Default|MouseMove|MouseMoveOff
+Click
+ClipWait [, SecondsToWait, 1]
+Control , Cmd [, Value, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlClick [, Control-or-Pos, WinTitle, WinText, WhichButton, ClickCount, Options, ExcludeTitle, ExcludeText]
+ControlFocus [, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlGet , OutputVar, Cmd [, Value, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlGetFocus , OutputVar [WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlGetPos [, X, Y, Width, Height, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlGetText , OutputVar [, Control, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlMove , Control, X, Y, Width, Height [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlSend [, Control, Keys, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlSendRaw [, Control, Keys, WinTitle, WinText, ExcludeTitle, ExcludeText]
+ControlSetText , Control, NewText [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+CoordMode , ToolTip|Pixel|Mouse [, Screen|Relative]
+Critical [, Off]
+DetectHiddenText , On|Off
+DetectHiddenWindows , On|Off
+Drive , Sub-command [, Drive , Value]
+DriveGet , OutputVar, Cmd [, Value]
+DriveSpaceFree , OutputVar, C:\\
+Edit
+EnvAdd , Var, Value [, TimeUnits]
+EnvDiv , Var, Value
+EnvGet , OutputVar, EnvVarName
+EnvMult , Var, Value
+EnvSet , EnvVar, Value
+EnvSub , Var, Value [, TimeUnits]
+EnvUpdate
+Exit [, ExitCode]
+ExitApp [, ExitCode]
+FileAppend [, Text, Filename, Encoding] \n(The encoding parameter is AutoHotkeyU-exclusive)
+FileCopy , Source, Dest [, Flag (1 = overwrite)]
+FileCopyDir , Source, Dest [, Flag]
+FileCreateDir , Path
+FileCreateShortcut , Target, C:\\My Shortcut.lnk [, WorkingDir, Args, Description, IconFile, ShortcutKey, IconNumber, RunState]
+FileDelete , FilePattern
+FileGetAttrib , OutputVar(RASHNDOCT) [, Filename]
+FileGetShortcut , LinkFile [, OutTarget, OutDir, OutArgs, OutDescription, OutIcon, OutIconNum, OutRunState]
+FileGetSize , OutputVar [, Filename, Units]
+FileGetTime , OutputVar [, Filename, WhichTime (M, C, or A -- default is M)]
+FileGetVersion , OutputVar [, Filename]
+FileInstall , Source, Dest [, Flag (1 = overwrite)]
+FileMove , Source, Dest [, Flag (1 = overwrite)]
+FileMoveDir , Source, Dest [, Flag (2 = overwrite)]
+FileRead , OutputVar, Filename
+FileReadLine , OutputVar, Filename, LineNum
+FileRecycle , FilePattern
+FileRecycleEmpty [, C:\\]
+FileRemoveDir , Path [, Recurse? (1 = yes)]
+FileSelectFile , OutputVar [, Options, RootDir[\\DefaultFilename], Prompt, Filter]
+FileSelectFolder , OutputVar [, *StartingFolder, Options, Prompt]
+FileSetAttrib , Attributes(+-^RASHNOT) [, FilePattern, OperateOnFolders?, Recurse?]
+FileSetTime [, YYYYMMDDHH24MISS, FilePattern, WhichTime (M|C|A), OperateOnFolders?, Recurse?]
+FormatTime , OutputVar [, YYYYMMDDHH24MISS, Format]
+GetKeyState , OutputVar, WhichKey [, Mode (P|T)]
+gosub , Label\nJumps to the specified label and continues execution until Return is encountered.
+goto , Label\nJumps to the specified label and continues execution.
+GroupActivate , GroupName [, R]
+GroupAdd , GroupName, WinTitle [, WinText, Label, ExcludeTitle, ExcludeText]
+GroupClose , GroupName [, A|R]
+GroupDeactivate , GroupName [, R]
+Gui , sub-command [, Param2, Param3, Param4]
+GuiControl , Sub-command, ControlID [, Param3]
+GuiControlGet , OutputVar [, Sub-command, ControlID, Param4]
+Hotkey , KeyName [, Label, Options]";
             return str.Split('\n');
         }
 

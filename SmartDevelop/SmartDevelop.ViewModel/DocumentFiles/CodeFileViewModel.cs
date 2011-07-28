@@ -14,6 +14,7 @@ using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.ViewModel.BackgroundRenderer;
 using SmartDevelop.ViewModel.TextTransformators;
+using SmartDevelop.Model.CodeLanguages.Extensions;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -26,8 +27,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         FoldingManager _foldingManager;
         AbstractFoldingStrategy _foldingStrategy;
         readonly IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
-        CompletionDataProvider _completionDataProvider;
-        bool foldingDirty = true;
+        bool _foldingDirty = true;
+        IEnumerable<EditorDocumentExtension> _extensions;
 
         #endregion
 
@@ -49,8 +50,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             return vm;
         }
-
-
+        
+        /// <summary>
+        /// Internal Constructor
+        /// </summary>
+        /// <param name="projectitem"></param>
         CodeFileViewModel(ProjectItemCode projectitem) {
 
             if(projectitem == null)
@@ -76,15 +80,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
 
-
-            _completionDataProvider = new CompletionDataProvider(_texteditor, _projectitem);
+            var _extensions = projectitem.CodeLanguage.CreateExtensionsForCodeDocument(_texteditor, _projectitem);
 
             _texteditor.MouseHover += TextEditorMouseHover;
             _texteditor.MouseHoverStopped += TextEditorMouseHoverStopped;
 
-            _texteditor.TextArea.TextEntered += (s, e) => {
-                _completionDataProvider.OnTextEntered(s, e);
-                };
+
             _texteditor.TextArea.TextEntering += OnTextEntering;
 
             _texteditor.TextArea.IndentationStrategy = new IAIndentationStrategy();
@@ -223,7 +224,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
 
         void OnDocumentTextChanged(object sender, EventArgs e) {
-            foldingDirty = true;
+            _foldingDirty = true;
         }
 
         void OnIsModifiedChanged(object sender, EventArgs e) {
@@ -235,13 +236,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
-            if(e.Text.Length > 0 && _completionDataProvider.CompletionWindow != null) {
-                if(!char.IsLetterOrDigit(e.Text[0])) {
-                    // Whenever a non-letter is typed while the completion window is open,
-                    // insert the currently selected element.
-                    _completionDataProvider.CompletionWindow.CompletionList.RequestInsertion(e);
-                }
-            }
             _toolTip.IsOpen = false;
             // Do not set e.Handled=true.
             // We still want to insert the character that was typed.
@@ -284,12 +278,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
             try {
-                if(foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
-                    foldingDirty = false;
+                if(_foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
+                    _foldingDirty = false;
                     _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
                 }
             } catch {
-                foldingDirty = true;
+                _foldingDirty = true;
             }
         }
 

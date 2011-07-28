@@ -32,8 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,6 +44,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AHKv1\CodeCompletion\CompletionDataProviderAHK.cs" />
     <Compile Include="AHKv1\CodeLanguageAHKBuildinMethods.cs" />
     <Compile Include="AHKv1\CodeLanguageAHKv1.cs" />
     <Compile Include="AHKv1\DOM\CodeDOMServiceIA.cs" />
@@ -75,6 +78,10 @@
     <ProjectReference Include="..\SmartDevelop.TokenizerBase\SmartDevelop.TokenizerBase.csproj">
       <Project>{DFACD34A-B3D0-4C45-BE90-ABBFF75979C9}</Project>
       <Name>SmartDevelop.TokenizerBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SmartDevelop.ViewModel\SmartDevelop.ViewModel.csproj">
+      <Project>{F658A346-3514-4D78-8CC0-12B99AD3ED5B}</Project>
+      <Name>SmartDevelop.ViewModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -704,7 +704,7 @@ namespace SmartDevelop.Model.DOM
 
 
                 //find closing bracket:
-                var closing = tokenSegment.Next.FindClosingBracked(false);
+                var closing = tokenSegment.Next.FindClosingBracked(true);
                 if(closing == null)
                     RegisterError(codeitem, tokenSegment.Next, "Missing: )");
 

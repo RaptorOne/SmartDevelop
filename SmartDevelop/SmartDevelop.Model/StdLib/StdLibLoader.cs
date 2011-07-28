@@ -22,7 +22,7 @@ namespace SmartDevelop.Model.StdLib
             SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language); // TODO 
 
             var stdlibFolder = new ProjectItemFolder("StdLib", demoProject);
-            //var dir = (Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64);
+            var dir = (Directory.Exists(AHK_STDLIB) ? AHK_STDLIB : AHK_STDLIB_x64);
             //if(Directory.Exists(dir)) {
             //    foreach(var file in Directory.GetFiles(dir)) {
             //        if(demoProject.Language.Extensions.Contains(Path.GetExtension(file))) {

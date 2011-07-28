@@ -2,37 +2,47 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Input;
 using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Projecting;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using SmartDevelop.TokenizerBase;
+using Archimedes.Patterns.Utils;
+using System.Windows.Input;
+using SmartDevelop.ViewModel.CodeCompleting;
 using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
-using SmartDevelop.ViewModel.CodeCompleting;
-using Archimedes.Patterns.Utils;
-using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.CodeLanguages.Extensions;
 
-namespace SmartDevelop.ViewModel.DocumentFiles
+namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
-    public class CompletionDataProvider
+    public class CompletionDataProviderAHK : EditorDocumentExtension
     {
         #region Fields
 
-        readonly TextEditor _texteditor;
-        readonly ProjectItemCode _projectitem;
+        TextEditor _texteditor;
+        ProjectItemCode _projectitem;
         CompletionWindow _completionWindow;
 
         #endregion
+
+        #region Static Char Definitions
 
         static List<char> whitespacesNewLine = new List<char> { ' ', '\t', '\n', '\r' };
         static List<char> whitespaces = new List<char> { ' ', '\t' };
         static List<Token> t_whitespaces = new List<Token> { Token.WhiteSpace };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
 
+        #endregion
 
-        public CompletionDataProvider(TextEditor texteditor, ProjectItemCode projectitem) {
+        public CompletionDataProviderAHK(TextEditor texteditor, ProjectItemCode projectitem) {
+            ThrowUtil.ThrowIfNull(texteditor);
+            ThrowUtil.ThrowIfNull(projectitem);
+
             _texteditor = texteditor;
             _projectitem = projectitem;
+
+            _texteditor.TextArea.TextEntered += OnTextEntered;
+            _texteditor.TextArea.TextEntering += OnTextEntering;
         }
 
         CompletionWindow CreateNewCompletionWindow() {
@@ -44,12 +54,21 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             return _completionWindow;
         }
 
+        #region Event Handlers
 
-        public CompletionWindow CompletionWindow {
-            get { return _completionWindow; }
+        void OnTextEntering(object sender, TextCompositionEventArgs e) {
+            if(e.Text.Length > 0 && _completionWindow != null) {
+                if(!char.IsLetterOrDigit(e.Text[0])) {
+                    // Whenever a non-letter is typed while the completion window is open,
+                    // insert the currently selected element.
+                    _completionWindow.CompletionList.RequestInsertion(e);
+                }
+            }
+            // We still want to insert the character that was typed.
         }
 
-        public void OnTextEntered(object sender, TextCompositionEventArgs e) {
+        
+        void OnTextEntered(object sender, TextCompositionEventArgs e) {
             char beforeChar;
             char currentChar;
             char carretChar;
@@ -58,7 +77,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             try {
                 currentChar = e.Text[0];
 
-                if(_texteditor.CaretOffset > 1){
+                if(_texteditor.CaretOffset > 1) {
                     beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
                     if(!(beforeChar == ' ' || beforeChar == '\t'))
                         return;
@@ -105,7 +124,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         }
                     } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
                         foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
-                            
+
                             var td = basetype.ResolveTypeDeclarationCache();
                             if(td != null) {
                                 foreach(var m in td.GetInheritedMembers())
@@ -164,6 +183,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 }
             }
         }
+#endregion
+
+        #region Helper Methods
 
         IEnumerable<CompletionItem> GetStaticCompletionItems() {
             var it = CompletionCache.Instance[_projectitem.CodeLanguage];
@@ -176,5 +198,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             }
             return it.GetAllStaticCompletionItems();
         }
+
+        #endregion
+
+
     }
 }

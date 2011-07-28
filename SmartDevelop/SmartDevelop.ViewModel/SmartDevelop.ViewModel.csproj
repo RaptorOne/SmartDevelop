@@ -55,7 +55,6 @@
     <Compile Include="CodeCompleting\CompletionItemProperty.cs" />
     <Compile Include="CodeCompleting\CompletionItemField.cs" />
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
-    <Compile Include="DocumentFiles\CompletionDataProvider.cs" />
     <Compile Include="Errors\ErrorListItemVM.cs" />
     <Compile Include="Errors\ErrorListViewModel.cs" />
     <Compile Include="Globals.cs" />

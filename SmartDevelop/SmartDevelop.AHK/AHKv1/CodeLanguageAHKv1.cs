@@ -18,6 +18,10 @@ using System.Xml;
 using System.Windows.Media;
 using SmartDevelop.Model.Highlighning;
 using System.Text.RegularExpressions;
+using SmartDevelop.AHK.AHKv1.CodeCompletion;
+using ICSharpCode.AvalonEdit;
+using SmartDevelop.Model.Projecting;
+using SmartDevelop.Model.CodeLanguages.Extensions;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -118,6 +122,12 @@ namespace SmartDevelop.AHK.AHKv1
 
         public override StringComparison NameComparisation {
             get { return StringComparison.InvariantCultureIgnoreCase; }
+        }
+
+        public override IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCode projectitem) {
+            var extes = new List<EditorDocumentExtension>();
+            extes.Add(new CompletionDataProviderAHK(texteditor, projectitem));
+            return extes;
         }
 
     }
