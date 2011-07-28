@@ -5,13 +5,13 @@ using System.Text;
 using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Projecting;
 using ICSharpCode.AvalonEdit.CodeCompletion;
-using SmartDevelop.TokenizerBase;
 using Archimedes.Patterns.Utils;
 using System.Windows.Input;
 using SmartDevelop.ViewModel.CodeCompleting;
 using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages.Extensions;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
@@ -142,7 +142,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                     if(segment == null) {
                         return;
                     } else {
-                        if(segment.Token == TokenizerBase.Token.MultiLineComment || segment.Token == TokenizerBase.Token.SingleLineComment)
+                        if(segment.Token == Token.MultiLineComment || segment.Token == Token.SingleLineComment)
                             return;
                     }
 

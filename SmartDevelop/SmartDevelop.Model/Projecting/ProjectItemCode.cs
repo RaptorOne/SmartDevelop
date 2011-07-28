@@ -14,6 +14,7 @@ using SmartDevelop.TokenizerBase;
 using Archimedes.Patterns;
 using System.Windows.Forms;
 using Archimedes.Patterns.Utils;
+using SmartDevelop.Model.Tokenizing;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -42,7 +43,7 @@ namespace SmartDevelop.Model.Projecting
 
         #region Events
 
-        public event EventHandler RequestShowDocument;
+        public event EventHandler<EventArgs<int>> RequestTextPosition;
 
         /// <summary>
         /// 
@@ -96,12 +97,12 @@ namespace SmartDevelop.Model.Projecting
             _codedocument.Changed += OnCodedocumentChanged;
 
             _codeSegmentService = new DocumentCodeSegmentService(this);
-            _tokenizer = _language.CreateTokenizer(_codedocument);
+            _tokenizer = _language.CreateTokenizer(this, _codedocument);
 
             _tokenizer.Finished += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
 
-                // notify that we have a new token base to parse
+                //// notify that we have a new token base to parse
                 OnTokenizerUpdated(this, new EventArgs<ProjectItemCode>(this));
                 OnRequestTextInvalidation();
             };
@@ -114,28 +115,61 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        public string FilePath {
-            get;
-            set;
+        /// <summary>
+        /// Request that this document is shown in the editor view
+        /// </summary>
+        public void ShowDocument() {
+            var p = this.Project;
+            if(p == null)
+                throw new NotSupportedException("Must be atached to a project to use this Method");
+            p.ShowDocument(this);
         }
 
-        public void OnRequestShowDocument() {
-            if(RequestShowDocument != null)
-                RequestShowDocument(this, EventArgs.Empty);
+
+        public void SetDocumentPosition(int offset) {
+            if(RequestTextPosition != null)
+                RequestTextPosition(this, new EventArgs<int>(offset));
         }
 
-        public override string Name {
-            get {
-                if(string.IsNullOrEmpty(FilePath)) {
-                    return _name ?? "unknown";
-                } else {
-                    return Path.GetFileName(FilePath);
-                }
+        /// <summary>
+        /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
+        /// </summary>
+        public void EnsureTokenizerHasWorked() {
+            while(_tokenizer.IsBusy) {
+                Thread.Sleep(10);
             }
-            set { _name = value; }
+
+            if(_documentdirty)
+                _tokenizer.TokenizeSync();
         }
+
+
 
         #region Save the document
+
+
+        /// <summary>
+        /// Saves the document at the current filepath. If no path is specified, the user will be prompted to select an appriopate path.
+        /// </summary>
+        public void QuickSave() {
+            if(!string.IsNullOrWhiteSpace(this.FilePath))
+                this.Save(this.FilePath);
+            else {
+
+                var saver = new SaveFileDialog()
+                {
+                    FileName = this.Name,
+                    Filter = "Code Files|*" + CodeLanguage.Extensions.First(),
+                    Title = "Select a Script File",
+                    AddExtension = true
+                };
+
+                if(saver.ShowDialog() == DialogResult.OK) {
+                    this.Save(saver.FileName);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Saves the text to the stream.
@@ -183,30 +217,7 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        public CodeLanguage CodeLanguage {
-            get { return _language; }
-        }
-
-        public TextDocument Document {
-            get { return _codedocument; }
-        }
-
-        public DocumentCodeSegmentService SegmentService {
-            get { return _codeSegmentService; }
-        }
-
-        /// <summary>
-        /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
-        /// </summary>
-        public void EnsureTokenizerHasWorked() {
-            while(_tokenizer.IsBusy) {
-                Thread.Sleep(10);
-            }
-
-            if(_documentdirty)
-                _tokenizer.TokenizeSync();
-        }
-
+        #region Event Handlers
 
         void OnCodedocumentChanged(object sender, EventArgs e){
             _documentdirty = true;
@@ -229,6 +240,27 @@ namespace SmartDevelop.Model.Projecting
                     RequestTextInvalidation(this, EventArgs.Empty);
         }
 
+        #endregion
+
+        #region Public Properties
+
+        public string FilePath {
+            get;
+            set;
+        }
+
+
+        public override string Name {
+            get {
+                if(string.IsNullOrEmpty(FilePath)) {
+                    return _name ?? "unknown";
+                } else {
+                    return Path.GetFileName(FilePath);
+                }
+            }
+            set { _name = value; }
+        }
+
         public bool HasUnsavedChanges { 
             get { return _isModified; } 
             protected set {
@@ -240,28 +272,24 @@ namespace SmartDevelop.Model.Projecting
             } 
         }
 
+        public CodeLanguage CodeLanguage {
+            get { return _language; }
+        }
+
+        public TextDocument Document {
+            get { return _codedocument; }
+        }
+
+        public DocumentCodeSegmentService SegmentService {
+            get { return _codeSegmentService; }
+        }
+
+        #endregion
+
         public override string ToString() {
             return string.Format("{0} ({1})", this.Name);
 
         }
 
-        public void QuickSave() {
-            if(!string.IsNullOrWhiteSpace(this.FilePath))
-                this.Save(this.FilePath);
-            else {
-
-                var saver = new SaveFileDialog()
-                {
-                    FileName = this.Name,
-                    Filter =  "Code Files|*" + CodeLanguage.Extensions.First(),
-                    Title = "Select a Script File",
-                    AddExtension = true
-                };
-
-                if(saver.ShowDialog() == DialogResult.OK) {
-                    this.Save(saver.FileName);
-                }
-            }
-        }
     }
 }

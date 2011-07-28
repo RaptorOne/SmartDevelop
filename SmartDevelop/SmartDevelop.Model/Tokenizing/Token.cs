@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.CodeDom;
 
-namespace SmartDevelop.TokenizerBase
+namespace SmartDevelop.Model.Tokenizing
 {
     public enum Token : int
     {

@@ -26,6 +26,8 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+        public event EventHandler<EventArgs<ProjectItem>> RequestShowDocument;
+
         #region Constructor
 
         public SmartCodeProject(string name, CodeLanguage language)
@@ -76,11 +78,28 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Shows the given document in the editor
+        /// </summary>
+        /// <param name="documentToShow"></param>
+        internal void ShowDocument(ProjectItem documentToShow){
+            OnRequestShowDocument(documentToShow);
+        }
+
+        #endregion
+
         #region Event Handlers
 
         protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCode> codeProjectEventArgs) {
             _domservice.CompileTokenFile(codeProjectEventArgs.Value, _domservice.RootType);
             base.OnTokenizerUpdated(sender, codeProjectEventArgs);
+        }
+
+        protected virtual void OnRequestShowDocument(ProjectItem documentToShow) {
+            if(RequestShowDocument != null)
+                RequestShowDocument(this, new EventArgs<ProjectItem>(documentToShow));
         }
 
         #endregion

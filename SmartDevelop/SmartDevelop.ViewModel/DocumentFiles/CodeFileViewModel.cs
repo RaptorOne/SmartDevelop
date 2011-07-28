@@ -11,10 +11,11 @@ using Archimedes.Services.WPF.WorkBenchServices;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Folding;
 using SmartDevelop.Model.Projecting;
-using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.ViewModel.BackgroundRenderer;
 using SmartDevelop.ViewModel.TextTransformators;
 using SmartDevelop.Model.CodeLanguages.Extensions;
+using SmartDevelop.TokenizerBase.IA.Indentation;
+using SmartDevelop.Model.DOM.Types;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -39,6 +40,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #region Constructor
 
+        /// <summary>
+        /// Creates a new VM, or if there was already created it returns the cached VM
+        /// </summary>
+        /// <param name="projectitem"></param>
+        /// <returns></returns>
         public static CodeFileViewModel Create(ProjectItemCode projectitem) {
             var viewModelPoolService = ServiceLocator.Instance.Resolve<IViewModelPoolService>();
             CodeFileViewModel vm;
@@ -47,7 +53,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 vm = new CodeFileViewModel(projectitem);
                 viewModelPoolService.Register(projectitem, vm);
             }
-
             return vm;
         }
         
@@ -62,6 +67,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _projectitem = projectitem;
 
             _projectitem.HasUnsavedChangesChanged += OnIsModifiedChanged;
+
+            _projectitem.RequestTextPosition += (s, e) => {
+                    _texteditor.TextArea.Caret.Offset = e.Value;
+                    _texteditor.TextArea.Caret.BringCaretToView();
+                };
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
@@ -80,6 +90,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
 
+            // load compeltion item strategy
             var _extensions = projectitem.CodeLanguage.CreateExtensionsForCodeDocument(_texteditor, _projectitem);
 
             _texteditor.MouseHover += TextEditorMouseHover;
@@ -93,18 +104,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.TextArea.TextView.BackgroundRenderers.Add(new CurrentLineHighlightRenderer(_texteditor, projectitem));
             _texteditor.TextArea.TextView.BackgroundRenderers.Add(new ErrorBackgroundRenderer(_texteditor, projectitem));
-            
+
 
             var contextTransformer = new ContextHighlightTransformator(projectitem);
             _texteditor.TextArea.TextView.LineTransformers.Add(contextTransformer);
 
             projectitem.RequestTextInvalidation += (s, e) => {
                 _texteditor.TextArea.TextView.Redraw();
-            };
-
-            _projectitem.RequestShowDocument += (s, e) => {
-                if(ShowCommand.CanExecute(null))
-                    ShowCommand.Execute(null);
             };
 
             DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
@@ -207,7 +213,42 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         void FindDeclaration() {
-            // todo
+            var segment = _projectitem.SegmentService
+                .QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+
+            if(segment != null) {
+
+                if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+                    var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                    var methodDeclaration = methodRef.ResolveMethodDeclarationCache();
+
+                    if(methodDeclaration != null) {
+                        var s = methodDeclaration.TryFindSegment();
+                        if(s != null)
+                            s.BringIntoView();
+                    }
+                } else if(segment.CodeDOMObject is CodeTypeReferenceEx) {
+                    var typeRef = segment.CodeDOMObject as CodeTypeReferenceEx;
+                    var classDeclaration = typeRef.ResolveTypeDeclarationCache();
+
+                    if(classDeclaration != null) {
+                        var s = classDeclaration.TryFindSegment();
+                        if(s != null)
+                            s.BringIntoView();
+                    }
+                } else if(segment.CodeDOMObject is CodePropertyReferenceExpressionEx) {
+                    var propRef = segment.CodeDOMObject as CodePropertyReferenceExpressionEx;
+                    var propDeclaration = propRef.ResolvePropertyDeclarationCache();
+
+                    if(propDeclaration != null) {
+                        var s = propDeclaration.TryFindSegment();
+                        if(s != null)
+                            s.BringIntoView();
+                    }
+                }
+
+            }
+
         }
 
         bool CanFindDeclaration {

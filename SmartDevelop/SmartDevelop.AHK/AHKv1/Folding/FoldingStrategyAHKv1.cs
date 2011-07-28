@@ -6,7 +6,7 @@ using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.TokenizerBase.IA;
 using SmartDevelop.Model.Tokening;
-using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.AHK.AHKv1.Folding
 {
@@ -47,7 +47,7 @@ namespace SmartDevelop.AHK.AHKv1.Folding
             int lastNewLineOffset = 0;
 
             foreach(var segment in _tokenservice.GetSegments()) {
-                if(segment.Token == TokenizerBase.Token.BlockOpen || segment.Token == TokenizerBase.Token.BlockClosed) {
+                if(segment.Token == Token.BlockOpen || segment.Token == Token.BlockClosed) {
 
                     if(segment.Token == _openingBrace) {
                         startOffsets.Push(segment.Range.Offset);
@@ -58,7 +58,7 @@ namespace SmartDevelop.AHK.AHKv1.Folding
                             newFoldings.Add(new NewFolding(startOffset, segment.Range.Offset + 1));
                         }
                     }
-                } else if(segment.Token == TokenizerBase.Token.NewLine) {
+                } else if(segment.Token == Token.NewLine) {
                     lastNewLineOffset = segment.Range.Offset;
                 }
             }

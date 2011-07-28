@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using ICSharpCode.AvalonEdit.Document;
 using System.CodeDom;
+using SmartDevelop.Model.Projecting;
 
-namespace SmartDevelop.TokenizerBase
+namespace SmartDevelop.Model.Tokenizing
 {
     /// <summary>
     /// Represents a CodeSegment
@@ -14,6 +15,7 @@ namespace SmartDevelop.TokenizerBase
     {
         #region Fields
 
+        readonly ProjectItemCode _codeDocument;
         readonly SimpleSegment _codesegment;
         readonly Token _type;
         readonly string _tokenstring;
@@ -36,13 +38,14 @@ namespace SmartDevelop.TokenizerBase
             _previous = null;
         }
 
-        public CodeSegment(Token token, string tokenstr, SimpleSegment anchorsegment, int line, int colstart, CodeSegment previous) {
+        public CodeSegment(ProjectItemCode codeDocument, Token token, string tokenstr, SimpleSegment anchorsegment, int line, int colstart, CodeSegment previous) {
             _type = token;
             _tokenstring = tokenstr;
             _codesegment = anchorsegment;
             _line = line;
             _column = colstart;
             _previous = previous;
+            _codeDocument = codeDocument;
         }
 
         #endregion
@@ -303,12 +306,18 @@ namespace SmartDevelop.TokenizerBase
 
         #endregion
 
+        public void BringIntoView() {
+            _codeDocument.ShowDocument();
+            _codeDocument.SetDocumentPosition(this.Range.Offset);
+        }
+
+
         /// <summary>
         /// Get a empty/undefined CodeSegment
         /// </summary>
         public static CodeSegment Empty {
             get {
-                return new CodeSegment(Token.Unknown, "", new SimpleSegment(), 0, 0, null);
+                return new CodeSegment(null, Token.Unknown, "", new SimpleSegment(), 0, 0, null);
             }
         }
 

@@ -9,6 +9,7 @@ using SmartDevelop.Model.Projecting;
 using System.CodeDom;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.DOM.Types;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.ViewModel.TextTransformators
 {

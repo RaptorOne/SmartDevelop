@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SmartDevelop.Model.StdLib;
 using SmartDevelop.Model.Errors;
 
 namespace SmartDevelop.Model.Projecting

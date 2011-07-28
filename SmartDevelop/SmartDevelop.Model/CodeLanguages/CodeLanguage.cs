@@ -12,6 +12,7 @@ using System.CodeDom;
 using SmartDevelop.Model.DOM.Types;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using ICSharpCode.AvalonEdit;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -83,7 +84,7 @@ namespace SmartDevelop.Model.CodeLanguages
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public abstract Tokenizer CreateTokenizer(ITextSource source);
+        public abstract Tokenizer CreateTokenizer(ProjectItemCode codeitem, ITextSource source);
 
         /// <summary>
         /// Creates a new DomService for this Language

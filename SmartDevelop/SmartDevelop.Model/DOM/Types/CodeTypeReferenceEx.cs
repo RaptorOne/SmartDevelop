@@ -89,10 +89,6 @@ namespace SmartDevelop.Model.DOM.Types
 
             if(_typeDeclaration == null && EnclosingType != null) {
 
-                // look for build in members
-                var rootMember = Project.Language.BuildInMembers.Find(
-                    x => ((x is CodeMemberMethodEx) && ((CodeMemberMethodEx)x).Matches(this)));
-
                 CodeTypeDeclarationEx typedecl = EnclosingType;
                 while(typedecl != null) {
                     var type = typedecl.Members.Cast<CodeTypeMember>().ToList().Find(

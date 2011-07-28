@@ -6,6 +6,7 @@ using SmartDevelop.Model.DOM.Types;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.DOM;
 using System.CodeDom;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.CodeContexts
 {

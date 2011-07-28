@@ -3,11 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:acb="clr-namespace:Archimedes.Patterns.WPF.ACB;assembly=Archimedes.Patterns.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="277" d:DesignWidth="669">
     <Grid>
         
-        <DataGrid AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding AllErrors}">
+        <DataGrid 
+            acb:CommandBehavior.Event="MouseDoubleClick"
+            acb:CommandBehavior.Command="{Binding JumpToSelectedErrorCommand}"
+            IsSynchronizedWithCurrentItem="True"
+            SelectedItem="{Binding CurrentError}"
+            AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding AllErrors}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="" >
                     <DataGridTemplateColumn.CellTemplate>

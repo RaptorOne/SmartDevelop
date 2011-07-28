@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.ViewModel.BackgroundRenderer
 {
@@ -59,7 +60,7 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
             if(_editor.TextArea.Caret.Offset > 1 && TokenHelper.BRAKETS.ContainsKey(_editor.TextArea.Document.GetCharAt(_editor.TextArea.Caret.Offset - 1))) {
                 var offset = _editor.TextArea.Caret.Offset;
                 var seg = _projectitem.SegmentService.QueryCodeSegmentAt(offset);
-                if(TokenHelper.BRAKETS.ContainsValue(seg.Token)) {
+                if(seg != null && TokenHelper.BRAKETS.ContainsValue(seg.Token)) {
                     var other = seg.FindOtherBracked(true);
 
                     var col = other != null ? _braketMatch : _braketMatchFail;

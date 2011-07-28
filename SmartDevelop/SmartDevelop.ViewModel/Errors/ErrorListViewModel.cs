@@ -7,6 +7,8 @@ using SmartDevelop.Model.Errors;
 using Archimedes.Patterns.WPF.ViewModels;
 using System.Windows;
 using Archimedes.Patterns.Utils;
+using System.Windows.Input;
+using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.Errors
 {
@@ -35,6 +37,24 @@ namespace SmartDevelop.ViewModel.Errors
                         RemoveError(e.Value);
                     }), null);   
                 };
+        }
+
+        public ErrorListItemVM CurrentError {
+            get;
+            set;
+        }
+
+        public ICommand JumpToSelectedErrorCommand {
+            get {
+                return new RelayCommand(x => JumpToSelectedError());
+            }
+        }
+
+        void JumpToSelectedError() {
+            if(CurrentError != null) {
+                CurrentError.ErrorItem
+                    .Segment.BringIntoView();
+            }
         }
 
         void ImportExisting() {

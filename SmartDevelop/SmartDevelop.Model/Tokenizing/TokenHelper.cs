@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SmartDevelop.TokenizerBase
+namespace SmartDevelop.Model.Tokenizing
 {
     public static class TokenHelper
     {

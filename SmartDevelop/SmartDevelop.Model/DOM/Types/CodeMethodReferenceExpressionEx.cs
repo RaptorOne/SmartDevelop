@@ -12,7 +12,7 @@ namespace SmartDevelop.Model.DOM.Types
     {
         #region Fields
 
-        CodeMemberMethodEx _methodref;
+        protected CodeMemberMethodEx _methodref;
         SmartCodeProject _project;
         Projecting.ProjectItemCode _codeDocumentItem;
 
@@ -56,7 +56,7 @@ namespace SmartDevelop.Model.DOM.Types
             }
         }
 
-        CodeLanguage Language {
+        protected CodeLanguage Language {
             get {
                 return Project != null ? Project.Language : null;
             }
@@ -87,9 +87,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #endregion
 
-
-
-        public CodeMemberMethodEx ResolveMethodDeclarationCache() {
+        public virtual CodeMemberMethodEx ResolveMethodDeclarationCache() {
             var lang = Language;
 
 

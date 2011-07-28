@@ -20,15 +20,6 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         #region Properties
 
-        //public override string DisplayName {
-        //    get {
-        //        return _codeitem.Name;
-        //    }
-        //    set {
-        //        _codeitem.Name = value;
-        //    }
-        //}
-
 
         #endregion
 

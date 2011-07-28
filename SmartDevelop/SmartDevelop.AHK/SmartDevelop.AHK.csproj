@@ -49,6 +49,7 @@
     <Compile Include="AHKv1\CodeLanguageAHKv1.cs" />
     <Compile Include="AHKv1\DOM\CodeDOMServiceIA.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMemberMethodExAHK.cs" />
+    <Compile Include="AHKv1\DOM\Types\CodeMethodReferenceExpressionExAHK.cs" />
     <Compile Include="AHKv1\Folding\FoldingStrategyAHKv1.cs" />
     <Compile Include="AHKv1\Tokenizing\SimpleTokinizerIA.cs" />
     <Compile Include="AHKv1\Tokenizing\TokenMapIA.cs" />
@@ -74,10 +75,6 @@
     <ProjectReference Include="..\SmartDevelop.Model\SmartDevelop.Model.csproj">
       <Project>{9F35A6BC-F9FA-46DD-9D1E-36EC665215EA}</Project>
       <Name>SmartDevelop.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SmartDevelop.TokenizerBase\SmartDevelop.TokenizerBase.csproj">
-      <Project>{DFACD34A-B3D0-4C45-BE90-ABBFF75979C9}</Project>
-      <Name>SmartDevelop.TokenizerBase</Name>
     </ProjectReference>
     <ProjectReference Include="..\SmartDevelop.ViewModel\SmartDevelop.ViewModel.csproj">
       <Project>{F658A346-3514-4D78-8CC0-12B99AD3ED5B}</Project>

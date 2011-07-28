@@ -52,6 +52,8 @@
       <Word>break</Word>
       <Word>continue</Word>
       <Word>in</Word>
+      <Word>do</Word>
+      <Word>until</Word>
       
       <Word>var</Word>
       <Word>this</Word>
@@ -64,6 +66,7 @@
       <Word>exitapp</Word>
       <Word>gosub</Word>
       <Word>goto</Word>
+      <Word>reload</Word>
       <!-- ... -->
     </Keywords>
     

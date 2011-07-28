@@ -98,10 +98,6 @@
       <Project>{9F35A6BC-F9FA-46DD-9D1E-36EC665215EA}</Project>
       <Name>SmartDevelop.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SmartDevelop.TokenizerBase\SmartDevelop.TokenizerBase.csproj">
-      <Project>{DFACD34A-B3D0-4C45-BE90-ABBFF75979C9}</Project>
-      <Name>SmartDevelop.TokenizerBase</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -561,19 +561,26 @@ namespace SmartDevelop.AHK.AHKv1
 
             #region Generate build in Commands
 
+
+            var commands = BuildInCommands().ToList();
+
+
             foreach(var prop in BuildInCommands()) {
 
                 var commandStr = prop.Trim();
                 if(string.IsNullOrWhiteSpace(commandStr))
                     continue;
 
-                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, 0, SpecailWordCharacters);
+                    
+
+                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, (prop[0] == '*') ? 1 : 0, SpecailWordCharacters);
 
                 var propr = new CodeMemberMethodExAHK(true)
                 {
                     Name = commandName,
                     IsTraditionalCommand = true,
-                    IsDefaultMethodInvoke = false
+                    IsDefaultMethodInvoke = false,
+                    IsFlowCommand = (prop[0] == '*')
                 };
                 members.Add(propr);
             }
@@ -758,7 +765,7 @@ Random , OutputVar [, Min, Max]
 RegDelete , HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
 RegRead , OutputVar, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName]
 RegWrite , REG_SZ|REG_EXPAND_SZ|REG_MULTI_SZ|REG_DWORD|REG_BINARY, HKLM|HKU|HKCU|HKCR|HKCC, SubKey [, ValueName, Value]
-Reload
+*Reload
 Run , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
 RunAs [, User, Password, Domain] 
 RunWait , Target [, WorkingDir, Max|Min|Hide|UseErrorLevel, OutputVarPID]
@@ -818,7 +825,6 @@ ToolTip [, Text, X, Y, WhichToolTip]
 Transform , OutputVar, Cmd, Value1 [, Value2]
 TrayTip [, Title, Text, Seconds, Options]
 URLDownloadToFile , URL, Filename
-while Expression
 WinActivate [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 WinActivateBottom [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 WinClose [, WinTitle, WinText, SecondsToWait, ExcludeTitle, ExcludeText]
@@ -875,8 +881,8 @@ EnvMult , Var, Value
 EnvSet , EnvVar, Value
 EnvSub , Var, Value [, TimeUnits]
 EnvUpdate
-Exit [, ExitCode]
-ExitApp [, ExitCode]
+*Exit [, ExitCode]
+*ExitApp [, ExitCode]
 FileAppend [, Text, Filename, Encoding] \n(The encoding parameter is AutoHotkeyU-exclusive)
 FileCopy , Source, Dest [, Flag (1 = overwrite)]
 FileCopyDir , Source, Dest [, Flag]
@@ -902,8 +908,8 @@ FileSetAttrib , Attributes(+-^RASHNOT) [, FilePattern, OperateOnFolders?, Recurs
 FileSetTime [, YYYYMMDDHH24MISS, FilePattern, WhichTime (M|C|A), OperateOnFolders?, Recurse?]
 FormatTime , OutputVar [, YYYYMMDDHH24MISS, Format]
 GetKeyState , OutputVar, WhichKey [, Mode (P|T)]
-gosub , Label\nJumps to the specified label and continues execution until Return is encountered.
-goto , Label\nJumps to the specified label and continues execution.
+*gosub , Label\nJumps to the specified label and continues execution until Return is encountered.
+*goto , Label\nJumps to the specified label and continues execution.
 GroupActivate , GroupName [, R]
 GroupAdd , GroupName, WinTitle [, WinText, Label, ExcludeTitle, ExcludeText]
 GroupClose , GroupName [, A|R]
@@ -911,7 +917,24 @@ GroupDeactivate , GroupName [, R]
 Gui , sub-command [, Param2, Param3, Param4]
 GuiControl , Sub-command, ControlID [, Param3]
 GuiControlGet , OutputVar [, Sub-command, ControlID, Param4]
-Hotkey , KeyName [, Label, Options]";
+Hotkey , KeyName [, Label, Options]
+
+IfEqual , var, value
+IfExist , File|Dir|Pattern
+IfGreater , var, value
+IfGreaterOrEqual , var, value
+IfInString , Var, SearchString
+IfLess , var, value
+IfLessOrEqual , var, value
+IfMsgBox , Yes|No|OK|Cancel|Abort|Ignore|Retry|Timeout
+IfNotEqual , var, value
+IfNotExist , File|Dir|Pattern
+IfNotInString , Var, SearchString
+IfWinActive [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+IfWinExist [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+IfWinNotActive [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+IfWinNotExist [, WinTitle, WinText, ExcludeTitle, ExcludeText]
+";
             return str.Split('\n');
         }
 

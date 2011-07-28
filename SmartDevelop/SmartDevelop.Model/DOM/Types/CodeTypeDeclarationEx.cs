@@ -5,6 +5,7 @@ using System.Text;
 using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM.Types
 {
@@ -65,6 +66,23 @@ namespace SmartDevelop.Model.DOM.Types
         #endregion
 
         #region Public Methods
+
+        public CodeSegment TryFindSegment() {
+            CodeSegment s = null;
+
+            var codeDocument = this.CodeDocumentItem;
+            var segmentLines = codeDocument.SegmentService.GetCodeSegmentLinesMap();
+
+            if(segmentLines.ContainsKey(this.LinePragma.LineNumber)) {
+                var segments = segmentLines[this.LinePragma.LineNumber];
+                if(!segments.IsEmpty) {
+                    s = segments.CodeSegments.Find(x => this.Equals(x.CodeDOMObject));
+                }
+            }
+            return s;
+        }
+
+
 
         public virtual IEnumerable<CodeTypeMember> GetInheritedMembers() {
             List<CodeTypeMember> members = new List<CodeTypeMember>();
@@ -138,5 +156,8 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         #endregion
+
+
+
     }
 }

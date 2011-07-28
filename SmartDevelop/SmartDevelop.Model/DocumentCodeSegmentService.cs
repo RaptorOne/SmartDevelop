@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.Tokening
 {
@@ -78,10 +79,13 @@ namespace SmartDevelop.Model.Tokening
 
         #region Query Methods
 
-        [Obsolete("Use line/column for much more performance")]
+        //[Obsolete("Use line/column for much more performance")]
         public CodeSegment QueryCodeSegmentAt(int offset) {
             CodeSegment t = CodeSegment.Empty;
             lock(_codesegmentsLock) {
+
+                if(_segments == null) return null;
+
                 foreach(var segment in _segments) {
                     if(segment.Range.Offset <= offset && segment.Range.EndOffset >= offset) {
                         t = segment;

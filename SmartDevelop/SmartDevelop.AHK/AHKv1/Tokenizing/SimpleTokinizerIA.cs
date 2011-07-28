@@ -7,8 +7,9 @@ using System.ComponentModel;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Archimedes.Patterns.Utils;
-using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.CodeLanguages;
+using SmartDevelop.Model.Tokenizing;
+using SmartDevelop.Model.Projecting;
 
 namespace SmartDevelop.AHK.AHKv1.Tokenizing
 {
@@ -44,7 +45,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
 
 
-    public class SimpleTokinizerIA : SmartDevelop.TokenizerBase.Tokenizer
+    public class SimpleTokinizerIA : Tokenizer
     {
         #region Constants
 
@@ -71,7 +72,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         List<CodeSegment> _codesegmentsSave = new List<CodeSegment>();
         object __codesegmentsSaveLock = new object();
 
-        ITextSource _document;
+        
         string _text;
         int _textlen = 0;
 
@@ -83,15 +84,20 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         Token _currentToken = Token.Unknown;
         BackgroundWorker _tokenizerworker;
 
+        readonly ProjectItemCode _codeitem;
+        readonly ITextSource _document;
+
         #endregion
 
         #region Constructor
 
-        public SimpleTokinizerIA(ITextSource document, CodeLanguage language)
+        public SimpleTokinizerIA(ProjectItemCode codeitem, ITextSource document)
          {
             _document = document;
+            _codeitem = codeitem;
 
-            KEYWORDS = (from w in language.LanguageKeywords
+
+            KEYWORDS = (from w in codeitem.CodeLanguage.LanguageKeywords
                        select w.Name).ToList();
 
 
@@ -180,7 +186,6 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             var bgw = sender as BackgroundWorker;
             _currentToken = Token.Unknown;
             
-            bool inliteralString = false;
             bool ensureNewToken = false;
             bool traditionalMode = false;
             int i;
@@ -196,6 +201,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
             char currentChar;
             for(i = 0; i < _textlen; i++) {
+
+            redo:
 
                 #region Handle Cancel Tokenizer
 
@@ -228,14 +235,41 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     //_currentLine++;
                     _currentColumn = 0;
                     traditionalMode = false;
-                } else if(!traditionalMode && IsLieralStringMarker(i)) {
-                    if(_activeToken == Token.LiteralString) {
-                        ensureNewToken = true;
-                        inliteralString = false;
-                    } else {
-                        _currentToken = Token.LiteralString;
-                        inliteralString = true;
+                } else if(!traditionalMode && IsLieralStringMarkerBegin(i)) {
+
+                    #region Parse literal string
+
+                    EndActiveToken(i);
+                    _activeToken = Token.LiteralString;
+
+
+                    bool previuosWasEscape = true;
+                    while(i < _textlen) {
+                        if(_text[i] == '\n') {
+                            _currentLine++;
+                            break;
+                        } else if(_text[i] == '"') {
+                            if(previuosWasEscape == true)
+                                previuosWasEscape = false;
+                            else if(_text.Next(i) == '"') {
+                                previuosWasEscape = true;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            previuosWasEscape = false;
+                        }
+                        i++;
                     }
+
+                    ensureNewToken = true;
+                    if((i + 1) < _textlen)
+                        i++;
+                    goto redo;
+                    //EndActiveToken(i);
+
+                    #endregion
+
                 } else if(!traditionalMode && IsMultiLineCommentStart(i)) {
 
                     #region Handle Multiline Comment
@@ -306,7 +340,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     #endregion
 
-                } else if(!inliteralString && !IsInAnyComment()) {
+                } else if(!IsInAnyComment()) {
                     //expressions
                     if(!traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
                         _currentToken = TokenHelper.BRAKETS[currentChar];
@@ -401,7 +435,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     if(_activeToken == Token.NewLine)
                         --linenumber;
 
-                    var current = new CodeSegment(tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
+                    var current = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
                         str, new SimpleSegment(_currentRangeStart, l), linenumber, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = current;
@@ -485,10 +519,13 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
 
-        bool IsLieralStringMarker(int index) {
-            return (_text[index] == LITERALSTR && !IsInAnyComment()
-                && _text.Previous(index) != LITERALSTR_ESCAPE
-                && !(_text[index] == LITERALSTR_ESCAPE && _text.Next(index) == LITERALSTR));
+        /// <summary>
+        /// Assuming that we are currently NOT in a literal string
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        bool IsLieralStringMarkerBegin(int index) {
+            return (_text[index] == LITERALSTR && !IsInAnyComment());
         }
 
         bool IsMultiLineCommentStart(int index) {

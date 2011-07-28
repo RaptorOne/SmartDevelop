@@ -10,6 +10,7 @@ using SmartDevelop.Model.DOM.Types;
 using SmartDevelop.Model.CodeContexts;
 using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -109,10 +110,5 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
     }
-
-
-
-
-
-        
+ 
 }

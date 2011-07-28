@@ -22,6 +22,7 @@ using SmartDevelop.AHK.AHKv1.CodeCompletion;
 using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.CodeLanguages.Extensions;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -74,7 +75,7 @@ namespace SmartDevelop.AHK.AHKv1
 
             foreach(var m in buildins) {
                 var command = m as CodeMemberMethodExAHK;
-                if(command != null && command.IsTraditionalCommand) {
+                if(command != null && command.IsTraditionalCommand && !command.IsFlowCommand) {
                     // Add custom but static highligning rules
                     customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
                     {
@@ -94,7 +95,7 @@ namespace SmartDevelop.AHK.AHKv1
 
         Regex GetRegexForCommand(string name) {
             var preregex = "^[\\s]*\\b";
-            var sufregex = "\\b";
+            var sufregex = "\\b[\\s|,]+";
             var r = new Regex(preregex + name + sufregex, RegexOptions.IgnoreCase);
             return r;
         }
@@ -108,8 +109,8 @@ namespace SmartDevelop.AHK.AHKv1
             }
         }
 
-        public override TokenizerBase.Tokenizer CreateTokenizer(ITextSource source) {
-            return new SimpleTokinizerIA(source, this);
+        public override Tokenizer CreateTokenizer(ProjectItemCode codeitem, ITextSource source) {
+            return new SimpleTokinizerIA(codeitem, source);
         }
 
         public override Model.DOM.CodeDOMService CreateDOMService(Model.Projecting.SmartCodeProject codeProject) {

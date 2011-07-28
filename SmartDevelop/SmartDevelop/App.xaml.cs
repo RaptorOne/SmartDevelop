@@ -17,7 +17,6 @@ using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.View.Main;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.AHK.AHKv1;
-using SmartDevelop.Model.StdLib;
 
 namespace SmartDevelop
 {
@@ -55,9 +54,7 @@ namespace SmartDevelop
             AddDemoProject();
         }
 
-        void AddDemoProject() {
-            _solution.Add(StdLibLoader.LoadStLib());
-        }
+
 
 
         #endregion
@@ -97,5 +94,76 @@ namespace SmartDevelop
 
         }
 
+
+        #region Demoe Code
+
+
+        void AddDemoProject() {
+
+            var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
+            var language = serviceLang.GetById("ahk-v1.1");
+
+            SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language);
+
+            DemoProjectLoader.AddStdLibTo(demoProject);
+            _solution.Add(demoProject);
+
+            // create a Test Folder and add a demo file
+            var testFolder = new ProjectItemFolder("Test", demoProject);
+            demoProject.Add(testFolder);
+            var dp = new ProjectItemCode(language, testFolder) { Name = "DemoFile.ahk" };
+            testFolder.Add(dp);
+            dp.Document.Text = InitialDemoCode();
+
+
+            dp.ShowDocument(); // present our demo file to the user
+        }
+
+        static string InitialDemoCode() {
+    return @"
+    ; Demo Code
+
+    fooinst := new Foo
+    str := fooinst.Helper()
+    msgbox % str
+    ExitApp
+
+    class Bar
+    {
+	    var TestProperty
+	
+	    SimpleMethod(){
+		    return ""The property is:"" this.TestProperty
+	    }
+
+	    Test(num){
+            return 0x44 << num
+	    }
+
+        __new(){
+            this.TestProperty := ""Bar's TestProperty""
+        }
     }
+
+
+
+    class Foo extends Bar
+    {
+        var TestProperty ;property override
+        var SubClassProperty := ""fal""
+
+	    Helper(){
+		    if(this.SubClassProperty == ""fal""){
+                return this.Test(this.TestProperty)
+		    }
+	    }
+
+        __new(){
+            this.TestProperty := ""Foo's TestProperty""
+        }
+
+    }";
+        }
+    }
+        #endregion
 }

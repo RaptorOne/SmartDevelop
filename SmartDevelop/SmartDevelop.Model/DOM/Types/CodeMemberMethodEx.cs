@@ -5,12 +5,20 @@ using System.Text;
 using System.CodeDom;
 using SmartDevelop.Model.Projecting;
 using Archimedes.Patterns.Utils;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM.Types
 {
     public class CodeMemberMethodEx : CodeMemberMethod, ICodeMemberEx, IEquatable<CodeMemberMethodEx>
     {
-        
+        #region Fields
+
+        SmartCodeProject _project;
+        Projecting.ProjectItemCode _codeDocumentItem;
+
+        #endregion
+
+        #region Constructor
 
         public CodeMemberMethodEx(Projecting.ProjectItemCode codeDocumentItem) 
             : base() {
@@ -20,6 +28,33 @@ namespace SmartDevelop.Model.DOM.Types
 
         public CodeMemberMethodEx(bool buildIn) 
             : base() { IsBuildInType = buildIn; }
+
+        #endregion
+
+
+
+        #region Methods
+
+        public CodeSegment TryFindSegment() {
+            CodeSegment s = null;
+            if(CodeDocumentItem != null) {
+                var segmentLines = CodeDocumentItem.SegmentService.GetCodeSegmentLinesMap();
+
+                if(segmentLines.ContainsKey(this.LinePragma.LineNumber)) {
+                    var segments = segmentLines[this.LinePragma.LineNumber];
+                    if(!segments.IsEmpty) {
+                        s = segments.CodeSegments.Find(x => this.Equals(x.CodeDOMObject));
+                    }
+                }
+            }
+            return s;
+        }
+
+
+        #endregion
+
+
+        #region Properties
 
         public CodeTypeDeclarationEx DefiningType {
             get;
@@ -36,8 +71,6 @@ namespace SmartDevelop.Model.DOM.Types
             protected set;
         }
 
-        SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
 
         public ProjectItemCode CodeDocumentItem {
             get { return _codeDocumentItem ; }
@@ -54,6 +87,8 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         public CodeLanguages.CodeLanguage Language { get { return Project.Language; } }
+
+        #endregion
 
         #region IEquatable
 

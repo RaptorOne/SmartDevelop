@@ -12,7 +12,7 @@ namespace SmartDevelop.Model.DOM.Types
     {
         #region Fields
 
-        CodeMemberProperty _propertyDecl;
+        CodeMemberPropertyEx _propertyDecl;
         SmartCodeProject _project;
         Projecting.ProjectItemCode _codeDocumentItem;
 
@@ -30,7 +30,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Properties
 
-        public CodeMemberProperty ResolvedPropertyMember {
+        public CodeMemberPropertyEx ResolvedPropertyMember {
             get { return _propertyDecl; }
             set { _propertyDecl = value; }
         }
@@ -87,7 +87,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #endregion
 
-        public CodeMemberProperty ResolvePropertyDeclarationCache() {
+        public CodeMemberPropertyEx ResolvePropertyDeclarationCache() {
             var lang = Language;
 
 
@@ -95,7 +95,7 @@ namespace SmartDevelop.Model.DOM.Types
                 CodeTypeDeclarationEx typedecl = EnclosingType;
 
                 var members = from m in typedecl.GetInheritedMembers()
-                              let memberMethod = m as CodeMemberProperty
+                              let memberMethod = m as CodeMemberPropertyEx
                                 where memberMethod != null && memberMethod.Name.Equals(this.PropertyName, lang.NameComparisation)
                                 select memberMethod;
 
@@ -108,7 +108,7 @@ namespace SmartDevelop.Model.DOM.Types
                 if(p != null && p.DOMService.RootType != EnclosingType) {
 
                     var members = from member in p.DOMService.RootType.Members.Cast<CodeTypeMember>()
-                                  let methodMember = member as CodeMemberProperty
+                                  let methodMember = member as CodeMemberPropertyEx
                                   where methodMember != null && methodMember.Name.Equals(this.PropertyName, lang.NameComparisation)
                                   select methodMember;
 

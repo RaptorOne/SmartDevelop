@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.Projecting;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.Errors
 {

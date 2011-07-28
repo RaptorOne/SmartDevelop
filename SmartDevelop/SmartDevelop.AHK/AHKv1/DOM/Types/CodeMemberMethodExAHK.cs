@@ -19,6 +19,11 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
         public CodeMemberMethodExAHK(bool buildin) 
             : base(buildin) { }
 
+        public bool IsFlowCommand {
+            get;
+            set;
+        }
+
 
         public bool IsTraditionalCommand {
             get;

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SmartDevelop.TokenizerBase.IA;
 using ICSharpCode.AvalonEdit.Document;
-using SmartDevelop.TokenizerBase;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Tests.TestCases
 {

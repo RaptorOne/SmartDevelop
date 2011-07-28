@@ -11,6 +11,7 @@ using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
 using System.Collections;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -37,7 +38,7 @@ namespace SmartDevelop.Model.DOM
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
 
-            RootType.Members.Add(_autoexec = new CodeMemberMethodEx(true) 
+            RootType.Members.Add(_autoexec = new CodeMemberMethodExAHK(true) 
             {
                 Name = "AutoExec",
                 Attributes = MemberAttributes.Public | MemberAttributes.Static,
@@ -383,11 +384,12 @@ namespace SmartDevelop.Model.DOM
                             // this is a class field declaration
 
                             var propertyType = new CodeTypeReference(typeof(object));
-                            var memberprop = new CodeMemberProperty()
+                            var memberprop = new CodeMemberPropertyEx(codeitem)
                             {
                                 Name = property.TokenString,
                                 Attributes = MemberAttributes.Public,
-                                Type = propertyType
+                                Type = propertyType,
+                                LinePragma = CreatePragma(property, codeitem.FilePath)
                             };
                             property.CodeDOMObject = memberprop;
                             decl.CodeDOMObject = propertyType;
@@ -432,7 +434,7 @@ namespace SmartDevelop.Model.DOM
 
                                     #region Generate Method Definition DOM
 
-                                    var method = new CodeMemberMethodEx(codeitem)
+                                    var method = new CodeMemberMethodExAHK(codeitem)
                                     {
                                         Name = methodSegment.TokenString,
                                         LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
@@ -443,7 +445,13 @@ namespace SmartDevelop.Model.DOM
 
                                     //check if this method is not already defined elsewere in current scope
 
-                                    if(thisparent.GetInheritedMembers().Contains(method)) {
+                                    var equalmethods = from m in thisparent.Members.Cast<CodeTypeMember>()
+                                                       let meth = m as CodeMemberMethodExAHK
+                                                       where meth != null && !meth.IsBuildInType && meth.Equals(method)
+                                                       select meth;
+
+
+                                    if(equalmethods.Any()) {
                                         RegisterError(codeitem, methodSegment,
                                             string.Format("The Methodename '{0}' is already used in the current scope!", method.Name));
                                         hasDeclarationError = true;
@@ -592,9 +600,9 @@ namespace SmartDevelop.Model.DOM
                 #region Resolve Code Property Invoke Referencees
 
                 if(segment.CodeDOMObject is CodePropertyReferenceExpressionEx) {
-                    var methodRef = segment.CodeDOMObject as CodePropertyReferenceExpressionEx;
-                    if(methodRef.ResolvedPropertyMember == null && !(methodRef.EnclosingType is CodeTypeDeclarationDynamic)) {
-                        var refi = methodRef.ResolvePropertyDeclarationCache();
+                    var propRef = segment.CodeDOMObject as CodePropertyReferenceExpressionEx;
+                    if(propRef.ResolvedPropertyMember == null && !(propRef.EnclosingType is CodeTypeDeclarationDynamic)) {
+                        var refi = propRef.ResolvePropertyDeclarationCache();
                         if(refi == null) {
                             RegisterError(codeitem, segment,
                                 string.Format("Property '{0}' does not exist!", segment.TokenString));
@@ -695,9 +703,9 @@ namespace SmartDevelop.Model.DOM
 
                     #endregion
                 }
-
+                
                 var invokeExpression = new CodeMethodInvokeExpression();
-                var methodRef = new CodeMethodReferenceExpressionEx(codeitem, null, tokenSegment.TokenString, methodContext);
+                var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, null, tokenSegment.TokenString, methodContext);
 
                 invokeExpression.Method = methodRef;
                 tokenSegment.CodeDOMObject = methodRef;
