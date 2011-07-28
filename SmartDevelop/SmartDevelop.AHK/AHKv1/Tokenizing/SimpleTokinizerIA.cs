@@ -212,7 +212,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 // ensure that we differ from the token before in those cases
                 if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken) 
                     || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
-                    || _activeToken == Token.MemberInvoke
+                    || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
@@ -327,8 +327,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     //}else if(!traditionalMode && IsVariableAsignStart(i)){
 
                     } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
+
                         _currentToken = Token.TraditionalCommandInvoke;
-                        traditionalMode = true;
+                        //traditionalMode = true;
+
                     } else if(!traditionalMode && OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.OperatorFlow;
                         // to do: default expressions_activeToken
@@ -467,8 +469,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     if(c == ' ' || c == '\t' || c == '\r' || c == ','){
                         // now, we expect a lot but not-> =, :=, 
                         //get next char which is not an whitespace
+                        
+
                         char nextChar = NextCharOnThisLineOmitWhiteSpace(cindex);
-                        if(!(nextChar == ':' || nextChar == '=')) {
+                        if(!(nextChar == '.' || OPERATORS.Contains(nextChar))) {
                             return true;
                         }
                     } else {
@@ -479,6 +483,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             }
             return false;
         }
+
 
         bool IsLieralStringMarker(int index) {
             return (_text[index] == LITERALSTR && !IsInAnyComment()
