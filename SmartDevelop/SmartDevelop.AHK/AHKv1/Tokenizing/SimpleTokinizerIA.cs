@@ -106,7 +106,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _tokenizerworker.WorkerSupportsCancellation = true;
 
             _tokenizerworker.RunWorkerCompleted += (s, e) => {
-                OnFinished();
+                if(!e.Cancelled)
+                    OnFinishedSucessfully();
+                else {
+                    var cucu = e.Cancelled;
+                    if(cucu) {
+
+                    }
+                }
             };
         }
 
@@ -144,7 +151,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 TokinizeWorker(null, new DoWorkEventArgs(null));
 
                 _syncTokenizerBusy = false;
-                OnFinished();
+                OnFinishedSucessfully();
             }
         }
 

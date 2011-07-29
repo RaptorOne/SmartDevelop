@@ -15,6 +15,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
         }
 
 
+
         public override CodeMemberMethodEx ResolveMethodDeclarationCache() {
             var lang = Language;
 
@@ -33,9 +34,9 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
 
             if(_methodref == null) {
                 var p = Project;
-                if(p != null && p.DOMService.RootType != EnclosingType) {
+                if(p != null && p.DOMService.RootTypeUnSave != EnclosingType) {
 
-                    var members = from member in p.DOMService.RootType.Members.Cast<CodeTypeMember>()
+                    var members = from member in p.DOMService.RootTypeUnSave.Members.Cast<CodeTypeMember>()
                                   let methodMember = member as CodeMemberMethodExAHK
                                   where methodMember != null && methodMember.IsDefaultMethodInvoke && methodMember.Name.Equals(this.MethodName, lang.NameComparisation)
                                   select methodMember;

@@ -9,6 +9,7 @@ using Archimedes.Patterns.Services;
 using SmartDevelop.Model.CodeContexts;
 using Archimedes.Patterns.Utils;
 using Archimedes.Patterns;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -93,7 +94,9 @@ namespace SmartDevelop.Model.Projecting
         #region Event Handlers
 
         protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCode> codeProjectEventArgs) {
-            _domservice.CompileTokenFile(codeProjectEventArgs.Value, _domservice.RootType);
+            Task.Factory.StartNew(() => {
+                    _domservice.CompileTokenFileAsync(codeProjectEventArgs.Value, null);
+                });
             base.OnTokenizerUpdated(sender, codeProjectEventArgs);
         }
 

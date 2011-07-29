@@ -105,7 +105,7 @@ namespace SmartDevelop
 
             SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language);
 
-            DemoProjectLoader.AddStdLibTo(demoProject);
+            //DemoProjectLoader.AddStdLibTo(demoProject);
             _solution.Add(demoProject);
 
             // create a Test Folder and add a demo file

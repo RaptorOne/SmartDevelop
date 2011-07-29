@@ -21,8 +21,9 @@ namespace SmartDevelop.Model.DOM
     {
         #region Fields
 
-        SmartCodeProject _project;
-        CodeTypeDeclarationEx _scriptRoot;
+        readonly SmartCodeProject _project;
+        protected readonly CodeTypeDeclarationEx _languageRoot;
+        protected object _languageRootLock = new object();
 
         protected static List<Token> whitespacetokenNewLinesComments = new List<Token> { Token.WhiteSpace, Token.NewLine, Token.MultiLineComment, Token.SingleLineComment };
         protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
@@ -32,10 +33,12 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+        public event EventHandler ASTUpdated;
+
         #region Constructor
 
         public CodeDOMService(SmartCodeProject project) {
-            _scriptRoot = new CodeTypeDeclarationEx(null, "Global") { Project = project };
+            _languageRoot = new CodeTypeDeclarationEx(null, "Global") { Project = project };
             _project = project;
         }
 
@@ -43,9 +46,22 @@ namespace SmartDevelop.Model.DOM
 
         #region Properties
 
+        /// <summary>
+        /// Accessing the RootType will lock it for all other threads
+        /// </summary>
         public CodeTypeDeclarationEx RootType {
-            get { return _scriptRoot; }
+            get { lock(_languageRootLock) { return _languageRoot; } }
         }
+
+        public CodeTypeDeclarationEx RootTypeUnSave {
+            get {  return _languageRoot; }
+        }
+
+        /// <summary>
+        /// Gets a immutable snapshot of the current roottype
+        /// </summary>
+        /// <returns></returns>
+        public abstract CodeTypeDeclarationEx GetRootTypeSnapshot();
 
         public SmartCodeProject CodeProject {
             get { return _project; }
@@ -55,19 +71,6 @@ namespace SmartDevelop.Model.DOM
         #endregion
 
         #region Public Methods
-
-        IEnumerable<CodeMemberMethod> CollectAllMembersBy(string filepath) {
-            List<CodeMemberMethod> methods;
-
-            methods = (from CodeTypeMember m in RootType.Members
-                       where m is CodeMemberMethod && m.LinePragma.FileName == filepath
-                       select m as CodeMemberMethod).ToList();
-            
-             // todo look up class methods
-            return methods;
-        }
-
-        
 
         public CodeContext GetCodeContext(ProjectItemCode codeitem, TextLocation location, bool includeCurrentSegment = false) {
             return GetCodeContext(codeitem, codeitem.Document.GetOffset(location));
@@ -106,9 +109,26 @@ namespace SmartDevelop.Model.DOM
 
         #region File Compiler
 
-        public abstract void CompileTokenFile(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent);
+        /// <summary>
+        /// Enqueues the codeitem to parse it async
+        /// </summary>
+        /// <param name="codeitem"></param>
+        /// <param name="initialparent"></param>
+        public abstract void CompileTokenFileAsync(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent);
+
+        public abstract bool IsBusy { get; }
 
         #endregion
+
+        #region Event Handlers
+
+        protected virtual void OnASTUpdated(){
+            if(ASTUpdated != null)
+                ASTUpdated(this, EventArgs.Empty);
+        }
+
+        #endregion
+
     }
  
 }

@@ -16,7 +16,7 @@ namespace SmartDevelop.Model.Tokenizing
         /// <summary>
         /// Raised when the Tokenizer has finished
         /// </summary>
-        public event EventHandler Finished;
+        public event EventHandler FinishedSucessfully;
 
         #endregion
 
@@ -45,9 +45,9 @@ namespace SmartDevelop.Model.Tokenizing
         /// </summary>
         public abstract bool IsBusy { get; }
 
-        protected virtual void OnFinished() {
-            if(Finished != null)
-                Finished(this, EventArgs.Empty);
+        protected virtual void OnFinishedSucessfully() {
+            if(FinishedSucessfully != null)
+                FinishedSucessfully(this, EventArgs.Empty);
         }
     }
 }

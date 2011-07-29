@@ -12,24 +12,39 @@ using SmartDevelop.Model.DOM.Ranges;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
 using System.Collections;
 using SmartDevelop.Model.Tokenizing;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Threading;
+using System.Windows;
 
 namespace SmartDevelop.Model.DOM
 {
+    public class CompilerArgument
+    {
+        public CompilerArgument(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
+            Codeitem = codeitem;
+            Initialparent = initialparent;
+        }
 
-    // ToDO Move this out of here :D
+        public ProjectItemCode Codeitem { get; protected set; }
+        public CodeTypeDeclarationEx Initialparent { get; protected set; }
+    }
+
 
     /// <summary>
     ///  CodeDOM Service Impl. for IA
     /// </summary>
     public class CodeDOMServiceIA : CodeDOMService
-    {
-        
-
+    {    
         #region Fields
 
         Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
         CodeMemberMethodEx _autoexec;
         CodeTypeDeclarationEx _superBase;
+        BackgroundWorker _fileCompileWorker;
+
+        object startcompilerLock = new object();
+        ProjectItemCode _currentItem = null;
 
         #endregion
 
@@ -38,531 +53,609 @@ namespace SmartDevelop.Model.DOM
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
 
-            RootType.Members.Add(_autoexec = new CodeMemberMethodExAHK(true) 
-            {
-                Name = "AutoExec",
-                Attributes = MemberAttributes.Public | MemberAttributes.Static,
-                DefiningType = RootType,
-                ReturnType = new CodeTypeReference(typeof(void)),
-                LinePragma = new CodeLinePragma("all", 0),
-                IsHidden = true,
-                Project = project
-            });
+                _fileCompileWorker = new BackgroundWorker();
+                _fileCompileWorker.DoWork += CompileTokenFile;
+                _fileCompileWorker.RunWorkerCompleted += (s, e) => {
+                    OnRunWorkerCompleted();
+                };
+                _fileCompileWorker.WorkerSupportsCancellation = true;
+                _fileCompileWorker.WorkerReportsProgress = false;
 
-            #region Base Object
 
-            var baseobj = new CodeTypeDeclarationEx(null, "Object") { 
-                Project = project,
-                IsClass = true,
-                IsBuildInType = true
-            };
-            /*_superBase = new CodeTypeReferenceEx("Object", );*/
-            baseobj.Comments.Add(new CodeCommentStatement("Base Object of all other Custom Objects", true));
+            lock(_languageRootLock) {
 
-            CodeMemberMethodExAHK method;
+                #region Create  auto exec method for AHK Scripts
 
-            #region Object.Insert
+                _languageRoot.Members.Add(_autoexec = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "AutoExec",
+                    Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                    DefiningType = _languageRoot,
+                    ReturnType = new CodeTypeReference(typeof(void)),
+                    LinePragma = new CodeLinePragma("all", 0),
+                    IsHidden = true,
+                    Project = project
+                });
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "Insert",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false,
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
-            method.Comments.Add(new CodeCommentStatement("Inserts key-value pairs into the object, automatically adjusting existing keys if appropriate.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion
+                #region Setup Base Object
 
-            #region Object.Remove
+                var baseobj = new CodeTypeDeclarationEx(null, "Object")
+                {
+                    Project = project,
+                    IsClass = true,
+                    IsBuildInType = true
+                };
+                /*_superBase = new CodeTypeReferenceEx("Object", );*/
+                baseobj.Comments.Add(new CodeCommentStatement("Base Object of all other Custom Objects", true));
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "Remove",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
-            method.Comments.Add(new CodeCommentStatement("Removes key-value pairs from an object.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
-            baseobj.Members.Add(method);
+                CodeMemberMethodExAHK method;
 
-            #endregion
+                #region Object.Insert
 
-            #region Object.Clone
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "Insert",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false,
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
+                method.Comments.Add(new CodeCommentStatement("Inserts key-value pairs into the object, automatically adjusting existing keys if appropriate.", true));
+                method.ReturnType = new CodeTypeReference(typeof(bool));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "Clone",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
-            method.ReturnType = new CodeTypeReference(typeof(object));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion
+                #region Object.Remove
 
-            #region Object.MinIndex
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "Remove",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "key"));
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "value"));
+                method.Comments.Add(new CodeCommentStatement("Removes key-value pairs from an object.", true));
+                method.ReturnType = new CodeTypeReference(typeof(bool));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "MinIndex",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion
+                #region Object.Clone
 
-            #region Object.MaxIndex
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "Clone",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
+                method.ReturnType = new CodeTypeReference(typeof(object));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "MaxIndex",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion
+                #region Object.MinIndex
 
-            #region Object.SetCapacity
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "MinIndex",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "SetCapacity",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
-            method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion
+                #region Object.MaxIndex
 
-            #region Object.GetCapacity
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "MaxIndex",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "GetCapacity",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-            method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion 
+                #region Object.SetCapacity
 
-            #region Object.HasKey
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "SetCapacity",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "HasKey",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-            method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion 
+                #region Object.GetCapacity
 
-            #region Object._NewEnum
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "GetCapacity",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "_NewEnum",
-                Project = project,
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = false
-            };
-            
-            method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
-            method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
-            baseobj.Members.Add(method);
+                #endregion
 
-            #endregion 
-             
+                #region Object.HasKey
 
-            RootType.Members.Add(baseobj);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "HasKey",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
+                method.ReturnType = new CodeTypeReference(typeof(bool));
+                baseobj.Members.Add(method);
 
-            #endregion
+                #endregion
 
-            foreach(var m in project.Language.BuildInMembers) {
-                var codeobj = m as ICodeMemberEx;
-                if(codeobj != null) {
-                    codeobj.Project = project;
+                #region Object._NewEnum
+
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "_NewEnum",
+                    Project = project,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+
+                method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
+                method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
+                baseobj.Members.Add(method);
+
+                #endregion
+
+
+                _languageRoot.Members.Add(baseobj);
+
+                #endregion
+
+                // Import build-in members
+                foreach(var m in project.Language.BuildInMembers) {
+                    var codeobj = m as ICodeMemberEx;
+                    if(codeobj != null) {
+                        codeobj.Project = project;
+                    }
+                    _languageRoot.Members.Add(m);
                 }
-                RootType.Members.Add(m);
             }
         }
 
         #endregion
 
+        #region Public Methods
 
-        public override void CompileTokenFile(Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
+        public override void CompileTokenFileAsync(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
+            lock(startcompilerLock){
+                if(_fileCompileWorker.IsBusy) {
 
-            #region Clean Up
-
-            //remove all old members which are from this code file:
-
-            var oldMembers = (from CodeTypeMember m in RootType.Members
-                              let meth = m as ICodeMemberEx
-                              where (meth == null || (!meth.IsHidden && !meth.IsBuildInType && codeitem.Equals(meth.CodeDocumentItem)))
-                              select m).ToList();
-            foreach(var m in oldMembers)
-                RootType.Members.Remove(m);
-
-            if(CodeRanges.ContainsKey(codeitem))
-                CodeRanges[codeitem].Clear();
-            else
-                CodeRanges.Add(codeitem, new CodeRangeManager());
-            var currentRanges = CodeRanges[codeitem];
-
-            // cleanup errors
-            codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
-
-            #endregion
-
-            var codeLineMap = codeitem.SegmentService.GetCodeSegmentLinesMap();
-            CodeTypeDeclaration parent = initialparent;
-            Stack<CodeSegment> paramstack = new Stack<CodeSegment>();           
-            int linecnt = codeitem.Document.LineCount;
-            CodeTokenLine line;
-
-            Stack<CodeTypeDeclarationEx> parentHirarchy = new Stack<CodeTypeDeclarationEx>();
-            int bcc = 0;
-            parentHirarchy.Push(initialparent);
-
-            #region Parse
-
-            for(int i = 0; i <= linecnt; i++) {
-
-                if(codeLineMap.ContainsKey(i))
-                    line = codeLineMap[i];
-                else
-                    continue;
-
-                // is class definition?:
-
-                #region Parse Class Definition
-
-                var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
-                if(classkeywordSegment != null && classkeywordSegment.Token == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
-                    var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
-                    if(classNameSegment != null) {
-
-                        var next = classNameSegment.NextOmit(whitespacetokenNewLines);
-                        if(next != null) {
-                            CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
-                            CodeTypeReferenceEx basecls = null;
-                            CodeSegment refBaseClass = null;
-                            if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
-                                refBaseClass = next.NextOmit(whitespacetokenNewLines);
-
-                                if(refBaseClass != null) {
-                                    if(refBaseClass.Token == Token.Identifier) {
-                                        refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(codeitem, refBaseClass.TokenString, thisparent);
-                                        next = refBaseClass.NextOmit(whitespacetokenNewLines);
-                                    } else {
-                                        RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
-                                        next = next.NextOmit(whitespacetokenNewLines);
-                                    }
-                                } else {
-                                    if(next.Next != null && next.Next.Token != Token.BlockOpen) {
-                                        RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
-                                        next = next.NextOmit(whitespacetokenNewLines);
-                                    }
-                                }
-
-                            }
-
-                            if(next.Token == Token.BlockOpen) {
-
-                                #region Add Class Declaration
-
-                                CodeSegment classBodyStart = next;
-
-                                var type = new CodeTypeDeclarationEx(codeitem, classNameSegment.TokenString)
-                                {
-                                    IsClass = true,
-                                    LinePragma = CreatePragma(classNameSegment, codeitem.FilePath),
-                                    CodeDocumentItem = codeitem
-                                };
-                                classNameSegment.CodeDOMObject = type;
+                    if(_currentItem != null && _currentItem != codeitem)
+                        throw new NotSupportedException("Multiple code documents arn't supported in an async task as enqueeing is not implemnted now.");
 
 
-                                // check if this type was alread defined in this scope
-                                if(thisparent.GetInheritedMembers().Contains(type)) {
-                                    RegisterError(codeitem, classNameSegment, "oh my dear, this class already exisits in the current scope!");
-                                } else {
+                    if(!_fileCompileWorker.CancellationPending)
+                        _fileCompileWorker.CancelAsync();
 
-                                    #region Check & Resolve Baseclass
-
-                                    if(basecls != null) {
-                                        //check if we have a circual interhance tree
-                                        var baseclassImpl = basecls.ResolveTypeDeclarationCache();
-                                        if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(codeitem, classNameSegment.TokenString, thisparent))) {
-                                            //circular dependency detected!!
-                                            RegisterError(codeitem, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
-                                        } else {
-                                            if(basecls != null)
-                                                type.BaseTypes.Add(basecls);
-                                            else
-                                                type.BaseTypes.Add(new CodeTypeReferenceEx(codeitem, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
-                                        }
-                                    }
-
-                                    #endregion
-
-                                    // Add it to the CodeDOM Tree
-                                    thisparent.Members.Add(type);
-                                    type.Parent = thisparent;
-                                }
-
-                                // Create a CodeRange Item
-                                int startOffset = classBodyStart.Range.Offset;
-                                var classBodyEnd = classBodyStart.FindClosingBracked(true);
-                                if(classBodyEnd != null) {
-                                    int length = (classBodyEnd.Range.Offset - startOffset);
-                                    currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
-                                } else {
-                                    RegisterError(codeitem, classBodyStart, "Expected: " + Token.BlockClosed);
-                                }
-
-                                parentHirarchy.Push(type);
-                                bcc++;
-
-                                i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
-                                continue;
-
-                                #endregion
-
-                            } else {
-                                RegisterError(codeitem, next, "Expected: " + Token.BlockOpen);
-                                i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
-                            }
-                        }
+                    while(true) {
+                        if(_fileCompileWorker.IsBusy) {
+                            Thread.Sleep(1);
+                        } else
+                            break;
                     }
                 }
-                
-                #endregion
-
-                // is class property / field
-
-                #region Parse Class Properties / Fields
-
-                var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
-                if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
-                    var property = decl.NextOmit(whitespacetokens);
-
-                    if(parentHirarchy.Count > 1) {
-                        // we must be in a class to have method properties
-                        if(property != null && property.Token == Token.Identifier) {
-                            // this is a class field declaration
-
-                            var propertyType = new CodeTypeReference(typeof(object));
-                            var memberprop = new CodeMemberPropertyEx(codeitem)
-                            {
-                                Name = property.TokenString,
-                                Attributes = MemberAttributes.Public,
-                                Type = propertyType,
-                                LinePragma = CreatePragma(property, codeitem.FilePath)
-                            };
-                            property.CodeDOMObject = memberprop;
-                            decl.CodeDOMObject = propertyType;
-                            parentHirarchy.Peek().Members.Add(memberprop);
-                        } else {
-                            RegisterError(codeitem, property, "unexpected Token -> Expected Identifier!");
-                        }
-                    } else {
-                        var err = "unexpected class field declaration -> not in class body";
-                        if(property != null)
-                            RegisterError(codeitem, property, err);
-                        RegisterError(codeitem, decl, err);
-                    }
-
-
-
-                }
-
-                #endregion
-
-
-                // is method definition?:
-
-                #region Analyze for Method Definition
-
-                var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
-                if(methodSegment != null && methodSegment.Token == Token.Identifier) {
-                    var methodSignatureStart = methodSegment.Next;
-                    if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
-                        var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
-                        if(methodSignatureEnd != null) {
-                            var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLinesComments);
-                            if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
-                                // jup we have a method definition here.
-                                // Method body starts at startMethodBody
-                                // Method body ends at
-                                var endMethodBody = startMethodBody.FindClosingBracked(true);
-                                if(endMethodBody != null) {
-
-                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
-                                    bool hasDeclarationError = false;
-
-                                    #region Generate Method Definition DOM
-
-                                    var method = new CodeMemberMethodExAHK(codeitem)
-                                    {
-                                        Name = methodSegment.TokenString,
-                                        LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
-                                        CodeDocumentItem = codeitem,
-                                        ReturnType = new CodeTypeReferenceEx(codeitem, typeof(object))
-                                    };
-                                    methodSegment.CodeDOMObject = method;
-
-                                    //check if this method is not already defined elsewere in current scope
-
-                                    var equalmethods = from m in thisparent.Members.Cast<CodeTypeMember>()
-                                                       let meth = m as CodeMemberMethodExAHK
-                                                       where meth != null && !meth.IsBuildInType && meth.Equals(method)
-                                                       select meth;
-
-
-                                    if(equalmethods.Any()) {
-                                        RegisterError(codeitem, methodSegment,
-                                            string.Format("The Methodename '{0}' is already used in the current scope!", method.Name));
-                                        hasDeclarationError = true;
-                                    } else {
-
-
-                                        // extract Method Comment
-                                        var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
-                                        if(comment != null && comment.Token == Token.MultiLineComment) {
-                                            method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
-                                        } else if(comment != null && comment.Token == Token.SingleLineComment) {
-
-                                            //todo: collect all above singleline comments
-                                        }
-
-                                        // extract method params
-                                        paramstack.Clear();
-                                        CodeSegment previous = methodSignatureStart;
-
-                                        // get method properties:
-                                        while(true) {
-                                            var current = previous.Next;
-                                            if(current.Token == Token.Identifier) {
-                                                paramstack.Push(current);
-                                            } else if(current.Token == Token.ParameterDelemiter || current.Token == Token.LiteralBracketClosed) {
-                                                // end of param reached:
-                                                if(paramstack.Count == 1) {
-                                                    // thread one param as the untyped argument, type of Object
-                                                    method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object), paramstack.Pop().TokenString));
-                                                } else if(paramstack.Count > 1) {
-                                                    // thread two param as the type and argument
-                                                    method.Parameters.Add(new CodeParameterDeclarationExpression(paramstack.Pop().TokenString, paramstack.Pop().TokenString));
-                                                }
-                                                if(current.Token == Token.LiteralBracketClosed)
-                                                    break;
-                                            }
-                                            previous = current;
-                                        }
-                                    }
-                                    #endregion
-
-                                    // get method statements
-                                    method.Statements.AddRange(
-                                        CollectAllCodeStatements(codeitem, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
-
-
-                                    // add it to the code DOM Tree
-                                    if(!hasDeclarationError) {
-                                        thisparent.Members.Add(method);
-                                        method.DefiningType = thisparent;
-                                    }
-                                
-
-                                    // Create a CodeRange Item
-                                    int startOffset = startMethodBody.Range.Offset;
-                                    int length = (endMethodBody.Range.Offset - startOffset);
-                                    currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
-
-                                    // move the scanpointer to the method end:
-                                    i = endMethodBody.LineNumber;
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                #endregion
-
-                #region Parse Remaining Tokens
-
-                if(codeLineMap.ContainsKey(i)) {
-                    var lineBlock = codeLineMap[i];
-                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : RootType;
-
-                    foreach(var segment in lineBlock.CodeSegments) {
-
-                        if(segment.Token == Token.BlockOpen) {
-                            bcc++;
-                        } else if(segment.Token == Token.BlockClosed) {
-                            bcc--;
-                            if(parentHirarchy.Count - 2 == bcc) {
-                                if(parentHirarchy.Any())
-                                    parentHirarchy.Pop();
-                            }
-                        }
-
-                        _autoexec.Statements.AddRange(
-                                        CollectAllCodeStatements(codeitem, thisparent, codeLineMap, i, i));
-                    }
-                } else
-                    continue;
-
-                #endregion
+                // if we are here the compiler is finished. either by completion or by cancelation
+                _currentItem = codeitem;
+                _fileCompileWorker.RunWorkerAsync(new CompilerArgument(codeitem, initialparent));
             }
-
-            #endregion
-
-            AnalyzeAST(codeitem);
         }
 
+        #endregion
 
-        #region Analyze AST 
+        #region Token Compiler Worker
+
+        protected virtual void CompileTokenFile(object sender, DoWorkEventArgs e) {
+
+            if(e.Cancel)
+                return;
 
 
-        void AnalyzeAST(Projecting.ProjectItemCode codeitem) {
+            var arg = e.Argument as CompilerArgument;
+            ProjectItemCode codeitem = arg.Codeitem;
+
+            lock(_languageRootLock) {
+
+                CodeTypeDeclarationEx initialparent = _languageRoot; //arg.Initialparent;
+
+                if(e.Cancel)
+                    return;
+
+                #region Clean Up
+
+                //remove all old members which are from this code file:
+
+                var oldMembers = (from CodeTypeMember m in _languageRoot.Members
+                                  let meth = m as ICodeMemberEx
+                                  where (meth == null || (!meth.IsHidden && !meth.IsBuildInType && codeitem.Equals(meth.CodeDocumentItem)))
+                                  select m).ToList();
+                foreach(var m in oldMembers)
+                    _languageRoot.Members.Remove(m);
+
+                if(CodeRanges.ContainsKey(codeitem))
+                    CodeRanges[codeitem].Clear();
+                else
+                    CodeRanges.Add(codeitem, new CodeRangeManager());
+                var currentRanges = CodeRanges[codeitem];
+
+                // cleanup errors
+                codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
+
+                #endregion
+
+                var codeLineMap = codeitem.SegmentService.GetCodeSegmentLinesMap();
+                CodeTypeDeclaration parent = initialparent;
+                Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
+
+                int linecnt = codeLineMap.Keys.Max();
+
+                CodeTokenLine line;
+
+                Stack<CodeTypeDeclarationEx> parentHirarchy = new Stack<CodeTypeDeclarationEx>();
+                int bcc = 0;
+                parentHirarchy.Push(initialparent);
+
+                if(e.Cancel)
+                    return;
+
+                #region Parse
+
+                for(int i = 0; i <= linecnt; i++) {
+
+                    if(e.Cancel)
+                        return;
+
+                    if(codeLineMap.ContainsKey(i))
+                        line = codeLineMap[i];
+                    else
+                        continue;
+
+                    // is class definition?:
+
+                    #region Parse Class Definition
+
+                    var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
+                    if(classkeywordSegment != null && classkeywordSegment.Token == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
+                        var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
+                        if(classNameSegment != null) {
+
+                            var next = classNameSegment.NextOmit(whitespacetokenNewLines);
+                            if(next != null) {
+                                CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
+                                CodeTypeReferenceEx basecls = null;
+                                CodeSegment refBaseClass = null;
+                                if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
+                                    refBaseClass = next.NextOmit(whitespacetokenNewLines);
+
+                                    if(refBaseClass != null) {
+                                        if(refBaseClass.Token == Token.Identifier) {
+                                            refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(codeitem, refBaseClass.TokenString, thisparent);
+                                            next = refBaseClass.NextOmit(whitespacetokenNewLines);
+                                        } else {
+                                            RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
+                                            next = next.NextOmit(whitespacetokenNewLines);
+                                        }
+                                    } else {
+                                        if(next.Next != null && next.Next.Token != Token.BlockOpen) {
+                                            RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
+                                            next = next.NextOmit(whitespacetokenNewLines);
+                                        }
+                                    }
+
+                                }
+
+                                if(next.Token == Token.BlockOpen) {
+
+                                    #region Add Class Declaration
+
+                                    CodeSegment classBodyStart = next;
+
+                                    var type = new CodeTypeDeclarationEx(codeitem, classNameSegment.TokenString)
+                                    {
+                                        IsClass = true,
+                                        LinePragma = CreatePragma(classNameSegment, codeitem.FilePath),
+                                        CodeDocumentItem = codeitem
+                                    };
+                                    classNameSegment.CodeDOMObject = type;
+
+
+                                    // check if this type was alread defined in this scope
+                                    if(thisparent.GetInheritedMembers().Contains(type)) {
+                                        RegisterError(codeitem, classNameSegment, "oh my dear, this class already exisits in the current scope!");
+                                    } else {
+
+                                        #region Check & Resolve Baseclass
+
+                                        if(basecls != null) {
+                                            //check if we have a circual interhance tree
+                                            var baseclassImpl = basecls.ResolveTypeDeclarationCache();
+                                            if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(codeitem, classNameSegment.TokenString, thisparent))) {
+                                                //circular dependency detected!!
+                                                RegisterError(codeitem, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
+                                            } else {
+                                                if(basecls != null)
+                                                    type.BaseTypes.Add(basecls);
+                                                else
+                                                    type.BaseTypes.Add(new CodeTypeReferenceEx(codeitem, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                            }
+                                        }
+
+                                        #endregion
+
+                                        // Add it to the CodeDOM Tree
+                                        thisparent.Members.Add(type);
+                                        type.Parent = thisparent;
+                                    }
+
+                                    // Create a CodeRange Item
+                                    int startOffset = classBodyStart.Range.Offset;
+                                    var classBodyEnd = classBodyStart.FindClosingBracked(true);
+                                    if(classBodyEnd != null) {
+                                        int length = (classBodyEnd.Range.Offset - startOffset);
+                                        currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
+                                    } else {
+                                        RegisterError(codeitem, classBodyStart, "Expected: " + Token.BlockClosed);
+                                    }
+
+                                    parentHirarchy.Push(type);
+                                    bcc++;
+
+                                    i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
+                                    continue;
+
+                                    #endregion
+
+                                } else {
+                                    RegisterError(codeitem, next, "Expected: " + Token.BlockOpen);
+                                    i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
+                                }
+                            }
+                        }
+                    }
+
+                    #endregion
+
+                    // is class property / field
+
+                    #region Parse Class Properties / Fields
+
+                    var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
+                    if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
+                        var property = decl.NextOmit(whitespacetokens);
+
+                        if(parentHirarchy.Count > 1) {
+                            // we must be in a class to have method properties
+                            if(property != null && property.Token == Token.Identifier) {
+                                // this is a class field declaration
+
+                                var propertyType = new CodeTypeReference(typeof(object));
+                                var memberprop = new CodeMemberPropertyEx(codeitem)
+                                {
+                                    Name = property.TokenString,
+                                    Attributes = MemberAttributes.Public,
+                                    Type = propertyType,
+                                    LinePragma = CreatePragma(property, codeitem.FilePath)
+                                };
+                                property.CodeDOMObject = memberprop;
+                                decl.CodeDOMObject = propertyType;
+                                parentHirarchy.Peek().Members.Add(memberprop);
+                            } else {
+                                RegisterError(codeitem, property, "unexpected Token -> Expected Identifier!");
+                            }
+                        } else {
+                            var err = "unexpected class field declaration -> not in class body";
+                            if(property != null)
+                                RegisterError(codeitem, property, err);
+                            RegisterError(codeitem, decl, err);
+                        }
+
+
+
+                    }
+
+                    #endregion
+
+
+                    // is method definition?:
+
+                    #region Analyze for Method Definition
+
+                    var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
+                    if(methodSegment != null && methodSegment.Token == Token.Identifier) {
+                        var methodSignatureStart = methodSegment.Next;
+                        if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
+                            var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
+                            if(methodSignatureEnd != null) {
+                                var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLinesComments);
+                                if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
+                                    // jup we have a method definition here.
+                                    // Method body starts at startMethodBody
+                                    // Method body ends at
+                                    var endMethodBody = startMethodBody.FindClosingBracked(true);
+                                    if(endMethodBody != null) {
+
+                                        CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
+                                        bool hasDeclarationError = false;
+
+                                        #region Generate Method Definition DOM
+
+                                        var method = new CodeMemberMethodExAHK(codeitem)
+                                        {
+                                            Name = methodSegment.TokenString,
+                                            LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
+                                            CodeDocumentItem = codeitem,
+                                            ReturnType = new CodeTypeReferenceEx(codeitem, typeof(object))
+                                        };
+                                        methodSegment.CodeDOMObject = method;
+
+                                        //check if this method is not already defined elsewere in current scope
+
+                                        var equalmethods = from m in thisparent.Members.Cast<CodeTypeMember>()
+                                                           let meth = m as CodeMemberMethodExAHK
+                                                           where meth != null && !meth.IsBuildInType && meth.Equals(method)
+                                                           select meth;
+
+
+                                        if(equalmethods.Any()) {
+                                            RegisterError(codeitem, methodSegment,
+                                                string.Format("The Methodename '{0}' is already used in the current scope!", method.Name));
+                                            hasDeclarationError = true;
+                                        } else {
+
+
+                                            // extract Method Comment
+                                            var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
+                                            if(comment != null && comment.Token == Token.MultiLineComment) {
+                                                method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
+                                            } else if(comment != null && comment.Token == Token.SingleLineComment) {
+
+                                                //todo: collect all above singleline comments
+                                            }
+
+                                            // extract method params
+                                            paramstack.Clear();
+                                            CodeSegment previous = methodSignatureStart;
+
+                                            // get method properties:
+                                            while(true) {
+                                                var current = previous.Next;
+                                                if(current.Token == Token.Identifier) {
+                                                    paramstack.Push(current);
+                                                } else if(current.Token == Token.ParameterDelemiter || current.Token == Token.LiteralBracketClosed) {
+                                                    // end of param reached:
+                                                    if(paramstack.Count == 1) {
+                                                        // thread one param as the untyped argument, type of Object
+                                                        method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object), paramstack.Pop().TokenString));
+                                                    } else if(paramstack.Count > 1) {
+                                                        // thread two param as the type and argument
+                                                        method.Parameters.Add(new CodeParameterDeclarationExpression(paramstack.Pop().TokenString, paramstack.Pop().TokenString));
+                                                    }
+                                                    if(current.Token == Token.LiteralBracketClosed)
+                                                        break;
+                                                }
+                                                previous = current;
+                                            }
+                                        }
+                                        #endregion
+
+                                        // get method statements
+                                        method.Statements.AddRange(
+                                            CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+
+
+                                        // add it to the code DOM Tree
+                                        if(!hasDeclarationError) {
+                                            thisparent.Members.Add(method);
+                                            method.DefiningType = thisparent;
+                                        }
+
+
+                                        // Create a CodeRange Item
+                                        int startOffset = startMethodBody.Range.Offset;
+                                        int length = (endMethodBody.Range.Offset - startOffset);
+                                        currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
+
+                                        // move the scanpointer to the method end:
+                                        i = endMethodBody.LineNumber;
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #endregion
+
+                    #region Parse Remaining Tokens
+
+                    if(codeLineMap.ContainsKey(i)) {
+                        var lineBlock = codeLineMap[i];
+                        CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
+
+                        foreach(var segment in lineBlock.CodeSegments) {
+
+                            if(e.Cancel)
+                                return;
+
+                            if(segment.Token == Token.BlockOpen) {
+                                bcc++;
+                            } else if(segment.Token == Token.BlockClosed) {
+                                bcc--;
+                                if(parentHirarchy.Count - 2 == bcc) {
+                                    if(parentHirarchy.Any())
+                                        parentHirarchy.Pop();
+                                }
+                            }
+
+                            _autoexec.Statements.AddRange(
+                                            CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, i, i));
+                        }
+                    } else
+                        continue;
+
+                    #endregion
+                }
+
+                #endregion
+
+                AnalyzeAST(codeitem, e);
+            }
+        }
+
+        #endregion
+
+        #region Analyze AST
+
+
+        void AnalyzeAST(Projecting.ProjectItemCode codeitem, DoWorkEventArgs e) {
 
             var segmentService = codeitem.SegmentService;
             var segments = segmentService.GetSegments();
 
             foreach(var segment in segments) {
+
+                if(e.Cancel)
+                    return;
+
 
                 #region Resolve CodeTypeReferencees
 
@@ -639,11 +732,15 @@ namespace SmartDevelop.Model.DOM
         /// <param name="startLine"></param>
         /// <param name="endLine"></param>
         /// <returns></returns>
-        public CodeStatementCollection CollectAllCodeStatements(Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
+        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
             CodeTokenLine line;
             var codeStatements = new CodeStatementCollection();
 
             for(int i = startLine; i <= endLine; i++) {
+
+                if(e.Cancel)
+                    break;
+
                 if(segments.ContainsKey(i))
                     line = segments[i];
                 else
@@ -656,7 +753,6 @@ namespace SmartDevelop.Model.DOM
                     codeStatements.Add(ex);
                     toParse = next;
                 }
-               
             }
             return codeStatements;
         }
@@ -803,7 +899,7 @@ namespace SmartDevelop.Model.DOM
                 #endregion
 
             } else if(tokenSegment.Token == Token.TraditionalCommandInvoke) {
-                var members = from m in RootType.Members.Cast<CodeTypeMember>()
+                var members = from m in _languageRoot.Members.Cast<CodeTypeMember>()
                               let methd = m as CodeMemberMethodExAHK
                               where methd != null && methd.IsTraditionalCommand && methd.Name.Equals(tokenSegment.TokenString, StringComparison.InvariantCultureIgnoreCase)
                               select methd;
@@ -822,5 +918,17 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+        protected virtual void OnRunWorkerCompleted() {
+            _currentItem = null;
+            OnASTUpdated();
+        }
+
+        public override bool IsBusy {
+            get { return _fileCompileWorker.IsBusy; }
+        }
+
+        public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
+            throw new NotImplementedException();
+        }
     }
 }

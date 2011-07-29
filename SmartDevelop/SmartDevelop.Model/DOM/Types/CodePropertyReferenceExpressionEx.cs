@@ -105,9 +105,9 @@ namespace SmartDevelop.Model.DOM.Types
 
             if(_propertyDecl == null) {
                 var p = Project;
-                if(p != null && p.DOMService.RootType != EnclosingType) {
+                if(p != null && p.DOMService.RootTypeUnSave != EnclosingType) {
 
-                    var members = from member in p.DOMService.RootType.Members.Cast<CodeTypeMember>()
+                    var members = from member in p.DOMService.RootTypeUnSave.Members.Cast<CodeTypeMember>()
                                   let methodMember = member as CodeMemberPropertyEx
                                   where methodMember != null && methodMember.Name.Equals(this.PropertyName, lang.NameComparisation)
                                   select methodMember;

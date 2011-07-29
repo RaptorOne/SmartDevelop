@@ -73,6 +73,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     _texteditor.TextArea.Caret.BringCaretToView();
                 };
 
+
+            _projectitem.Project.DOMService.ASTUpdated += (s, e) => {
+                _workbenchservice.STADispatcher.Invoke(new Action(() => {
+                        _texteditor.TextArea.TextView.Redraw( DispatcherPriority.ContextIdle);
+                    }));
+                };
+
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
             _texteditor.ShowLineNumbers = true;
@@ -220,7 +227,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
                 if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
                     var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
-                    var methodDeclaration = methodRef.ResolveMethodDeclarationCache();
+                    var methodDeclaration = methodRef.ResolvedMethodMember; //.ResolveMethodDeclarationCache();
 
                     if(methodDeclaration != null) {
                         var s = methodDeclaration.TryFindSegment();
@@ -229,7 +236,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     }
                 } else if(segment.CodeDOMObject is CodeTypeReferenceEx) {
                     var typeRef = segment.CodeDOMObject as CodeTypeReferenceEx;
-                    var classDeclaration = typeRef.ResolveTypeDeclarationCache();
+                    var classDeclaration = typeRef.ResolvedTypeDeclaration; //.ResolveTypeDeclarationCache();
 
                     if(classDeclaration != null) {
                         var s = classDeclaration.TryFindSegment();
@@ -238,7 +245,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     }
                 } else if(segment.CodeDOMObject is CodePropertyReferenceExpressionEx) {
                     var propRef = segment.CodeDOMObject as CodePropertyReferenceExpressionEx;
-                    var propDeclaration = propRef.ResolvePropertyDeclarationCache();
+                    var propDeclaration = propRef.ResolvedPropertyMember; // .ResolvePropertyDeclarationCache();
 
                     if(propDeclaration != null) {
                         var s = propDeclaration.TryFindSegment();
@@ -292,6 +299,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             if(pos != null) {
 
                 var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
+                if(segment == null)
+                    return;
 
                 string msg;
 

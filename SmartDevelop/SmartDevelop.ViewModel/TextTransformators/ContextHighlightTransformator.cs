@@ -10,17 +10,20 @@ using System.CodeDom;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.DOM.Types;
 using SmartDevelop.Model.Tokenizing;
+using SmartDevelop.Model.DOM;
 
 namespace SmartDevelop.ViewModel.TextTransformators
 {
     class ContextHighlightTransformator : DocumentColorizingTransformer
     {
-        ProjectItemCode _codeProject;
+        readonly ProjectItemCode _codeProject;
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
         Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
+        //readonly CodeDOMService _domservice;
 
         public ContextHighlightTransformator(ProjectItemCode codeProject) {
             _codeProject = codeProject;
+            //_domservice = _codeProject.Project.DOMService;
         }
 
 

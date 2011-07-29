@@ -99,16 +99,15 @@ namespace SmartDevelop.Model.Projecting
             _codeSegmentService = new DocumentCodeSegmentService(this);
             _tokenizer = _language.CreateTokenizer(this, _codedocument);
 
-            _tokenizer.Finished += (s, e) => {
+            _tokenizer.FinishedSucessfully += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
-
                 //// notify that we have a new token base to parse
                 OnTokenizerUpdated(this, new EventArgs<ProjectItemCode>(this));
-                OnRequestTextInvalidation();
+                //OnRequestTextInvalidation();
             };
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
-            tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(200);
+            tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(500);
             tokenUpdateTimer.Tick += CheckUpdateTokenRepresentation;
             tokenUpdateTimer.Start();
         }
