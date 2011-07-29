@@ -135,11 +135,18 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public void EnsureTokenizerHasWorked() {
             while(_tokenizer.IsBusy) {
+                Thread.Sleep(1);
+            }
+            UpdateTokenizer();
+            while(true) {
+                if(!_tokenizer.IsBusy)
+                    break;
                 Thread.Sleep(10);
             }
+        }
 
-            if(_documentdirty)
-                _tokenizer.TokenizeSync();
+        public void EnsureASTIsUpdated() {
+            Project.DOMService.EnsureIsUpdated();
         }
 
 
@@ -287,7 +294,6 @@ namespace SmartDevelop.Model.Projecting
 
         public override string ToString() {
             return string.Format("{0} ({1})", this.Name);
-
         }
 
     }

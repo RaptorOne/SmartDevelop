@@ -136,7 +136,7 @@ namespace SmartDevelop.Model.DOM.Types
         #endregion
 
         public override string ToString() {
-            return string.Format("TypeDeclaration: {0}", this.Name);
+            return string.Format("\nTypeDeclaration: {0}", this.Name);
         }
 
         #region IEquatable

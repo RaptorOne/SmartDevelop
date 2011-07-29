@@ -55,6 +55,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char PARAMDELEMITER = ',';
         const char MEMBERINVOKE = '.';
         const char STRINGCONCAT = '.';
+        const char ESCAPECHAR = '`';
         const char VARIABLEDEREF = '%';
         
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
@@ -108,11 +109,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _tokenizerworker.RunWorkerCompleted += (s, e) => {
                 if(!e.Cancelled)
                     OnFinishedSucessfully();
-                else {
-                    var cucu = e.Cancelled;
-                    if(cucu) {
-
-                    }
+                lock(_tokenizerworkerLock) {
+                    _asynctokenizerworkerBusy = false;
                 }
             };
         }
@@ -125,33 +123,38 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         /// Starts Tokenizing async
         /// </summary>
         public override void TokenizeAsync() {
-            if(_tokenizerworker.IsBusy) {
-                _tokenizerworker.CancelAsync();
-                while(true) {
-                    if(_tokenizerworker.IsBusy) {
-                        Thread.Sleep(1);
-                    } else
-                        break;
+            lock(_tokenizerworkerLock) {
+                if(_tokenizerworker.IsBusy) {
+                    _tokenizerworker.CancelAsync();
+                    while(true) {
+                        if(_tokenizerworker.IsBusy) {
+                            Thread.Sleep(1);
+                        } else
+                            break;
+                    }
                 }
+                _text = _document.Text;
+                _textlen = _text.Length;
+                _asynctokenizerworkerBusy = true;
+                _tokenizerworker.RunWorkerAsync();
             }
-            _text = _document.Text;
-            _textlen = _text.Length;
-            _tokenizerworker.RunWorkerAsync();
         }
 
         /// <summary>
         /// Starts Tokenizing sync
         /// </summary>
         public override void TokenizeSync() {
-            if(!_tokenizerworker.IsBusy) {
-                _syncTokenizerBusy = true;
+            lock(_tokenizerworkerLock) {
+                if(!_tokenizerworker.IsBusy) {
+                    _syncTokenizerBusy = true;
 
-                _text = _document.Text;
-                _textlen = _text.Length;
-                TokinizeWorker(null, new DoWorkEventArgs(null));
+                    _text = _document.Text;
+                    _textlen = _text.Length;
+                    TokinizeWorker(null, new DoWorkEventArgs(null));
 
-                _syncTokenizerBusy = false;
-                OnFinishedSucessfully();
+                    _syncTokenizerBusy = false;
+                    OnFinishedSucessfully();
+                }
             }
         }
 
@@ -169,7 +172,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         #region Properties
 
+        object _tokenizerworkerLock = new object();
         bool _syncTokenizerBusy = false;
+        bool _asynctokenizerworkerBusy = false;
+        
 
         /// <summary>
         /// Is tokenizing running now?
@@ -179,8 +185,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 if(_syncTokenizerBusy)
                     return true;
 
-                lock(_tokenizerworker) {
-                    return _tokenizerworker.IsBusy;
+                lock(_tokenizerworkerLock) {
+                    return _asynctokenizerworkerBusy;//_tokenizerworker.IsBusy;
                 }
             }
         }
@@ -348,7 +354,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     #endregion
 
                 } else if(!IsInAnyComment()) {
-                    //expressions
+
                     if(!traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
                         _currentToken = TokenHelper.BRAKETS[currentChar];
                     } else if(currentChar == SINGLELINE_COMMENT) {
@@ -369,13 +375,65 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
 
-                        _currentToken = Token.TraditionalCommandInvoke;
+                        #region Parse Traditional Command
+
+                        EndActiveToken(i);
+
+                        _activeToken = Token.TraditionalCommandInvoke;
+                        //todo: parse in traditional mode.
+                        var command = ExtractWord(i);
+                        i += command.Length;
+                        EndActiveToken(i);
+
+                        //Token localActiveToken = Token.Unknown;
+                        _activeToken = Token.TraditionalString;
+                        _currentToken = Token.TraditionalString;
+                        bool inescapeseqBefore = false;
+                        bool inderef = false;
+                        while(_textlen > i) {
+
+
+                            if(IsSingleCharToken(_activeToken)) {
+                                if(inderef)
+                                    _currentToken = Token.Unknown;
+                                else
+                                    _currentToken = Token.TraditionalString;
+                            }
+
+
+                            if(_text[i] == '\n'){
+                                goto redo; //for now we assume traditional commands can't be multilined
+                            } else if(_text[i] == PARAMDELEMITER && !inescapeseqBefore) {
+                                _currentToken = Token.ParameterDelemiter;
+                            } else if(_text[i] == VARIABLEDEREF && !inescapeseqBefore && !inderef) {
+                                _currentToken = Token.Deref;
+                                inderef = true;
+                            } else if(_text[i] == VARIABLEDEREF && inderef) {
+                                _currentToken = Token.Deref;
+                                inderef = false;
+                            }
+
+                            if(_text[i] == ESCAPECHAR && !inescapeseqBefore) {
+                                inescapeseqBefore = true;
+                            } else {
+                                inescapeseqBefore = false;
+                            }
+
+                            if(_activeToken != _currentToken || IsSingleCharToken(_activeToken)) {
+                                EndActiveToken(i);
+                                _activeToken = _currentToken;
+                            }
+                            i++;
+                        }
+
+
                         //traditionalMode = true;
+
+                        #endregion
 
                     } else if(!traditionalMode && OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.OperatorFlow;
-                        // to do: default expressions_activeToken
-                    } else if(_activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
+                    } else if(!traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.Unknown;
                     }
                 }
@@ -396,10 +454,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 _codesegmentsSave.Clear();
                 _codesegmentsSave.AddRange(_codesegmentsWorker);
             }
+            lock(_tokenizerworkerLock) {
+                _asynctokenizerworkerBusy = false; //_tokenizerworker.IsBusy;
+            }
         }
 
         #endregion
 
+        #region End & Save Tokenflow
 
         static char[] trimchars = { ' ', '\t', '\n', '\r' };
         CodeSegment _previous = null;
@@ -454,6 +516,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _currentColStart = _currentColumn;
         }
 
+        #endregion
 
         #region Helpermethods
 
@@ -569,7 +632,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         public static bool IsSingleCharToken(Token token) {
-            return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || TokenHelper.BRAKETS.ContainsValue(token);
+            return token == Token.NewLine || token == Token.ParameterDelemiter || token == Token.MemberInvoke || token == Token.StringConcat || token == Token.Deref || TokenHelper.BRAKETS.ContainsValue(token);
         }
 
         bool IsReservedKeyWordStart(int index) {

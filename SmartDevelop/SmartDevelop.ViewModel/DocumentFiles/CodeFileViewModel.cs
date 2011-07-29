@@ -307,8 +307,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 if(segment.HasError) {
                     msg = segment.ErrorContext.Description;
                 } else
-                 msg = string.Format("[{0}] {1} @ Line {2} Col {3} \n {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
-                
+                 msg = string.Format("[{0}] {1} @ L{2} C{3}, {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
                 
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;

@@ -31,6 +31,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         static List<char> whitespaces = new List<char> { ' ', '\t' };
         static List<Token> t_whitespaces = new List<Token> { Token.WhiteSpace };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
+        static List<char> triggerCodeCompletion = new List<char> { '.' };
 
         #endregion
 
@@ -46,6 +47,10 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         }
 
         CompletionWindow CreateNewCompletionWindow() {
+
+            if(_completionWindow != null)
+                _completionWindow.Close();
+
             _completionWindow = new CompletionWindow(_texteditor.TextArea);
             _completionWindow.Closed += delegate
             {
@@ -77,7 +82,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
             try {
                 currentChar = e.Text[0];
 
-                if(_texteditor.CaretOffset > 1) {
+                if(_texteditor.CaretOffset > 1 && !triggerCodeCompletion.Contains(currentChar)) {
                     beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
                     if(!(beforeChar == ' ' || beforeChar == '\t'))
                         return;
@@ -93,9 +98,9 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
                     return;
 
-                var previousUsabeToken = segment.PreviousOmit(t_whitespaces);
-                if(previousUsabeToken.Token == Token.KeyWord)
-                    return;
+                //var previousUsabeToken = segment.PreviousOmit(t_whitespaces);
+                //if(previousUsabeToken.Token == Token.KeyWord)
+                //    return;
 
             } catch {
                 return;
@@ -108,13 +113,12 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 // Open code completion after the user has pressed dot:
                 if(e.Text == ".") {
 
-                    if(_completionWindow != null)
-                        _completionWindow.Close();
-
                     IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
 
                     //ensure we have a updated tokenizer
                     _projectitem.EnsureTokenizerHasWorked();
+                    _projectitem.Project.DOMService.EnsureIsUpdated();
+
 
                     // do type lookup & list avaiable members
                     var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset - 1, true);

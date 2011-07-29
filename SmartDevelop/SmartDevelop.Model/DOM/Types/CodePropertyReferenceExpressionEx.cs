@@ -120,7 +120,7 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         public override string ToString() {
-            return "CodePropertyReferenceExpression: " + this.PropertyName + "\n" + CommentInfo;
+            return this.PropertyName + "\n" + CommentInfo;
         }
 
 

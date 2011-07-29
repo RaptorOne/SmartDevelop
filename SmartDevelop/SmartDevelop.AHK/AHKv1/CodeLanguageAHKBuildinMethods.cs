@@ -6,6 +6,7 @@ using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
 using SmartDevelop.AHK.AHKv1.Tokenizing;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -590,8 +591,30 @@ namespace SmartDevelop.AHK.AHKv1
             return members;
         }
 
+
+        public static IEnumerable<PreProcessorDirective> GetDirectives() {
+            #region Generate Directives
+
+            foreach(var d in Directives()){
+
+                var commandStr = d.Trim();
+                if(string.IsNullOrWhiteSpace(commandStr))
+                    continue;
+
+                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, 1, SpecailWordCharacters);
+
+                yield return new PreProcessorDirective()
+                {
+                    Name = commandName
+                };
+
+            }
+
+            #endregion
+        }
+
         static string[] BuildInProperties() {
-#region Rawstring
+            #region Rawstring
             string propertyrawString =
 @"A_Ahkpath
 A_Ahkversion
@@ -734,6 +757,8 @@ A_Ptrsize";
         }
 
         static string[] BuildInCommands() {
+
+            #region commands 
             string str =
 @"
 ImageSearch , OutputVarX, OutputVarY, X1, Y1, X2, Y2, ImageFile
@@ -935,7 +960,53 @@ IfWinExist [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 IfWinNotActive [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 IfWinNotExist [, WinTitle, WinText, ExcludeTitle, ExcludeText]
 ";
+            #endregion
             return str.Split('\n');
+        }
+
+
+        static string[] Directives() {
+
+            #region directives
+            string directives =
+@"
+#Include
+#AllowSameLineComments \n(Only for .aut scripts) Allows comments on the same line.
+#ClipboardTimeout milliseconds\nChanges how long the script keeps trying to access the clipboard when the first attempt fails.
+#CommentFlag NewString
+#ErrorStdOut
+#EscapeChar NewChar
+#HotkeyInterval Value
+#HotkeyModifierTimeout milliseconds
+#Hotstring NewOptions
+#If [expression] \n[AutoHotkey_L] Makes subsequent hotkeys and hotstrings only function when the specified expression is true.
+#IfTimeout timeout \n[AutoHotkey_L] Sets the maximum time that may be spent evaluating a single #If expression.
+#IfWinActive [, WinTitle, WinText] \nMakes subsequent hotkeys and hotstrings only function when the specified window is active.
+#IfWinExist [, WinTitle, WinText] \nMakes subsequent hotkeys and hotstrings only function when the specified window exists.
+#IfWinNotActive [, WinTitle, WinText] \nMakes subsequent hotkeys and hotstrings only function when the specified window is not active.
+#IfWinNotExist [, WinTitle, WinText] \nMakes subsequent hotkeys and hotstrings only function when the specified window doesn't exist.
+#Include FileName \nCauses the script to behave as though the specified file's contents are present at this exact position.
+#IncludeAgain FileName \nCauses the script to behave as though the specified file's contents are present at this exact position.
+#InstallKeybdHook
+#InstallMouseHook
+#KeyHistory MaxEvents
+#LTrim On|Off
+#MaxHotkeysPerInterval Value
+#MaxMem ValueInMegabytes
+#MaxThreads Value
+#MaxThreadsBuffer On|Off
+#MaxThreadsPerHotkey Value
+#MenuMaskKey keyname \n[AutoHotkey_L] Changes which key is used to mask Win or Alt keyup events.
+#NoEnv
+#NoTrayIcon
+#Persistent
+#SingleInstance [force|ignore|off]
+#UseHook [On|Off]
+#Warn [WarningType, WarningMode] \n[AutoHotkey_L] Enables or disables warnings for selected load-time or run-time conditions that may be indicative of developer errors.
+#WinActivateForce
+";
+            #endregion
+            return directives.Split('\n');
         }
 
     }

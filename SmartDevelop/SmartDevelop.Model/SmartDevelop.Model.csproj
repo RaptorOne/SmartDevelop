@@ -52,6 +52,7 @@
     <Compile Include="CodeLanguages\CodeLanguageService.cs" />
     <Compile Include="CodeLanguages\ICodeLanguageService.cs" />
     <Compile Include="CodeLanguages\Extensions\EditorDocumentExtension.cs" />
+    <Compile Include="CodeLanguages\PreProcessorDirective.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
     <Compile Include="DOM\DOMMathEx.cs" />
     <Compile Include="DOM\Ranges\CodeRange.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="DOM\Types\CodeTypeReferenceEx.cs" />
     <Compile Include="DOM\Types\CodePropertyReferenceExpressionEx.cs" />
     <Compile Include="DOM\Types\CodeTypeDeclarationDynamic.cs" />
+    <Compile Include="DOM\Types\Helper.cs" />
     <Compile Include="DOM\Types\ICodeObjectEx.cs" />
     <Compile Include="Errors\ErrorItem.cs" />
     <Compile Include="Errors\ErrorService.cs" />

@@ -128,6 +128,9 @@ namespace SmartDevelop
     msgbox % str
     ExitApp
 
+    /*
+        This is a base for all Foos out there
+    */
     class Bar
     {
 	    var TestProperty
@@ -136,6 +139,9 @@ namespace SmartDevelop
 		    return ""The property is:"" this.TestProperty
 	    }
 
+        /*
+            Example Documentation comment
+        */
 	    Test(num){
             return 0x44 << num
 	    }
@@ -146,7 +152,9 @@ namespace SmartDevelop
     }
 
 
-
+    /*
+        This is an example sub class
+    */
     class Foo extends Bar
     {
         var TestProperty ;property override

@@ -8,6 +8,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System.CodeDom;
 using System.Windows.Input;
+using SmartDevelop.Model.DOM.Types;
 
 namespace SmartDevelop.ViewModel.CodeCompleting
 {
@@ -21,28 +22,22 @@ namespace SmartDevelop.ViewModel.CodeCompleting
         #endregion
 
         public static CompletionItem Build(object m) {
-            if(m is CodeMemberMethod) {
-                var method = m as CodeMemberMethod;
-                return new CompletionItemMethod(method.Name, string.Format("Method {0}\n{1}", GetDocumentCommentString(method.Comments), GetParamInfo(method.Parameters)));
-            }
-
-            if(m is CodeTypeDeclaration && ((CodeTypeDeclaration)m).IsClass) {
+            if(m is CodeMemberMethodEx) {
+                var method = m as CodeMemberMethodEx;
+                return new CompletionItemMethod(method.Name, string.Format("Method {0}({1})\n{2}", method.Name, method.GetParamInfo(), GetDocumentCommentString(method.Comments)));
+            }else if(m is CodeTypeDeclaration && ((CodeTypeDeclaration)m).IsClass) {
                 var classdecl = ((CodeTypeDeclaration)m);
                 return new CompletionItemClass(classdecl.Name, string.Format("class {0}\n{1}", classdecl.Name, GetDocumentCommentString(classdecl.Comments)));
-            }
-
-            if(m is CodeMemberProperty) {
+            }else if(m is CodeMemberProperty) {
                 var prop = ((CodeMemberProperty)m);
                 return new CompletionItemProperty(prop.Name, string.Format("Property {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
-            }
-
-            if(m is CodeMemberField) {
+            }else if(m is CodeMemberField) {
                 var prop = ((CodeMemberField)m);
                 return new CompletionItemField(prop.Name, string.Format("Field {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
-            }
+            }else
+                throw new NotSupportedException("Cant handle obj type: " + m.GetType().ToString());
 
-
-            return new CompletionItem(m.ToString(), "");
+            //return /* new CompletionItem(m.ToString(), ""); */
         }
 
         public static string GetDocumentCommentString(CodeCommentStatementCollection comments) {
@@ -54,13 +49,13 @@ namespace SmartDevelop.ViewModel.CodeCompleting
             return info.ToString();
         }
 
-        static string GetParamInfo(CodeParameterDeclarationExpressionCollection parsams) {
-            string str = "";
-            foreach(CodeParameterDeclarationExpression p in parsams) {
-                str += p.Name + ", ";
-            }
-            return str;
-        }
+        //static string GetParamInfo(CodeParameterDeclarationExpressionCollection parsams) {
+        //    string str = "";
+        //    foreach(CodeParameterDeclarationExpression p in parsams) {
+        //        str += p.Name + ", ";
+        //    }
+        //    return str;
+        //}
 
 
         public CompletionItem(string text, string description) {

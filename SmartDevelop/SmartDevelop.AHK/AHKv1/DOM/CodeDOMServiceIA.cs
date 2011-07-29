@@ -14,8 +14,9 @@ using System.Collections;
 using SmartDevelop.Model.Tokenizing;
 using System.Threading.Tasks;
 using System.ComponentModel;
-using System.Threading;
+
 using System.Windows;
+
 
 namespace SmartDevelop.Model.DOM
 {
@@ -52,6 +53,12 @@ namespace SmartDevelop.Model.DOM
 
         public CodeDOMServiceIA(SmartCodeProject project)
             : base(project) {
+
+                var _checkQueueTimer = new System.Timers.Timer(); // Timer anlegen
+                _checkQueueTimer.Interval = 100; // Intervall festlegen, hier 100 ms
+                _checkQueueTimer.Elapsed += (s, e) => CheckQueue();
+                _checkQueueTimer.Start(); // Timer starten
+
 
                 _fileCompileWorker = new BackgroundWorker();
                 _fileCompileWorker.DoWork += CompileTokenFile;
@@ -252,31 +259,77 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
+
+
+        void CheckQueue()
+        {
+            ProjectItemCode compileme = null;
+            lock(_itemsToCompileLock) {
+                if(_compileQueue.Any()) {
+                    compileme = _compileQueue.First();
+                }
+            }
+
+            if(compileme != null) {
+                if(_fileCompileWorker.IsBusy) {
+                    if(_currentItem == compileme) { // can we cancel it?
+                        if(!_fileCompileWorker.CancellationPending)
+                            _fileCompileWorker.CancelAsync();
+
+                        while(true) {
+                            if(_fileCompileWorker.IsBusy) {
+                                System.Threading.Thread.Sleep(1);
+                            } else
+                                break;
+                        }
+                    } else
+                        return; // no change.. we have to wait until it has finished.
+                }
+                // if we are here the compiler is finished. either by completion or by cancelation
+
+                lock(_itemsToCompileLock) {
+                        _currentItem = compileme;
+                        _compileQueue.Remove(_currentItem);
+                        _fileCompileWorker.RunWorkerAsync(new CompilerArgument(compileme, null));
+                }
+            }
+
+        }
+
+
         #endregion
 
         #region Public Methods
 
+
+        List<ProjectItemCode> _compileQueue = new List<ProjectItemCode>();
+        object _itemsToCompileLock = new object();
+
+
+        /// <summary>
+        /// Ensures that there is no item queued and the parser is finished.
+        /// </summary>
+        public override void EnsureIsUpdated() {
+            while(true) {
+                lock(_itemsToCompileLock) {
+                    if(!_compileQueue.Any()) {
+                        if(!IsBusy)
+                            break;
+                    }  
+                }
+                System.Threading.Thread.Sleep(1);
+            }
+        }
+
+
         public override void CompileTokenFileAsync(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
             lock(startcompilerLock){
-                if(_fileCompileWorker.IsBusy) {
-
-                    if(_currentItem != null && _currentItem != codeitem)
-                        throw new NotSupportedException("Multiple code documents arn't supported in an async task as enqueeing is not implemnted now.");
-
-
-                    if(!_fileCompileWorker.CancellationPending)
-                        _fileCompileWorker.CancelAsync();
-
-                    while(true) {
-                        if(_fileCompileWorker.IsBusy) {
-                            Thread.Sleep(1);
-                        } else
-                            break;
-                    }
+                // enqueue the given codedocument
+                // the queue will be checked by a timer
+                lock(_itemsToCompileLock) {
+                    if(!_compileQueue.Contains(codeitem))
+                        _compileQueue.Add(codeitem);
                 }
-                // if we are here the compiler is finished. either by completion or by cancelation
-                _currentItem = codeitem;
-                _fileCompileWorker.RunWorkerAsync(new CompilerArgument(codeitem, initialparent));
             }
         }
 
@@ -325,8 +378,9 @@ namespace SmartDevelop.Model.DOM
                 var codeLineMap = codeitem.SegmentService.GetCodeSegmentLinesMap();
                 CodeTypeDeclaration parent = initialparent;
                 Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
-
-                int linecnt = codeLineMap.Keys.Max();
+                int linecnt = 0;
+                if(codeLineMap.Keys.Any())
+                    linecnt = codeLineMap.Keys.Max();
 
                 CodeTokenLine line;
 
@@ -420,6 +474,13 @@ namespace SmartDevelop.Model.DOM
                                         }
 
                                         #endregion
+
+
+                                        // extract class documentation Comment
+                                        var comment = ExtractComment(classkeywordSegment);
+                                        if(comment != null)
+                                            type.Comments.Add(comment);
+
 
                                         // Add it to the CodeDOM Tree
                                         thisparent.Members.Add(type);
@@ -543,13 +604,9 @@ namespace SmartDevelop.Model.DOM
 
 
                                             // extract Method Comment
-                                            var comment = methodSegment.PreviousOmit(whitespacetokenNewLines);
-                                            if(comment != null && comment.Token == Token.MultiLineComment) {
-                                                method.Comments.Add(new CodeCommentStatement(comment.TokenString, true));
-                                            } else if(comment != null && comment.Token == Token.SingleLineComment) {
-
-                                                //todo: collect all above singleline comments
-                                            }
+                                            var comment = ExtractComment(methodSegment);
+                                            if(comment != null)
+                                                method.Comments.Add(comment);
 
                                             // extract method params
                                             paramstack.Clear();
@@ -639,6 +696,33 @@ namespace SmartDevelop.Model.DOM
 
                 AnalyzeAST(codeitem, e);
             }
+        }
+
+        CodeCommentStatement ExtractComment(CodeSegment identifier) {
+            var comment = identifier.PreviousOmit(whitespacetokenNewLines);
+            if(comment != null && comment.Token == Token.MultiLineComment) {
+                return new CodeCommentStatement(GetDocumentationComment(comment.TokenString), true);
+            } else if(comment != null && comment.Token == Token.SingleLineComment) {
+
+                //todo: collect all above singleline comments
+            }
+            return null;
+        }
+
+
+        string GetDocumentationComment(string data) {
+            StringBuilder sb = new StringBuilder();
+            foreach(var line in data.Split('\n')) {
+                var cline = line.Trim();
+                cline = cline.TrimStart(' ', '\t', ';', '/');
+                cline = cline.TrimStart('*');
+                cline = cline.TrimEnd(' ', '\t', '/');
+                cline = cline.TrimEnd('*');
+                cline = cline.Trim();
+                if(!string.IsNullOrWhiteSpace(cline))
+                    sb.AppendLine(cline);
+            }
+            return sb.ToString();
         }
 
         #endregion
@@ -930,5 +1014,7 @@ namespace SmartDevelop.Model.DOM
         public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
             throw new NotImplementedException();
         }
+
+
     }
 }

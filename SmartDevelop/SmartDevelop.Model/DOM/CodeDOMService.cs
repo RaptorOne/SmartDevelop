@@ -129,6 +129,8 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+
+        public abstract void EnsureIsUpdated();
     }
  
 }

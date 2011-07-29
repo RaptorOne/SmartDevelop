@@ -81,6 +81,15 @@ namespace SmartDevelop.Model.DOM.Types
             }
         }
 
+        public string CommentInfo {
+            get {
+                if(ResolvedTypeDeclaration != null) {
+                    return Helper.GetDocumentCommentString(ResolvedTypeDeclaration.Comments);
+                }
+                return null;
+            }
+        }
+
         #endregion
 
         #region Public Methods
@@ -126,7 +135,7 @@ namespace SmartDevelop.Model.DOM.Types
         #endregion
 
         public override string ToString() {
-            return string.Format("TypeReference: {0} --> {1}", this.TypeName, this.ResolvedTypeDeclaration);
+            return string.Format("{0}\n{1}", this.TypeName, this.CommentInfo);
         }
     }
 }

@@ -50,9 +50,15 @@ namespace SmartDevelop.Model.DOM.Types
             return s;
         }
 
+        public string GetParamInfo() {
+            string str = "";
+            foreach(CodeParameterDeclarationExpression p in this.Parameters) {
+                str += p.Name + ", ";
+            }
+            return str.TrimEnd(' ', ',');
+        }
 
         #endregion
-
 
         #region Properties
 
@@ -113,7 +119,9 @@ namespace SmartDevelop.Model.DOM.Types
             return this.Name.Equals(codeTypeRef.TypeName, Language.NameComparisation);
         }
 
-
+        public override string ToString() {
+            return "\nMethod Declaration: " + this.Name + "()";
+        }
 
     }
 }

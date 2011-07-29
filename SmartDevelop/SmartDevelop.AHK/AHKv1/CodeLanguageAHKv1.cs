@@ -23,6 +23,7 @@ using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.Tokenizing;
+using System.Windows;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -59,7 +60,9 @@ namespace SmartDevelop.AHK.AHKv1
             IHighlightingDefinition customHighlighting;
 
             Brush b = new SolidColorBrush(Colors.GreenYellow);
-            var brushchen = new HighlightingBrushStaticColor(b);
+            var greenYellowBrush = new HighlightingBrushStaticColor(b);
+            var orangeBrush = new HighlightingBrushStaticColor(new SolidColorBrush(Colors.Orange));
+
 
             var sr = new StreamReader(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Syntax\\Autohotkey.xshd"));
             using(var reader = new XmlTextReader(sr)) {
@@ -68,10 +71,15 @@ namespace SmartDevelop.AHK.AHKv1
             }
 
 
-            var hicolor = new HighlightingColor()
-                        {
-                            Foreground = brushchen
-                        };
+            var commandColor = new HighlightingColor()
+                {
+                    Foreground = orangeBrush,
+                    FontWeight = FontWeights.Bold
+                };
+            var directiveColor = new HighlightingColor()
+                {
+                    Foreground = greenYellowBrush
+                };
 
             foreach(var m in buildins) {
                 var command = m as CodeMemberMethodExAHK;
@@ -79,11 +87,20 @@ namespace SmartDevelop.AHK.AHKv1
                     // Add custom but static highligning rules
                     customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
                     {
-                        Color = hicolor,
+                        Color = commandColor,
                         Regex = GetRegexForCommand(command.Name)
                     });
                 } 
             }
+
+            //foreach(var d in CodeLanguageAHKBuildinMethods.GetDirectives()) {
+            //    customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
+            //    {
+            //        Color = directiveColor, 
+            //        Regex = GetRegexForDirective(d.Name)
+            //    });
+            //}
+
 
             HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);
 
@@ -94,6 +111,14 @@ namespace SmartDevelop.AHK.AHKv1
 
 
         Regex GetRegexForCommand(string name) {
+            var preregex = @"^[\s]*\b";
+            var sufregex = @"(?=[\s|,|$])";
+            var regex = preregex + name + sufregex;
+            var r = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.Multiline );
+            return r;
+        }
+
+        Regex GetRegexForDirective(string name) {
             var preregex = "^[\\s]*\\b";
             var sufregex = "\\b[\\s|,]+";
             var r = new Regex(preregex + name + sufregex, RegexOptions.IgnoreCase);

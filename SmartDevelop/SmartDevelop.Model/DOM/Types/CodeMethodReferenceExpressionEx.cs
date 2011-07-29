@@ -66,7 +66,7 @@ namespace SmartDevelop.Model.DOM.Types
         public string CommentInfo {
             get {
                 if(ResolvedMethodMember != null) {
-                    return GetDocumentCommentString(ResolvedMethodMember.Comments);
+                    return Helper.GetDocumentCommentString(ResolvedMethodMember.Comments);
                 }
                 return null;
             }
@@ -74,18 +74,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #endregion
 
-        #region Static Methods
-
-        public static string GetDocumentCommentString(CodeCommentStatementCollection comments) {
-            var info = new StringBuilder();
-            foreach(CodeCommentStatement com in comments) {
-                if(com.Comment.DocComment)
-                    info.AppendLine(com.Comment.Text);
-            }
-            return info.ToString();
-        }
-
-        #endregion
+        
 
         public virtual CodeMemberMethodEx ResolveMethodDeclarationCache() {
             var lang = Language;
@@ -120,7 +109,7 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         public override string ToString() {
-            return "CodeMethodReferenceExpression: " + this.MethodName + "\n" + CommentInfo;
+            return this.MethodName + "()\n" + CommentInfo;
         }
 
 
