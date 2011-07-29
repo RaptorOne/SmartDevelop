@@ -70,35 +70,40 @@ namespace SmartDevelop.Model.Tokenizing
         Operator_BooleanOr = 26,
 
         /// <summary>
+        /// !
+        /// </summary>
+        Operator_BooleanNot = 27,
+
+        /// <summary>
         /// /
         /// </summary>
-        Operator_Divide = 27,
+        Operator_Divide = 28,
 
         /// <summary>
         /// //
         /// </summary>
-        Operator_Modulus = 28,
+        Operator_Modulus = 29,
 
         /// <summary>
         /// *
         /// </summary>
-        Operator_Multiply = 29,
+        Operator_Multiply = 30,
 
         /// <summary>
         /// x**a 
         /// x ^ (a)
         /// </summary>
-        Operator_Power = 30,
+        Operator_Power = 31,
 
         /// <summary>
         /// <<
         /// </summary>
-        Operator_ShiftLeft = 31,
+        Operator_ShiftLeft = 32,
 
         /// <summary>
         /// >>
         /// </summary>
-        Operator_ShiftRight = 32,
+        Operator_ShiftRight = 33,
 
         Operator_GreaterThan,
         Operator_GreaterThanOrEqual,
@@ -124,7 +129,13 @@ namespace SmartDevelop.Model.Tokenizing
         Operator_AssignShiftRight,
         Operator_AssignShiftLeft,
 
+        /// <summary>
+        /// ?
+        /// </summary>
         Operator_TernaryIf,
+        /// <summary>
+        /// :
+        /// </summary>
         Operator_TernaryElse,
 
         #endregion

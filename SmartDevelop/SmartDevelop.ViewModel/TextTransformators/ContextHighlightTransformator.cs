@@ -18,6 +18,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
     {
         readonly ProjectItemCode _codeProject;
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
+        Brush _stringBrush = new SolidColorBrush(Colors.Crimson);
         Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
         //readonly CodeDOMService _domservice;
 
@@ -41,31 +42,43 @@ namespace SmartDevelop.ViewModel.TextTransformators
             foreach(var segment in codeline.CodeSegments) {
 
 
-                if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
-                   
-                        var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
-                        if(methodRef.ResolvedMethodMember != null) {
-                            try {
-                                base.ChangeLinePart(
-                                segment.Range.Offset, // startOffset
-                                segment.Range.EndOffset, // endOffset
-                                (VisualLineElement element) => {
-                                    // This lambda gets called once for every VisualLineElement
-                                    // between the specified offsets.
-                                    Typeface tf = element.TextRunProperties.Typeface;
-                                    // Replace the typeface with a modified version of
-                                    // the same typeface
-                                    element.TextRunProperties.SetTypeface(new Typeface(
-                                        tf.FontFamily,
-                                        FontStyles.Italic,
-                                        FontWeights.Bold,
-                                        tf.Stretch
-                                    ));
-                                });
-                            } catch {
+                if(segment.Token == Token.TraditionalString) {
 
-                            }
-                        } 
+                    try {
+
+                        base.ChangeLinePart(
+                            segment.Range.Offset, // startOffset
+                            segment.Range.EndOffset, // endOffset
+                            (VisualLineElement element) => {
+                                Typeface tf = element.TextRunProperties.Typeface;
+                                element.TextRunProperties.SetForegroundBrush(_stringBrush);
+                            });
+                    } catch { }
+                } else if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+
+                    var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                    if(methodRef.ResolvedMethodMember != null) {
+                        try {
+                            base.ChangeLinePart(
+                            segment.Range.Offset, // startOffset
+                            segment.Range.EndOffset, // endOffset
+                            (VisualLineElement element) => {
+                                // This lambda gets called once for every VisualLineElement
+                                // between the specified offsets.
+                                Typeface tf = element.TextRunProperties.Typeface;
+                                // Replace the typeface with a modified version of
+                                // the same typeface
+                                element.TextRunProperties.SetTypeface(new Typeface(
+                                    tf.FontFamily,
+                                    FontStyles.Italic,
+                                    FontWeights.Bold,
+                                    tf.Stretch
+                                ));
+                            });
+                        } catch {
+
+                        }
+                    }
 
                 } else if(segment.CodeDOMObject is CodeTypeReferenceEx) {
 

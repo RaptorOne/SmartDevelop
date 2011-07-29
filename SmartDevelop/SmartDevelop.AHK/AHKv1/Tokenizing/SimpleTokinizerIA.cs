@@ -192,6 +192,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         #endregion
+        bool _traditionalMode = false;
 
         #region Tokenizer
 
@@ -200,9 +201,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _currentToken = Token.Unknown;
             
             bool ensureNewToken = false;
-            bool traditionalMode = false;
+            
             int i;
 
+
+            bool inTradEscapeBefore = false;
+            bool inderef = false;
+            bool inTraditionalCommand = false;
+            int openLiteralBracketsInTraditional = 0;
 
             //clean things up
             _activeToken = Token.Unknown;
@@ -211,6 +217,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _currentColStart = 0;
             _currentLine = 1;
             _currentColumn = 0;
+            _traditionalMode = false;
+
+
 
             char currentChar;
             for(i = 0; i < _textlen; i++) {
@@ -231,12 +240,15 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 // end one sign regions -> braktes/lines
                 // ensure that we differ from the token before in those cases
                 if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken) 
-                    || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter
+                    || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter || _activeToken == Token.Deref
                     || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
-                    _currentToken = Token.Unknown;
+                    if(!_traditionalMode || inderef)
+                        _currentToken = Token.Unknown;
+                    else
+                        _currentToken = Token.TraditionalString;
                 }
 
                 #endregion
@@ -247,8 +259,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     _currentToken = Token.NewLine;
                     //_currentLine++;
                     _currentColumn = 0;
-                    traditionalMode = false;
-                } else if(!traditionalMode && IsLieralStringMarkerBegin(i)) {
+                    _traditionalMode = false;   // we assume that traditional commands not have multilines
+                    inTraditionalCommand = false; 
+                } else if(!_traditionalMode && IsLieralStringMarkerBegin(i)) {
 
                     #region Parse literal string
 
@@ -283,7 +296,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     #endregion
 
-                } else if(!traditionalMode && IsMultiLineCommentStart(i)) {
+                } else if(!_traditionalMode && IsMultiLineCommentStart(i)) {
 
                     #region Handle Multiline Comment
 
@@ -315,7 +328,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     #endregion
 
-                } else if(!IsInAnyComment() && !traditionalMode && IsMultilineTraditionalStringStart(i)){
+                } else if(!IsInAnyComment() && !_traditionalMode && IsMultilineTraditionalStringStart(i)){
 
                     #region Handle Multiline strings
                     // for now extract the wohle thing as one token.
@@ -355,87 +368,61 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                 } else if(!IsInAnyComment()) {
 
-                    if(!traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
+                    if(!_traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
                         _currentToken = TokenHelper.BRAKETS[currentChar];
                     } else if(currentChar == SINGLELINE_COMMENT) {
                         _currentToken = Token.SingleLineComment;
-                    } else if(!traditionalMode && IsWhiteSpace(i)) {
+                    } else if(!_traditionalMode && IsWhiteSpace(i)) {
                         _currentToken = Token.WhiteSpace;
-                    } else if(currentChar == PARAMDELEMITER) {
-                        _currentToken = Token.ParameterDelemiter;
-                    } else if(!traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
+                    } else if(!_traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
                         _currentToken = Token.MemberInvoke;
-                    } else if(!traditionalMode && currentChar == STRINGCONCAT) {
+                    } else if(!_traditionalMode && currentChar == STRINGCONCAT) {
                         _currentToken = Token.StringConcat;
-
-
-                    } else if(currentChar == VARIABLEDEREF) {
-                        _currentToken = Token.Deref;
                     //}else if(!traditionalMode && IsVariableAsignStart(i)){
 
-                    } else if(!traditionalMode && IsTraditionalCommandBegin(i)) {
-
-                        #region Parse Traditional Command
-
-                        EndActiveToken(i);
-
-                        _activeToken = Token.TraditionalCommandInvoke;
-                        //todo: parse in traditional mode.
-                        var command = ExtractWord(i);
-                        i += command.Length;
-                        EndActiveToken(i);
-
-                        //Token localActiveToken = Token.Unknown;
-                        _activeToken = Token.TraditionalString;
-                        _currentToken = Token.TraditionalString;
-                        bool inescapeseqBefore = false;
-                        bool inderef = false;
-                        while(_textlen > i) {
-
-
-                            if(IsSingleCharToken(_activeToken)) {
-                                if(inderef)
-                                    _currentToken = Token.Unknown;
-                                else
-                                    _currentToken = Token.TraditionalString;
-                            }
-
-
-                            if(_text[i] == '\n'){
-                                goto redo; //for now we assume traditional commands can't be multilined
-                            } else if(_text[i] == PARAMDELEMITER && !inescapeseqBefore) {
-                                _currentToken = Token.ParameterDelemiter;
-                            } else if(_text[i] == VARIABLEDEREF && !inescapeseqBefore && !inderef) {
-                                _currentToken = Token.Deref;
-                                inderef = true;
-                            } else if(_text[i] == VARIABLEDEREF && inderef) {
-                                _currentToken = Token.Deref;
-                                inderef = false;
-                            }
-
-                            if(_text[i] == ESCAPECHAR && !inescapeseqBefore) {
-                                inescapeseqBefore = true;
-                            } else {
-                                inescapeseqBefore = false;
-                            }
-
-                            if(_activeToken != _currentToken || IsSingleCharToken(_activeToken)) {
-                                EndActiveToken(i);
-                                _activeToken = _currentToken;
-                            }
-                            i++;
-                        }
-
-
-                        //traditionalMode = true;
-
-                        #endregion
-
-                    } else if(!traditionalMode && OPERATORS.Contains(currentChar)) {
+                    } else if(!_traditionalMode && IsTraditionalCommandBegin(i)) {
+                        _currentToken = Token.TraditionalCommandInvoke;
+                        inTraditionalCommand = true;
+                    } else if(!_traditionalMode && OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.OperatorFlow;
-                    } else if(!traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
+                    } else if(!_traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.Unknown;
+                    
+                    #region traditional parsing
+
+                    } else if(_text[i] == PARAMDELEMITER && !inTradEscapeBefore) {
+                        _currentToken = Token.ParameterDelemiter;
+                        if(inTraditionalCommand && openLiteralBracketsInTraditional == 0)
+                            _traditionalMode = true;
+                    } else if(_text[i] == VARIABLEDEREF && !inTradEscapeBefore && !inderef) {
+                        _currentToken = Token.Deref;
+                        if(!IsWhiteChar(_text.Next(i))) {
+                            inderef = true;
+                        } else
+                            _traditionalMode = false;
+                    } else if(_text[i] == VARIABLEDEREF && inderef) {
+                        _currentToken = Token.Deref;
+                        inderef = false;
                     }
+
+                    if(_traditionalMode) {
+                        if(_text[i] == ESCAPECHAR && !inTradEscapeBefore) {
+                            inTradEscapeBefore = true;
+                        } else {
+                            inTradEscapeBefore = false;
+                        }
+                    }
+
+                    if(!_traditionalMode && inTraditionalCommand && _activeToken != Token.TraditionalString){
+                        if(_text[i] == '('){
+                            openLiteralBracketsInTraditional++;
+                        }else if(_text[i] == ')'){
+                            openLiteralBracketsInTraditional--;
+                        }
+                    }
+
+                    #endregion
+
                 }
 
                 if(_currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
@@ -503,6 +490,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     int linenumber = _currentLine;
                     if(_activeToken == Token.NewLine)
                         --linenumber;
+
+
+                    if(_activeToken == Token.TraditionalCommandInvoke && _currentToken != Token.NewLine)
+                        _traditionalMode = true;
 
                     var current = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
                         str, new SimpleSegment(_currentRangeStart, l), linenumber, _currentColStart, _previous);

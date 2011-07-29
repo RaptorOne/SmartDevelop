@@ -52,6 +52,9 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 _completionWindow.Close();
 
             _completionWindow = new CompletionWindow(_texteditor.TextArea);
+            //_completionWindow.CompletionList.IsFiltering = false;
+            _completionWindow.StartOffset -= 1;
+
             _completionWindow.Closed += delegate
             {
                 _completionWindow = null;
@@ -62,13 +65,13 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         #region Event Handlers
 
         void OnTextEntering(object sender, TextCompositionEventArgs e) {
-            if(e.Text.Length > 0 && _completionWindow != null) {
-                if(!char.IsLetterOrDigit(e.Text[0])) {
-                    // Whenever a non-letter is typed while the completion window is open,
-                    // insert the currently selected element.
-                    _completionWindow.CompletionList.RequestInsertion(e);
-                }
-            }
+            //if(e.Text.Length > 0 && _completionWindow != null) {
+            //    if(!char.IsLetterOrDigit(e.Text[0])) {
+            //        // Whenever a non-letter is typed while the completion window is open,
+            //        // insert the currently selected element.
+            //        _completionWindow.CompletionList.RequestInsertion(e);
+            //    }
+            //}
             // We still want to insert the character that was typed.
         }
 
@@ -84,7 +87,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                 if(_texteditor.CaretOffset > 1 && !triggerCodeCompletion.Contains(currentChar)) {
                     beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
-                    if(!(beforeChar == ' ' || beforeChar == '\t'))
+                    if(currentChar != ' ' && !(beforeChar == ' ' || beforeChar == '\t'))
                         return;
                 }
 

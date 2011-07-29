@@ -159,6 +159,9 @@ namespace SmartDevelop.Model.Tokenizing
         }
 
 
+
+        CodeSegment _closingSegment = null;
+
         /// <summary>
         /// Very handy Method to find the Closing Bracket Codesegment of this Open Braket Segment
         /// </summary>
@@ -168,30 +171,35 @@ namespace SmartDevelop.Model.Tokenizing
             if(!TokenHelper.IsOpenBracketToken(this.Token))
                 throw new NotSupportedException("Must be called on open barcket type");
 
-            int openBracketCounter = 1;
-            CodeSegment current;
-            CodeSegment previous = this;
-            CodeSegment closingSegment = null;
+            if(_closingSegment == null) {
+                int openBracketCounter = 1;
+                CodeSegment current;
+                CodeSegment previous = this;
 
-            Token openbracket = this.Token;
-            Token closingbracket = TokenHelper.GetClosingToken(this.Token);
+                Token openbracket = this.Token;
+                Token closingbracket = TokenHelper.GetClosingToken(this.Token);
 
-            while((current = previous.Next) != null) {
-                if(current.Token == Token.NewLine && !allowNewlinesbetween)
-                    break;
-                else if(current.Token == openbracket)
-                    openBracketCounter++;
-                else if(current.Token == closingbracket) {
-                    openBracketCounter--;
-                    if(openBracketCounter == 0) {
-                        closingSegment = current;
+                while((current = previous.Next) != null) {
+                    if(current.Token == Token.NewLine && !allowNewlinesbetween)
                         break;
+                    else if(current.Token == openbracket)
+                        openBracketCounter++;
+                    else if(current.Token == closingbracket) {
+                        openBracketCounter--;
+                        if(openBracketCounter == 0) {
+                            _closingSegment = current;
+                            break;
+                        }
                     }
+                    previous = current;
                 }
-                previous = current;
             }
-            return closingSegment;
+            return _closingSegment;
         }
+
+
+
+        CodeSegment _openSegment = null;
 
         /// <summary>
         /// Very handy Method to find the Open Bracket Codesegment of this Close Braket Segment
@@ -202,29 +210,30 @@ namespace SmartDevelop.Model.Tokenizing
             if(!TokenHelper.IsClosedBracketToken(this.Token))
                 throw new NotSupportedException("Must be called on closed barcket type");
 
-            int openBracketCounter = 1;
-            CodeSegment current;
-            CodeSegment previous = this;
-            CodeSegment closingSegment = null;
+            if(_openSegment == null) {
+                int openBracketCounter = 1;
+                CodeSegment current;
+                CodeSegment previous = this;
 
-            Token closingbracket = this.Token;
-            Token openbracket = TokenHelper.GetOpenToken(this.Token);
+                Token closingbracket = this.Token;
+                Token openbracket = TokenHelper.GetOpenToken(this.Token);
 
-            while((current = previous.Previous) != null) {
-                if(current.Token == Token.NewLine && !allowNewlinesbetween)
-                    break;
-                else if(current.Token == closingbracket)
-                    openBracketCounter++;
-                else if(current.Token == openbracket) {
-                    openBracketCounter--;
-                    if(openBracketCounter == 0) {
-                        closingSegment = current;
+                while((current = previous.Previous) != null) {
+                    if(current.Token == Token.NewLine && !allowNewlinesbetween)
                         break;
+                    else if(current.Token == closingbracket)
+                        openBracketCounter++;
+                    else if(current.Token == openbracket) {
+                        openBracketCounter--;
+                        if(openBracketCounter == 0) {
+                            _openSegment = current;
+                            break;
+                        }
                     }
+                    previous = current;
                 }
-                previous = current;
             }
-            return closingSegment;
+            return _openSegment;
         }
 
         #endregion

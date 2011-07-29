@@ -81,25 +81,22 @@ namespace SmartDevelop.AHK.AHKv1
                     Foreground = greenYellowBrush
                 };
 
+
+            string regexstr = "";
             foreach(var m in buildins) {
                 var command = m as CodeMemberMethodExAHK;
                 if(command != null && command.IsTraditionalCommand && !command.IsFlowCommand) {
-                    // Add custom but static highligning rules
-                    customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
-                    {
-                        Color = commandColor,
-                        Regex = GetRegexForCommand(command.Name)
-                    });
+                    regexstr += command.Name.ToLowerInvariant() + "|";
                 } 
             }
 
-            //foreach(var d in CodeLanguageAHKBuildinMethods.GetDirectives()) {
-            //    customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
-            //    {
-            //        Color = directiveColor, 
-            //        Regex = GetRegexForDirective(d.Name)
-            //    });
-            //}
+            // Add custom but static highligning rule
+            customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
+            {
+                Color = commandColor,
+                Regex = GetRegexForCommand(regexstr.TrimEnd('|'))
+            });
+
 
 
             HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);

@@ -33,6 +33,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                 { "&&", Token.Operator_BooleanAnd},
                 { "||", Token.Operator_BooleanOr},
+                { "!", Token.Operator_BooleanNot},
 
                 { ">", Token.Operator_GreaterThan },
                 { ">=", Token.Operator_GreaterThanOrEqual },

@@ -28,7 +28,7 @@ namespace ICSharpCode.AvalonEdit.CodeCompletion
 		public CompletionList CompletionList {
 			get { return completionList; }
 		}
-		
+
 		/// <summary>
 		/// Creates a new code completion window.
 		/// </summary>

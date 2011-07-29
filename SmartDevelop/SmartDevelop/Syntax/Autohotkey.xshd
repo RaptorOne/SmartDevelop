@@ -18,12 +18,12 @@
       <Begin>"</Begin>
       <End>"</End>
       <RuleSet>
-        <!-- nested span for escape sequences  (?&lt;=\()[\w|\s|?|%]*[\s]+\)-->
+        <!-- nested span for escape sequences -->
         <Span begin="\\" end="." />
       </RuleSet>
     </Span>
 
-    <Span fontWeight="bold" multiline="false" begin="%" end="%" />
+    <Span fontWeight="bold" multiline="false" begin="%[\w]" end="%" />
 
 
     <Rule foreground="CadetBlue" fontWeight="bold">

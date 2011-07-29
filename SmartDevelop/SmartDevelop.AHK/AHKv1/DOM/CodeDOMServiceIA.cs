@@ -570,9 +570,7 @@ namespace SmartDevelop.Model.DOM
                                 if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
                                     // jup we have a method definition here.
                                     // Method body starts at startMethodBody
-                                    // Method body ends at
-                                    var endMethodBody = startMethodBody.FindClosingBracked(true);
-                                    if(endMethodBody != null) {
+
 
                                         CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
                                         bool hasDeclarationError = false;
@@ -634,27 +632,35 @@ namespace SmartDevelop.Model.DOM
                                         }
                                         #endregion
 
-                                        // get method statements
-                                        method.Statements.AddRange(
-                                            CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+                                        // Method body ends at
+                                        var endMethodBody = startMethodBody.FindClosingBracked(true);
+                                        if(endMethodBody != null) {
+
+                                            // get method statements
+                                            method.Statements.AddRange(
+                                                CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
 
-                                        // add it to the code DOM Tree
-                                        if(!hasDeclarationError) {
-                                            thisparent.Members.Add(method);
-                                            method.DefiningType = thisparent;
+                                            // add it to the code DOM Tree
+                                            if(!hasDeclarationError) {
+                                                thisparent.Members.Add(method);
+                                                method.DefiningType = thisparent;
+                                            }
+
+
+                                            // Create a CodeRange Item
+                                            int startOffset = startMethodBody.Range.Offset;
+                                            int length = (endMethodBody.Range.Offset - startOffset);
+                                            currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
+
+                                            // move the scanpointer to the method end:
+                                            i = endMethodBody.LineNumber;
+                                            continue;
+                                        } else {
+                                            RegisterError(codeitem, startMethodBody, "Missing: " + Token.BlockClosed);
+                                            
+
                                         }
-
-
-                                        // Create a CodeRange Item
-                                        int startOffset = startMethodBody.Range.Offset;
-                                        int length = (endMethodBody.Range.Offset - startOffset);
-                                        currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
-
-                                        // move the scanpointer to the method end:
-                                        i = endMethodBody.LineNumber;
-                                        continue;
-                                    }
                                 }
                             }
                         }
@@ -852,54 +858,67 @@ namespace SmartDevelop.Model.DOM
             if(tokenSegment.Token == Token.Identifier && tokenSegment.Next != null
                     && tokenSegment.Next.Token == Token.LiteralBracketOpen) {
 
-                #region Parse for Method Invokes
 
-                CodeTypeDeclarationEx methodContext = null;
 
-                if(tokenSegment.Previous != null && tokenSegment.Previous.Previous != null
-                    && tokenSegment.Previous.Token == Token.MemberInvoke) {
-
-                    var invoker = tokenSegment.Previous.Previous;
-
-                    #region adjust Method Context
-
-                    if(codeitem.CodeLanguage.SELFREF_CAN_BE_OMITTED)
-                        methodContext = enclosingType;
-
-                    if(invoker.CodeDOMObject is CodeBaseReferenceExpression) {
-                        foreach(CodeTypeReferenceEx bt in enclosingType.BaseTypes) {
-                            var typedeclaration = bt.ResolveTypeDeclarationCache();
-                            if(typedeclaration != null && typedeclaration.IsClass) {
-                                methodContext = typedeclaration;
-                                break;
-                            }
-                        }
-                    } else if(invoker.CodeDOMObject is CodeThisReferenceExpression) {
-                        methodContext = enclosingType;
-                    } else if(invoker.Token == Token.Identifier){
-                        invoker.CodeDOMObject = CodeTypeDeclarationDynamic.Default;
-                        methodContext = CodeTypeDeclarationDynamic.Default;
+                        bool ismethodDeclaration = false;
+                var closingliteral = tokenSegment.Next.FindClosingBracked(true);
+                if(closingliteral != null) {
+                    //ensure that it is not a defect method declaration
+                    var bra = closingliteral.NextOmit(whitespacetokenNewLines);
+                    if(bra != null && bra.Token == Token.BlockOpen) {
+                        // it is a method indeed
+                        ismethodDeclaration = true;
                     }
-
-                    #endregion
+                } else {
+                    RegisterError(codeitem, tokenSegment.Next, "Missing: )");
                 }
                 
-                var invokeExpression = new CodeMethodInvokeExpression();
-                var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, null, tokenSegment.TokenString, methodContext);
-
-                invokeExpression.Method = methodRef;
-                tokenSegment.CodeDOMObject = methodRef;
 
 
-                //find closing bracket:
-                var closing = tokenSegment.Next.FindClosingBracked(true);
-                if(closing == null)
-                    RegisterError(codeitem, tokenSegment.Next, "Missing: )");
+                #region Parse for Method Invokes
 
+                if(!ismethodDeclaration) {
+
+                    CodeTypeDeclarationEx methodContext = null;
+
+                    if(tokenSegment.Previous != null && tokenSegment.Previous.Previous != null
+                        && tokenSegment.Previous.Token == Token.MemberInvoke) {
+
+                        var invoker = tokenSegment.Previous.Previous;
+
+                        #region adjust Method Context
+
+                        if(codeitem.CodeLanguage.SELFREF_CAN_BE_OMITTED)
+                            methodContext = enclosingType;
+
+                        if(invoker.CodeDOMObject is CodeBaseReferenceExpression) {
+                            foreach(CodeTypeReferenceEx bt in enclosingType.BaseTypes) {
+                                var typedeclaration = bt.ResolveTypeDeclarationCache();
+                                if(typedeclaration != null && typedeclaration.IsClass) {
+                                    methodContext = typedeclaration;
+                                    break;
+                                }
+                            }
+                        } else if(invoker.CodeDOMObject is CodeThisReferenceExpression) {
+                            methodContext = enclosingType;
+                        } else if(invoker.Token == Token.Identifier) {
+                            invoker.CodeDOMObject = CodeTypeDeclarationDynamic.Default;
+                            methodContext = CodeTypeDeclarationDynamic.Default;
+                        }
+
+                        #endregion
+                    }
+
+                    var invokeExpression = new CodeMethodInvokeExpression();
+                    var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, null, tokenSegment.TokenString, methodContext);
+
+                    invokeExpression.Method = methodRef;
+                    tokenSegment.CodeDOMObject = methodRef;
+                    expression = invokeExpression;
+                }
 
                 nextToParse = tokenSegment.Next.Next;
-                expression = invokeExpression;
-
+                
                 #endregion
 
             } else if(tokenSegment.Token == Token.KeyWord) {

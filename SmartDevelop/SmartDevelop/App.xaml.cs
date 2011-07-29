@@ -105,7 +105,7 @@ namespace SmartDevelop
 
             SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language);
 
-            //DemoProjectLoader.AddStdLibTo(demoProject);
+            DemoProjectLoader.AddStdLibTo(demoProject);
             _solution.Add(demoProject);
 
             // create a Test Folder and add a demo file
@@ -123,9 +123,14 @@ namespace SmartDevelop
     return @"
     ; Demo Code
 
+	; dynamic mini expression evaluator:
+	sk += !(a3 == """" ? (sub != """")
+		: a3 == ""<="" ? sub <= a5)
+
+
     fooinst := new Foo
     str := fooinst.Helper()
-    msgbox % str
+    msgbox I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33), also inline expressions are supported!
     ExitApp
 
     /*
@@ -145,6 +150,13 @@ namespace SmartDevelop
 	    Test(num){
             return 0x44 << num
 	    }
+
+        MethodWhichQuits(){
+            ExitApp
+        }
+        MethodWhichQuits2(errcode){
+            Exit, %errcode%
+        }
 
         __new(){
             this.TestProperty := ""Bar's TestProperty""
