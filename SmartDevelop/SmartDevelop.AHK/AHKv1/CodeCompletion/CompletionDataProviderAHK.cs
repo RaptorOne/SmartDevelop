@@ -43,7 +43,6 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
             _projectitem = projectitem;
 
             _texteditor.TextArea.TextEntered += OnTextEntered;
-            _texteditor.TextArea.TextEntering += OnTextEntering;
         }
 
         CompletionWindow CreateNewCompletionWindow() {
@@ -63,17 +62,6 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         }
 
         #region Event Handlers
-
-        void OnTextEntering(object sender, TextCompositionEventArgs e) {
-            //if(e.Text.Length > 0 && _completionWindow != null) {
-            //    if(!char.IsLetterOrDigit(e.Text[0])) {
-            //        // Whenever a non-letter is typed while the completion window is open,
-            //        // insert the currently selected element.
-            //        _completionWindow.CompletionList.RequestInsertion(e);
-            //    }
-            //}
-            // We still want to insert the character that was typed.
-        }
 
         
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
@@ -100,10 +88,6 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
                 if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
                     return;
-
-                //var previousUsabeToken = segment.PreviousOmit(t_whitespaces);
-                //if(previousUsabeToken.Token == Token.KeyWord)
-                //    return;
 
             } catch {
                 return;
@@ -139,7 +123,8 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                             }
                         }
                     }
-                    _completionWindow.Show();
+                    if(data.Any())
+                        _completionWindow.Show();
 
                 } else if(_completionWindow == null && e.Text != "\n" &&
                     (_texteditor.Document.TextLength > _texteditor.CaretOffset) &&

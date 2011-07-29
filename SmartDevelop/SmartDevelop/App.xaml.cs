@@ -131,7 +131,27 @@ namespace SmartDevelop
     fooinst := new Foo
     str := fooinst.Helper()
     msgbox I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33), also inline expressions are supported!
+    val = I'm a traditional assignment, for sure!`nThe Result is %str%!
+    Run, C:\Folder\%str%
+    RunFail
+
+    msgbox =msgbox
+    msgbox % msgbox
+    msgbox % Add(44, 33)
+
     ExitApp
+    
+    ;;;
+    ;;; Functions & Classes
+    ;;;
+
+    /*
+    	Returns the sum of the given numbers
+    */
+    Add(a,b){
+    	return tok + n
+    }
+
 
     /*
         This is a base for all Foos out there

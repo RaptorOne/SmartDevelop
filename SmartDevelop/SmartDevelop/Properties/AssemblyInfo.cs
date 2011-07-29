@@ -8,12 +8,12 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SmartDevelop")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("The intelligent Script IDE")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SmartDevelop")]
-[assembly: AssemblyCopyright("Copyright ©  2011")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("securityvision")]
+[assembly: AssemblyProduct("SmartDevelop IDE")]
+[assembly: AssemblyCopyright("Copyright ©  2011 by Pascal Büttiker")]
+[assembly: AssemblyTrademark("securityvision SmartDevelop")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

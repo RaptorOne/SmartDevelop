@@ -64,6 +64,7 @@
 
 
       <Word>exitapp</Word>
+      <Word>exit</Word>
       <Word>gosub</Word>
       <Word>goto</Word>
       <Word>reload</Word>

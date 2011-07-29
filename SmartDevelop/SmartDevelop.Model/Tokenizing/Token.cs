@@ -132,11 +132,11 @@ namespace SmartDevelop.Model.Tokenizing
         /// <summary>
         /// ?
         /// </summary>
-        Operator_TernaryIf,
+        Operator_TernaryIf = 61,
         /// <summary>
         /// :
         /// </summary>
-        Operator_TernaryElse,
+        Operator_TernaryElse = 61,
 
         #endregion
 
@@ -145,32 +145,32 @@ namespace SmartDevelop.Model.Tokenizing
         /// <summary>
         /// (
         /// </summary>
-        LiteralBracketOpen = 50,
+        LiteralBracketOpen = 80,
 
         /// <summary>
         /// )
         /// </summary>
-        LiteralBracketClosed = 51,
+        LiteralBracketClosed = 81,
 
         /// <summary>
         /// [
         /// </summary>
-        IndexerBracketOpen = 52,
+        IndexerBracketOpen = 82,
 
         /// <summary>
         /// ]
         /// </summary>
-        IndexerBracketClosed = 53,
+        IndexerBracketClosed = 83,
 
         /// <summary>
         /// {
         /// </summary>
-        BlockOpen = 54,
+        BlockOpen = 84,
 
         /// <summary>
         /// }
         /// </summary>
-        BlockClosed = 55,
+        BlockClosed = 85,
 
 
         #endregion

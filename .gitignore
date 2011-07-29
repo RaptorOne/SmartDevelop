@@ -49,3 +49,4 @@ shared
 *.sdf
 *.sdf
 *.msi
+SmartDevelop/SmartDevelop/publish/*

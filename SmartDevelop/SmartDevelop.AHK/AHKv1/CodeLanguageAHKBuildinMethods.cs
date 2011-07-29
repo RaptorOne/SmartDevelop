@@ -27,25 +27,7 @@ namespace SmartDevelop.AHK.AHKv1
 
             // for now we add some of the manualy for debug puposes
 
-            #region Command vs Method Example
-
             CodeMemberMethodEx method;
-
-            method = new CodeMemberMethodExAHK(true)
-            {
-                Name = "Msgbox",
-                IsDefaultMethodInvoke = true,
-                IsTraditionalCommand = true
-            };
-            //, Options, Title, Text, Timeout]
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "Options"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Title"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Text"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Timeout"));
-            method.Comments.Add(new CodeCommentStatement("Displays the specified text in a small window containing one or more buttons (such as Yes and No).",true));
-            members.Add(method);
-
-            #endregion
 
             #region Trigo Math Functions
 

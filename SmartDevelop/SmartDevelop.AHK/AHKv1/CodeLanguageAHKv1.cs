@@ -86,16 +86,22 @@ namespace SmartDevelop.AHK.AHKv1
             foreach(var m in buildins) {
                 var command = m as CodeMemberMethodExAHK;
                 if(command != null && command.IsTraditionalCommand && !command.IsFlowCommand) {
-                    regexstr += command.Name.ToLowerInvariant() + "|";
+                    //regexstr += command.Name.ToLowerInvariant() + "|";
+                    // Add custom but static highligning rule
+                    customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
+                    {
+                        Color = commandColor,
+                        Regex = GetRegexForCommand(command.Name.ToLowerInvariant())
+                    });
                 } 
             }
 
-            // Add custom but static highligning rule
-            customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
-            {
-                Color = commandColor,
-                Regex = GetRegexForCommand(regexstr.TrimEnd('|'))
-            });
+            //// Add custom but static highligning rule
+            //customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
+            //{
+            //    Color = commandColor,
+            //    Regex = GetRegexForCommand(regexstr.TrimEnd('|'))
+            //});
 
 
 
@@ -109,7 +115,7 @@ namespace SmartDevelop.AHK.AHKv1
 
         Regex GetRegexForCommand(string name) {
             var preregex = @"^[\s]*\b";
-            var sufregex = @"(?=[\s|,|$])";
+            var sufregex = @"(?=[\s|,|$][^=])";
             var regex = preregex + name + sufregex;
             var r = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.Multiline );
             return r;
@@ -118,7 +124,7 @@ namespace SmartDevelop.AHK.AHKv1
         Regex GetRegexForDirective(string name) {
             var preregex = "^[\\s]*\\b";
             var sufregex = "\\b[\\s|,]+";
-            var r = new Regex(preregex + name + sufregex, RegexOptions.IgnoreCase);
+            var r = new Regex(preregex + name + sufregex, RegexOptions.IgnoreCase | RegexOptions.ECMAScript);
             return r;
         }
 

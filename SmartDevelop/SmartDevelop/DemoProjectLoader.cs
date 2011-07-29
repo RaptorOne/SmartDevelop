@@ -25,6 +25,7 @@ namespace SmartDevelop
                         var codeItem = ProjectItemCode.FromFile(file, project);
                         if(codeItem != null)
                             stdlibFolder.Add(codeItem);
+                    
                     }
                 }
             }

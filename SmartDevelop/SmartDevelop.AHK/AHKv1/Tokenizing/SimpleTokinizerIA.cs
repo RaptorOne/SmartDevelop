@@ -57,6 +57,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char STRINGCONCAT = '.';
         const char ESCAPECHAR = '`';
         const char VARIABLEDEREF = '%';
+        const char TRADITIONAL_ASIGNMENT = '=';
         
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '^' , '-', '|' , '?' };
@@ -207,7 +208,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
             bool inTradEscapeBefore = false;
             bool inderef = false;
-            bool inTraditionalCommand = false;
+            bool inTraditionalContext = false;
+            bool inTraditionalAsignment = false;
             int openLiteralBracketsInTraditional = 0;
 
             //clean things up
@@ -241,7 +243,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 // ensure that we differ from the token before in those cases
                 if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken) 
                     || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter || _activeToken == Token.Deref
-                    || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat
+                    || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat || _activeToken == Token.TraditionalAssign
                     || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
                 {
                     ensureNewToken = false;
@@ -249,6 +251,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         _currentToken = Token.Unknown;
                     else
                         _currentToken = Token.TraditionalString;
+
+                    if(_activeToken == Token.TraditionalAssign)
+                        _currentToken = Token.TraditionalString;
+
                 }
 
                 #endregion
@@ -260,7 +266,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     //_currentLine++;
                     _currentColumn = 0;
                     _traditionalMode = false;   // we assume that traditional commands not have multilines
-                    inTraditionalCommand = false; 
+                    inTraditionalContext = false;
+                    inTraditionalAsignment = false;
                 } else if(!_traditionalMode && IsLieralStringMarkerBegin(i)) {
 
                     #region Parse literal string
@@ -382,7 +389,11 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     } else if(!_traditionalMode && IsTraditionalCommandBegin(i)) {
                         _currentToken = Token.TraditionalCommandInvoke;
-                        inTraditionalCommand = true;
+                        inTraditionalContext = true;
+                    }else if(!_traditionalMode && IsTraditionalAssign(i)){
+                        _currentToken = Token.TraditionalAssign;
+                        inTraditionalContext = true;
+                        inTraditionalAsignment = true;
                     } else if(!_traditionalMode && OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.OperatorFlow;
                     } else if(!_traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
@@ -390,9 +401,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     
                     #region traditional parsing
 
-                    } else if(_text[i] == PARAMDELEMITER && !inTradEscapeBefore) {
+                    } else if(_text[i] == PARAMDELEMITER && !inTradEscapeBefore && !inTraditionalAsignment) {
                         _currentToken = Token.ParameterDelemiter;
-                        if(inTraditionalCommand && openLiteralBracketsInTraditional == 0)
+                        if(inTraditionalContext && openLiteralBracketsInTraditional == 0)
                             _traditionalMode = true;
                     } else if(_text[i] == VARIABLEDEREF && !inTradEscapeBefore && !inderef) {
                         _currentToken = Token.Deref;
@@ -413,7 +424,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         }
                     }
 
-                    if(!_traditionalMode && inTraditionalCommand && _activeToken != Token.TraditionalString){
+                    if(!_traditionalMode && inTraditionalContext && _activeToken != Token.TraditionalString){
                         if(_text[i] == '('){
                             openLiteralBracketsInTraditional++;
                         }else if(_text[i] == ')'){
@@ -492,7 +503,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         --linenumber;
 
 
-                    if(_activeToken == Token.TraditionalCommandInvoke && _currentToken != Token.NewLine)
+                    if((_activeToken == Token.TraditionalCommandInvoke || _activeToken == Token.TraditionalAssign) && _currentToken != Token.NewLine)
                         _traditionalMode = true;
 
                     var current = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
@@ -542,6 +553,45 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return (_text[index] == ' ') || (_text[index] == '\t');
         }
 
+
+        /// <summary>
+        /// Checks if here is a traditional asignment
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        bool IsTraditionalAssign(int index) {
+            if(_text[index] == TRADITIONAL_ASIGNMENT) {
+                char c;
+                string word;
+                bool gotIdentifier = false;
+                while(true) {
+                    c = _text.Previous(index);
+                    if(c == '\0' || c == '\n') {
+                        break;
+                    }else if(IsWhiteChar(c)){
+                        // igonre
+                    } else if(gotIdentifier) {
+                        return false;
+                    } else {
+                        word = ExtractWordBackWards(index);
+                        if(word.Length > 0 && gotIdentifier) {
+                            return false;
+                        } else {
+                            gotIdentifier = true;
+                            index -= word.Length;
+                        }
+                    }
+                    index--;
+                }
+                return gotIdentifier;
+            }
+            return false;
+        }
+
+
+
+
+
         /// <summary>
         /// Checks if at this index a traditional command starts:
         /// -> Must be sequeled by whitechars
@@ -561,11 +611,13 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 if(cindex < _text.Length) {
                     char c = _text[cindex];
                     // the next char must be a whitespace or param delemiter
-                    if(c == ' ' || c == '\t' || c == '\r' || c == ','){
-                        // now, we expect a lot but not-> =, :=, 
-                        //get next char which is not an whitespace
-                        
 
+                    if(c == ',')
+                        return true;
+                    else if(c == ' ' || c == '\t' || c == '\r'){
+                        // after whitespace, we expect a lot but not-> =, :=, 
+                        // get next char which is not an whitespace
+                        
                         char nextChar = NextCharOnThisLineOmitWhiteSpace(cindex);
                         if(!(nextChar == '.' || OPERATORS.Contains(nextChar))) {
                             return true;
@@ -637,6 +689,13 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return ExtractWord(ref _text, start, allowedspecailChars);
         }
 
+        string ExtractWordBackWards(int start){
+            return ExtractWordBackWards(ref _text, start, null);
+        }
+        string ExtractWordBackWards(int start, List<char> allowedspecailChars) {
+            return ExtractWordBackWards(ref _text, start, allowedspecailChars);
+        }
+
         public static string ExtractWord(ref string text, int start, List<char> allowedspecailChars) {
             var sb = new StringBuilder();
             char c;
@@ -645,6 +704,21 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 c = text[sprt];
                 if(!IsWhiteChar(c) && (AsciiHelper.IsAsciiLiteralLetter(c) || (allowedspecailChars != null && allowedspecailChars.Contains(c)))) {
                     sb.Append(c);
+                } else
+                    break;
+            }
+            return sb.ToString();
+        }
+
+
+        public static string ExtractWordBackWards(ref string text, int start, List<char> allowedspecailChars) {
+            string sb = "";
+            char c;
+            --start;
+            for(int sprt = start; sprt >= 0; sprt--) {
+                c = text[sprt];
+                if(!IsWhiteChar(c) && (AsciiHelper.IsAsciiLiteralLetter(c) || (allowedspecailChars != null && allowedspecailChars.Contains(c)))) {
+                    sb = c + sb;
                 } else
                     break;
             }
