@@ -33,7 +33,7 @@ namespace SmartDevelop.Model.Errors
             OnErrorRemoved(error);
         }
 
-        public void ClearAllErrorsFrom(ProjectItemCode codeDocument) {
+        public void ClearAllErrorsFrom(ProjectItemCodeDocument codeDocument) {
             foreach(var error in GetErrorsFromDocument(codeDocument)) {
                 this.Remove(error);
             }
@@ -43,7 +43,7 @@ namespace SmartDevelop.Model.Errors
             return _errors.FindAll(x => x.CodeItem.Project.Equals(codeProject));
         }
 
-        public IEnumerable<ErrorItem> GetErrorsFromDocument(ProjectItemCode codeDocument) {
+        public IEnumerable<ErrorItem> GetErrorsFromDocument(ProjectItemCodeDocument codeDocument) {
             return _errors.FindAll(x => x.CodeItem.Equals(codeDocument));
         }
 

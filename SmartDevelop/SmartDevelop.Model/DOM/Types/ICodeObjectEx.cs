@@ -14,7 +14,7 @@ namespace SmartDevelop.Model.DOM.Types
 
     public interface ICodeContext
     {
-        ProjectItemCode CodeDocumentItem { get; set; }
+        ProjectItemCodeDocument CodeDocumentItem { get; set; }
         SmartCodeProject Project { get; set; }
     }
 }

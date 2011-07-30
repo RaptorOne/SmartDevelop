@@ -42,9 +42,9 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
             set { _codeDocumentItem = value; }
         }

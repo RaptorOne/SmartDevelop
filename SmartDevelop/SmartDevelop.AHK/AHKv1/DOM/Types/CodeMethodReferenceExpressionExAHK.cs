@@ -10,17 +10,20 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
 {
     public class CodeMethodReferenceExpressionExAHK : CodeMethodReferenceExpressionEx
     {
-        public CodeMethodReferenceExpressionExAHK(ProjectItemCode codeDocumentItem, System.CodeDom.CodeExpression target, string methodName, CodeTypeDeclarationEx enclosingType)
+        public CodeMethodReferenceExpressionExAHK(ProjectItemCodeDocument codeDocumentItem, System.CodeDom.CodeExpression target, string methodName, CodeTypeDeclarationEx enclosingType)
             : base(codeDocumentItem, target, methodName, enclosingType) {
         }
-
+        public CodeMethodReferenceExpressionExAHK(ProjectItemCodeDocument codeDocumentItem, CodeMemberMethodEx resolvedCommand)
+            : base(codeDocumentItem, null, resolvedCommand.Name, null) {
+                _methodDeclaration = resolvedCommand;
+        }
 
 
         public override CodeMemberMethodEx ResolveMethodDeclarationCache() {
             var lang = Language;
 
 
-            if(_methodref == null && EnclosingType != null) {
+            if(_methodDeclaration == null && EnclosingType != null) {
                 CodeTypeDeclarationEx typedecl = EnclosingType;
 
                 var members = from m in typedecl.GetInheritedMembers()
@@ -29,10 +32,10 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
                               select memberMethod;
 
                 if(members.Any())
-                    _methodref = members.First();
+                    _methodDeclaration = members.First();
             }
 
-            if(_methodref == null) {
+            if(_methodDeclaration == null) {
                 var p = Project;
                 if(p != null && p.DOMService.RootTypeUnSave != EnclosingType) {
 
@@ -42,10 +45,10 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
                                   select methodMember;
 
                     if(members.Any())
-                        _methodref = members.First();
+                        _methodDeclaration = members.First();
                 }
             }
-            return _methodref;
+            return _methodDeclaration;
         }
     }
 }

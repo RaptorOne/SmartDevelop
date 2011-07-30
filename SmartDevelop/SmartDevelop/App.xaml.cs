@@ -17,6 +17,7 @@ using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using SmartDevelop.View.Main;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.AHK.AHKv1;
+using SmartDevelop.AHK.AHKv1.Projecting;
 
 namespace SmartDevelop
 {
@@ -39,8 +40,7 @@ namespace SmartDevelop
         void Application_Startup(object sender, StartupEventArgs e) {
 
             RegisterServices();
-            _solution = new SmartSolution();
-            _mainVM = new MainViewModel(_solution);
+            _mainVM = new MainViewModel();
 
             _mainView = new MainWindow();
             _mainView.DataContext = _mainVM;
@@ -51,7 +51,7 @@ namespace SmartDevelop
 
         void OnMainWindowLoaded(object sender, EventArgs e) {
             _mainVM.SetDockManager(_mainView.DockManger);
-            AddDemoProject();
+            AddDemoSolution();
         }
 
 
@@ -98,30 +98,64 @@ namespace SmartDevelop
         #region Demoe Code
 
 
-        void AddDemoProject() {
+        void AddDemoSolution() {
+
+            var tempProjectPath = Path.Combine(Path.GetTempPath(), "SmartDevelop", "Demo");
+            if(!Directory.Exists(tempProjectPath)) {
+                Directory.CreateDirectory(tempProjectPath);
+            }
+
 
             var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
             var language = serviceLang.GetById("ahk-v1.1");
 
-            SmartCodeProject demoProject = new SmartCodeProject("Demo Project", language);
+            _solution = new SmartSolution();
+            _mainVM.SetSolution(_solution);
+            SmartCodeProject demoProject = new SmartCodeProjectAHK("Demo Project", language);
+            demoProject.SetProjectFilePath(tempProjectPath);
 
-            DemoProjectLoader.AddStdLibTo(demoProject);
+            //DemoProjectLoader.AddStdLibTo(demoProject);
             _solution.Add(demoProject);
 
             // create a Test Folder and add a demo file
-            var testFolder = new ProjectItemFolder("Test", demoProject);
-            demoProject.Add(testFolder);
-            var dp = new ProjectItemCode(language, testFolder) { Name = "DemoFile.ahk" };
-            testFolder.Add(dp);
+
+            var dp = new ProjectItemCodeDocument(language, demoProject) { Name = "DemoFile.ahk" };
+            demoProject.Add(dp);
             dp.Document.Text = InitialDemoCode();
-
-
+            dp.QuickSave();
+            dp.IsStartUpDocument = true;
             dp.ShowDocument(); // present our demo file to the user
+
+            var libFolder = new ProjectItemFolder("Lib", demoProject);
+            demoProject.Add(libFolder);
+            dp = new ProjectItemCodeDocument(language, libFolder) { Name = "DemoIncludeMe.ahk" };
+            libFolder.Add(dp);
+            dp.Document.Text = InitialDemoIncludeCode();
+            dp.QuickSave();
+           
         }
+
+
+        static string InitialDemoIncludeCode() {
+            return 
+@"
+; Demo Include
+
+/*
+    This is a Method in a include file
+*/
+IncludeTestMethod(){
+    return 0x44
+}
+";
+        }
+
 
         static string InitialDemoCode() {
     return @"
     ; Demo Code
+
+    #Include <DemoIncludeMe>
 
 	; dynamic mini expression evaluator:
 	sk += !(a3 == """" ? (sub != """")
@@ -130,7 +164,7 @@ namespace SmartDevelop
 
     fooinst := new Foo
     str := fooinst.Helper()
-    msgbox I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33), also inline expressions are supported!
+    msgbox, 0, I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33) . also inline expressions are supported!
     val = I'm a traditional assignment, for sure!`nThe Result is %str%!
     Run, C:\Folder\%str%
     RunFail

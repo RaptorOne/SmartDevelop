@@ -22,12 +22,12 @@ namespace SmartDevelop.Model.DOM
 {
     public class CompilerArgument
     {
-        public CompilerArgument(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
+        public CompilerArgument(ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx initialparent) {
             Codeitem = codeitem;
             Initialparent = initialparent;
         }
 
-        public ProjectItemCode Codeitem { get; protected set; }
+        public ProjectItemCodeDocument Codeitem { get; protected set; }
         public CodeTypeDeclarationEx Initialparent { get; protected set; }
     }
 
@@ -45,7 +45,7 @@ namespace SmartDevelop.Model.DOM
         BackgroundWorker _fileCompileWorker;
 
         object startcompilerLock = new object();
-        ProjectItemCode _currentItem = null;
+        ProjectItemCodeDocument _currentItem = null;
 
         #endregion
 
@@ -263,7 +263,7 @@ namespace SmartDevelop.Model.DOM
 
         void CheckQueue()
         {
-            ProjectItemCode compileme = null;
+            ProjectItemCodeDocument compileme = null;
             lock(_itemsToCompileLock) {
                 if(_compileQueue.Any()) {
                     compileme = _compileQueue.First();
@@ -302,7 +302,7 @@ namespace SmartDevelop.Model.DOM
         #region Public Methods
 
 
-        List<ProjectItemCode> _compileQueue = new List<ProjectItemCode>();
+        List<ProjectItemCodeDocument> _compileQueue = new List<ProjectItemCodeDocument>();
         object _itemsToCompileLock = new object();
 
 
@@ -322,7 +322,7 @@ namespace SmartDevelop.Model.DOM
         }
 
 
-        public override void CompileTokenFileAsync(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent) {
+        public override void CompileTokenFileAsync(ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx initialparent) {
             lock(startcompilerLock){
                 // enqueue the given codedocument
                 // the queue will be checked by a timer
@@ -344,7 +344,7 @@ namespace SmartDevelop.Model.DOM
 
 
             var arg = e.Argument as CompilerArgument;
-            ProjectItemCode codeitem = arg.Codeitem;
+            ProjectItemCodeDocument codeitem = arg.Codeitem;
 
             lock(_languageRootLock) {
 
@@ -688,10 +688,10 @@ namespace SmartDevelop.Model.DOM
                                         parentHirarchy.Pop();
                                 }
                             }
-
-                            _autoexec.Statements.AddRange(
-                                            CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, i, i));
                         }
+                        _autoexec.Statements.AddRange(
+                                        CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, i, i));
+
                     } else
                         continue;
 
@@ -736,7 +736,7 @@ namespace SmartDevelop.Model.DOM
         #region Analyze AST
 
 
-        void AnalyzeAST(Projecting.ProjectItemCode codeitem, DoWorkEventArgs e) {
+        void AnalyzeAST(Projecting.ProjectItemCodeDocument codeitem, DoWorkEventArgs e) {
 
             var segmentService = codeitem.SegmentService;
             var segments = segmentService.GetSegments();
@@ -801,7 +801,7 @@ namespace SmartDevelop.Model.DOM
 
         #region Helper Methods
 
-        void RegisterError(Projecting.ProjectItemCode codeitem, CodeSegment segment, string errorDescription) {
+        void RegisterError(Projecting.ProjectItemCodeDocument codeitem, CodeSegment segment, string errorDescription) {
             var errorService = codeitem.Project.Solution.ErrorService;
             segment.ErrorContext = new CodeError() { Description = errorDescription };
             errorService.Add(new Errors.ErrorItem(segment, codeitem));
@@ -822,7 +822,7 @@ namespace SmartDevelop.Model.DOM
         /// <param name="startLine"></param>
         /// <param name="endLine"></param>
         /// <returns></returns>
-        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, Projecting.ProjectItemCode codeitem, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
+        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, Projecting.ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
             CodeTokenLine line;
             var codeStatements = new CodeStatementCollection();
 
@@ -850,7 +850,7 @@ namespace SmartDevelop.Model.DOM
         static readonly List<Token> LocalExpressionEndTokens = new List<Token>() { Token.NewLine, Token.ParameterDelemiter };
 
 
-        CodeExpression ParseExpression(Projecting.ProjectItemCode codeitem, CodeSegment tokenSegment, out CodeSegment nextToParse, CodeTypeDeclarationEx enclosingType) {
+        CodeExpression ParseExpression(Projecting.ProjectItemCodeDocument codeitem, CodeSegment tokenSegment, out CodeSegment nextToParse, CodeTypeDeclarationEx enclosingType) {
             CodeExpression expression = null;
             nextToParse = tokenSegment.Next;
 
@@ -1002,15 +1002,25 @@ namespace SmartDevelop.Model.DOM
                 #endregion
 
             } else if(tokenSegment.Token == Token.TraditionalCommandInvoke) {
+
+                #region Parse Traditional Command Invoke
+
                 var members = from m in _languageRoot.Members.Cast<CodeTypeMember>()
                               let methd = m as CodeMemberMethodExAHK
                               where methd != null && methd.IsTraditionalCommand && methd.Name.Equals(tokenSegment.TokenString, StringComparison.InvariantCultureIgnoreCase)
                               select methd;
                 if(members.Any()) {
-                    tokenSegment.CodeDOMObject = members.First();
+
+                    var invokeExpression = new CodeMethodInvokeExpression();
+                    var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, members.First());
+
+                    tokenSegment.CodeDOMObject = methodRef;
+                    expression = invokeExpression;
                 } else {
                     RegisterError(codeitem, tokenSegment, string.Format("Unknown traditional Command '{0}'", tokenSegment.TokenString));
                 }
+
+                #endregion
             }
 
             if(!(nextToParse != null && nextToParse.LineNumber == tokenSegment.LineNumber)) {

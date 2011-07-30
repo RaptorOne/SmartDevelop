@@ -17,8 +17,8 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         public static TreeViewProjectItem Build(ProjectItem item, TreeViewProjectItem parent) {
             TreeViewProjectItem treeitem = null;
 
-            if(item is ProjectItemCode) {
-                treeitem = new TreeViewProjectItemCodeFile(item as ProjectItemCode, parent);
+            if(item is ProjectItemCodeDocument) {
+                treeitem = new TreeViewProjectItemCodeFile(item as ProjectItemCodeDocument, parent);
             } else if(item is ProjectItemFolder) {
                 treeitem = new TreeViewProjectItemFolder(item as ProjectItemFolder, parent);
             } else

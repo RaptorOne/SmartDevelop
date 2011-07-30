@@ -15,8 +15,8 @@ namespace SmartDevelop.Model.DOM.Types
         #region Constructors
 
         public CodeTypeDeclarationEx() : base() { }
-        public CodeTypeDeclarationEx(ProjectItemCode codeitem, string name) : base(name) { CodeDocumentItem = codeitem; }
-        public CodeTypeDeclarationEx(ProjectItemCode codeitem, string name, bool buildin) : base(name) { IsBuildInType = buildin; CodeDocumentItem = codeitem; }
+        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name) : base(name) { CodeDocumentItem = codeitem; }
+        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name, bool buildin) : base(name) { IsBuildInType = buildin; CodeDocumentItem = codeitem; }
 
         #endregion
 
@@ -41,9 +41,9 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
             set { _codeDocumentItem = value; }
         }

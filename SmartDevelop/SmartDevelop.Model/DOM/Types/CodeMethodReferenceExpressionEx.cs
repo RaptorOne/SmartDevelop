@@ -12,15 +12,15 @@ namespace SmartDevelop.Model.DOM.Types
     {
         #region Fields
 
-        protected CodeMemberMethodEx _methodref;
+        protected CodeMemberMethodEx _methodDeclaration;
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
         #endregion
 
         #region Constructor
 
-        public CodeMethodReferenceExpressionEx(ProjectItemCode codeDocumentItem, CodeExpression target, string methodName, CodeTypeDeclarationEx enclosingType) 
+        public CodeMethodReferenceExpressionEx(ProjectItemCodeDocument codeDocumentItem, CodeExpression target, string methodName, CodeTypeDeclarationEx enclosingType) 
             : base(target, methodName) {
                 _enclosingType = enclosingType;
                 _codeDocumentItem = codeDocumentItem;
@@ -31,8 +31,8 @@ namespace SmartDevelop.Model.DOM.Types
         #region Properties
 
         public CodeMemberMethodEx ResolvedMethodMember {
-            get { return _methodref; }
-            set { _methodref = value; }
+            get { return _methodDeclaration; }
+            set { _methodDeclaration = value; }
         }
 
         CodeTypeDeclarationEx _enclosingType;
@@ -42,7 +42,7 @@ namespace SmartDevelop.Model.DOM.Types
 
 
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
             set { _codeDocumentItem = value; }
         }
@@ -80,7 +80,7 @@ namespace SmartDevelop.Model.DOM.Types
             var lang = Language;
 
 
-            if(_methodref == null && EnclosingType != null) {
+            if(_methodDeclaration == null && EnclosingType != null) {
                 CodeTypeDeclarationEx typedecl = EnclosingType;
 
                 var members = from m in typedecl.GetInheritedMembers()
@@ -89,10 +89,10 @@ namespace SmartDevelop.Model.DOM.Types
                                 select memberMethod;
 
                 if(members.Any())
-                    _methodref = members.First();
+                    _methodDeclaration = members.First();
             }
 
-            if(_methodref == null) {
+            if(_methodDeclaration == null) {
                 var p = Project;
                 if(p != null && p.DOMService.RootTypeUnSave != EnclosingType) {
 
@@ -102,10 +102,10 @@ namespace SmartDevelop.Model.DOM.Types
                                   select methodMember;
 
                     if(members.Any())
-                        _methodref = members.First();
+                        _methodDeclaration = members.First();
                 }
             }
-            return _methodref;
+            return _methodDeclaration;
         }
 
         public override string ToString() {

@@ -29,7 +29,7 @@ namespace SmartDevelop.AHK.AHKv1
 {
     public class CodeLanguageAHKv1 : CodeLanguage
     {
-
+        AHKSettings _settings;
         #region Constructor
 
         public CodeLanguageAHKv1() 
@@ -37,7 +37,13 @@ namespace SmartDevelop.AHK.AHKv1
         {
 
             SELFREF_CAN_BE_OMITTED = false;
+            SUPPORTS_STARTUP_CODEDOCUMENT = true;
 
+            // those settings actualy are taken from deserialized settings file
+            _settings = new AHKSettings();
+
+
+            #region Define Language Syntax
             // todo
             // those data is actually thougt to be read out of confic files
             //
@@ -54,6 +60,8 @@ namespace SmartDevelop.AHK.AHKv1
 
             var buildins = CodeLanguageAHKBuildinMethods.ReadMembers();
             BuildInMembers.AddRange(buildins);
+
+            #endregion
 
             #region Load Syntax Definition of AHK
 
@@ -112,6 +120,9 @@ namespace SmartDevelop.AHK.AHKv1
         
         #endregion
 
+        public AHKSettings Settings {
+            get { return _settings; }
+        }
 
         Regex GetRegexForCommand(string name) {
             var preregex = @"^[\s]*\b";
@@ -137,7 +148,7 @@ namespace SmartDevelop.AHK.AHKv1
             }
         }
 
-        public override Tokenizer CreateTokenizer(ProjectItemCode codeitem, ITextSource source) {
+        public override Tokenizer CreateTokenizer(ProjectItemCodeDocument codeitem, ITextSource source) {
             return new SimpleTokinizerIA(codeitem, source);
         }
 
@@ -153,7 +164,7 @@ namespace SmartDevelop.AHK.AHKv1
             get { return StringComparison.InvariantCultureIgnoreCase; }
         }
 
-        public override IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCode projectitem) {
+        public override IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCodeDocument projectitem) {
             var extes = new List<EditorDocumentExtension>();
             extes.Add(new CompletionDataProviderAHK(texteditor, projectitem));
             return extes;

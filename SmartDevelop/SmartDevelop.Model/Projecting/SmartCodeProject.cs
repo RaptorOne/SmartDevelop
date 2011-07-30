@@ -23,11 +23,27 @@ namespace SmartDevelop.Model.Projecting
         readonly CodeDOMService _domservice;
         readonly CodeLanguage _language;
 
+
+        string _name = "";
+        string _projectPath;
+        ProjectItemCodeDocument _startUpCodeDocument = null;
         SmartSolution _solution;
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Raised when a Documents requests to be shown in the editor
+        /// </summary>
         public event EventHandler<EventArgs<ProjectItem>> RequestShowDocument;
+
+        /// <summary>
+        /// Raised when the StartUpCodeDocument has Changed
+        /// </summary>
+        public event EventHandler StartUpCodeDocumentChanged;
+
+        #endregion
 
         #region Constructor
 
@@ -44,10 +60,16 @@ namespace SmartDevelop.Model.Projecting
 
         #region Properties
 
+        /// <summary>
+        /// Gets the DOM Service for this Project
+        /// </summary>
         public CodeDOMService DOMService {
             get { return _domservice; }
         }
 
+        /// <summary>
+        /// Gets the Code-Language of this Project
+        /// </summary>
         public CodeLanguage Language {
             get { return _language; }
         }
@@ -71,11 +93,40 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        string _name="";
+        /// <summary>
+        /// Gets/Sets the StartUpCodeDocument of this Project - if any.
+        /// </summary>
+        public ProjectItemCodeDocument StartUpCodeDocument {
+            get {
+                return _startUpCodeDocument;
+            }
+            set {
+                var old = _startUpCodeDocument;
+                _startUpCodeDocument = value;
+
+                if(old != null)
+                    old.OnIsStartUpDocumentChanged();
+                if(value != null)
+                    value.OnIsStartUpDocumentChanged();
+
+                OnStartUpCodeDocumentChanged();
+            }
+        }
+
+        
         public override string Name {
             get { return _name; }
             set { _name = value; }
         }
+
+        public void SetProjectFilePath(string newPath) {
+            _projectPath = newPath;
+        }
+
+        public override string FilePath {
+            get { return _projectPath; }
+        }
+
 
         #endregion
 
@@ -89,11 +140,29 @@ namespace SmartDevelop.Model.Projecting
             OnRequestShowDocument(documentToShow);
         }
 
+        /// <summary>
+        /// Runs this Project
+        /// </summary>
+        
+        public virtual void Run() {
+        }
+
+        public virtual bool CanRun {
+            get { return false; }
+        }
+
+
         #endregion
 
         #region Event Handlers
 
-        protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCode> codeProjectEventArgs) {
+
+        protected virtual void OnStartUpCodeDocumentChanged() {
+            if(StartUpCodeDocumentChanged != null)
+                StartUpCodeDocumentChanged(this, EventArgs.Empty);
+        }
+
+        protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCodeDocument> codeProjectEventArgs) {
             Task.Factory.StartNew(() => {
                     _domservice.CompileTokenFileAsync(codeProjectEventArgs.Value, null);
                 });
@@ -106,6 +175,9 @@ namespace SmartDevelop.Model.Projecting
         }
 
         #endregion
+
+
+
     }
 
 

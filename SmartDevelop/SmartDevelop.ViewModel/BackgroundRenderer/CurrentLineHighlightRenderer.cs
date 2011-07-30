@@ -23,12 +23,12 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
         Brush _lineSelection = new SolidColorBrush(Color.FromArgb(0x33, 0xFF, 0xCC, 0x33));
         Brush _braketMatch = new SolidColorBrush(Colors.Green);
         Brush _braketMatchFail = new SolidColorBrush(Colors.Pink);
-        ProjectItemCode _projectitem;
+        ProjectItemCodeDocument _projectitem;
         int lastLine = -1;
 
         #endregion
 
-        public CurrentLineHighlightRenderer(TextEditor editor, ProjectItemCode projectitem) {
+        public CurrentLineHighlightRenderer(TextEditor editor, ProjectItemCodeDocument projectitem) {
             _editor = editor;
             _projectitem = projectitem;
 

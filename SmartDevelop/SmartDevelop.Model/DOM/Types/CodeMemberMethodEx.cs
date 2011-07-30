@@ -14,13 +14,13 @@ namespace SmartDevelop.Model.DOM.Types
         #region Fields
 
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
         #endregion
 
         #region Constructor
 
-        public CodeMemberMethodEx(Projecting.ProjectItemCode codeDocumentItem) 
+        public CodeMemberMethodEx(Projecting.ProjectItemCodeDocument codeDocumentItem) 
             : base() {
                 ThrowUtil.ThrowIfNull(codeDocumentItem);
                 _codeDocumentItem = codeDocumentItem;
@@ -78,7 +78,7 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem ; }
             set { _codeDocumentItem = value; }
         }

@@ -19,6 +19,7 @@ namespace SmartDevelop.Model.Projecting
 
         #region Events
 
+        public event EventHandler OutputDataChanged;
         public event EventHandler CurrentChanged;
         public event EventHandler<ProjectEventArgs> ProjectAdded;
         public event EventHandler<ProjectEventArgs> ProjectRemoved;
@@ -54,6 +55,32 @@ namespace SmartDevelop.Model.Projecting
             get { return _name; }
             set { _name = value; }
         }
+        string _outputData;
+        public string OutputData {
+            get { return _outputData; }
+        }
+
+        public void ClearOutput(){
+            _outputData = "";
+            OnOutputDataChanged();
+        }
+
+        public void AddNewOutput(string newData) {
+            _outputData = newData;
+            OnOutputDataChanged();
+        }
+
+        public void AddNewOutputLine(string newData) {
+            _outputData = newData + "\r\n";
+            OnOutputDataChanged();
+        }
+
+        protected virtual void OnOutputDataChanged(){
+            if(OutputDataChanged != null){
+                OutputDataChanged(this, EventArgs.Empty);
+            }
+        }
+        
 
         #endregion
 

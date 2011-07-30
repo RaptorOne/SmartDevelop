@@ -22,7 +22,7 @@ namespace SmartDevelop
             if(Directory.Exists(dir)) {
                 foreach(var file in Directory.GetFiles(dir)) {
                     if(project.Language.Extensions.Contains(Path.GetExtension(file))) {
-                        var codeItem = ProjectItemCode.FromFile(file, project);
+                        var codeItem = ProjectItemCodeDocument.FromFile(file, project);
                         if(codeItem != null)
                             stdlibFolder.Add(codeItem);
                     

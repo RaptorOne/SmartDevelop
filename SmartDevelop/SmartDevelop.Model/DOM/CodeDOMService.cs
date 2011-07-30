@@ -29,7 +29,7 @@ namespace SmartDevelop.Model.DOM
         protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
         protected static List<Token> whitespacetokens = new List<Token> { Token.WhiteSpace };
         
-        protected Dictionary<ProjectItemCode, CodeRangeManager> CodeRanges = new Dictionary<ProjectItemCode, CodeRangeManager>();
+        protected Dictionary<ProjectItemCodeDocument, CodeRangeManager> CodeRanges = new Dictionary<ProjectItemCodeDocument, CodeRangeManager>();
 
         #endregion
 
@@ -72,11 +72,11 @@ namespace SmartDevelop.Model.DOM
 
         #region Public Methods
 
-        public CodeContext GetCodeContext(ProjectItemCode codeitem, TextLocation location, bool includeCurrentSegment = false) {
+        public CodeContext GetCodeContext(ProjectItemCodeDocument codeitem, TextLocation location, bool includeCurrentSegment = false) {
             return GetCodeContext(codeitem, codeitem.Document.GetOffset(location));
         }
 
-        public virtual CodeContext GetCodeContext(ProjectItemCode codeitem, int offset, bool includeCurrentSegment = false) {
+        public virtual CodeContext GetCodeContext(ProjectItemCodeDocument codeitem, int offset, bool includeCurrentSegment = false) {
             var context = new CodeContext(this);
 
             if(CodeRanges.ContainsKey(codeitem)) {
@@ -114,7 +114,7 @@ namespace SmartDevelop.Model.DOM
         /// </summary>
         /// <param name="codeitem"></param>
         /// <param name="initialparent"></param>
-        public abstract void CompileTokenFileAsync(ProjectItemCode codeitem, CodeTypeDeclarationEx initialparent);
+        public abstract void CompileTokenFileAsync(ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx initialparent);
 
         public abstract bool IsBusy { get; }
 

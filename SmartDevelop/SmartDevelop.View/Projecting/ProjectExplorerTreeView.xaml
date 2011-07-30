@@ -51,12 +51,13 @@
                             <ContextMenu>
                                 <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}"/>
                                 <MenuItem Header="Delete" Command="{Binding DeleteItemCommand}"/>
+                                <MenuItem Header="Set as Startup File" Command="{Binding SetAsStartUpDocumentCommand}"/>
                                 <MenuItem Header="Clear"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                    
                     <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
-                        <TextBlock Text="{Binding DisplayName}" />
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="{Binding ItemFontWeight}" />
                     </StackPanel>
                 </Grid>
             </HierarchicalDataTemplate>
@@ -75,11 +76,11 @@
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                     <Setter Property="FontWeight" Value="Normal" />
-                    <Style.Triggers>
+                    <!--<Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="FontWeight" Value="Bold" />
                         </Trigger>
-                    </Style.Triggers>
+                    </Style.Triggers>-->
                 </Style>
             </TreeView.ItemContainerStyle>
         

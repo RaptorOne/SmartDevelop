@@ -14,13 +14,13 @@ namespace SmartDevelop.Model.DOM.Types
 
         CodeMemberPropertyEx _propertyDecl;
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
         #endregion
 
         #region Constructor
 
-        public CodePropertyReferenceExpressionEx(ProjectItemCode codeDocumentItem, CodeExpression target, string propertyName, CodeTypeDeclarationEx enclosingType) 
+        public CodePropertyReferenceExpressionEx(ProjectItemCodeDocument codeDocumentItem, CodeExpression target, string propertyName, CodeTypeDeclarationEx enclosingType) 
             : base(target, propertyName) {
                 _enclosingType = enclosingType;
                 _codeDocumentItem = codeDocumentItem;
@@ -42,7 +42,7 @@ namespace SmartDevelop.Model.DOM.Types
 
 
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
             set { _codeDocumentItem = value; }
         }

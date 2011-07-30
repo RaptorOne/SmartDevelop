@@ -16,8 +16,8 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
                 _project = project;
 
                 _project.RequestShowDocument += (s, e) => {
-                        if(e.Value is ProjectItemCode) {
-                            var codeVM = CodeFileViewModel.Create(e.Value as ProjectItemCode);
+                        if(e.Value is ProjectItemCodeDocument) {
+                            var codeVM = CodeFileViewModel.Create(e.Value as ProjectItemCodeDocument);
                             var showcmd = codeVM.ShowCommand;
                             if(showcmd.CanExecute(null))
                                 showcmd.Execute(null);

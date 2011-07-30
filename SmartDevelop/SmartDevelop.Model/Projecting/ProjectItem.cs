@@ -21,7 +21,7 @@ namespace SmartDevelop.Model.Projecting
         /// Raised when the background tokenizer has refreshed the tokens 
         /// This Event blubbles up
         /// </summary>
-        public event EventHandler<EventArgs<ProjectItemCode>> TokenizerUpdated;
+        public event EventHandler<EventArgs<ProjectItemCodeDocument>> TokenizerUpdated;
 
         public event EventHandler<ProjectItemEventArgs> ItemAdded;
 
@@ -32,6 +32,9 @@ namespace SmartDevelop.Model.Projecting
         public ProjectItem(ProjectItem parent) {
             _parent = parent;
         }
+
+
+        #region Public Properties
 
         public List<ProjectItem> Children {
             get { return _children; }
@@ -50,8 +53,13 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
+        public abstract string FilePath {
+            get;
+        }
+
         public abstract string Name { get; set; }
 
+        #endregion
 
         #region ProjectItem Access
 
@@ -88,7 +96,7 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="codeProjectEventArgs"></param>
-        protected virtual void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCode> codeProjectEventArgs) {
+        protected virtual void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCodeDocument> codeProjectEventArgs) {
             if(TokenizerUpdated != null) {
                 TokenizerUpdated(this, codeProjectEventArgs);
             }

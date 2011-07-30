@@ -14,9 +14,9 @@ namespace SmartDevelop.Model.Errors
     public class ErrorItem
     {
         readonly CodeSegment _errorSegment;
-        readonly ProjectItemCode _codeProjectItem;
+        readonly ProjectItemCodeDocument _codeProjectItem;
 
-        public ErrorItem(CodeSegment errorSegment, ProjectItemCode codeItem) {
+        public ErrorItem(CodeSegment errorSegment, ProjectItemCodeDocument codeItem) {
             _errorSegment = errorSegment;
             _codeProjectItem = codeItem;
         }
@@ -31,7 +31,7 @@ namespace SmartDevelop.Model.Errors
         /// <summary>
         /// Gets the Code Projectitem 
         /// </summary>
-        public ProjectItemCode CodeItem {
+        public ProjectItemCodeDocument CodeItem {
             get { return _codeProjectItem; }
         }
     }

@@ -18,7 +18,7 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
         #region Fields
 
         readonly SmartSolution _solution;
-        readonly ProjectItemCode _codeitem;
+        readonly ProjectItemCodeDocument _codeitem;
         readonly TextEditor _editor;
 
         Pen _errorPen = new Pen(new SolidColorBrush(Colors.Red), 1);
@@ -27,7 +27,7 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
 
         #endregion
 
-        public ErrorBackgroundRenderer(TextEditor editor, ProjectItemCode projectitem) {
+        public ErrorBackgroundRenderer(TextEditor editor, ProjectItemCodeDocument projectitem) {
             _editor = editor;
             _codeitem = projectitem;
             _solution = projectitem.Project.Solution;

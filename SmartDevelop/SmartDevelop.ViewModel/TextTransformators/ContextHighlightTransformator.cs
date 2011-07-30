@@ -16,13 +16,13 @@ namespace SmartDevelop.ViewModel.TextTransformators
 {
     class ContextHighlightTransformator : DocumentColorizingTransformer
     {
-        readonly ProjectItemCode _codeProject;
+        readonly ProjectItemCodeDocument _codeProject;
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
         Brush _stringBrush = new SolidColorBrush(Colors.Crimson);
         Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
         //readonly CodeDOMService _domservice;
 
-        public ContextHighlightTransformator(ProjectItemCode codeProject) {
+        public ContextHighlightTransformator(ProjectItemCodeDocument codeProject) {
             _codeProject = codeProject;
             //_domservice = _codeProject.Project.DOMService;
         }

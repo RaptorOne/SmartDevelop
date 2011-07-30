@@ -18,12 +18,12 @@ namespace SmartDevelop.Model.Tokening
         readonly object _codesegmentsLock = new object();
         readonly Dictionary<int, CodeTokenLine> _codeLineSegments = new Dictionary<int, CodeTokenLine>();
         IEnumerable<CodeSegment> _segments;
-        readonly ProjectItemCode _codeitem;
+        readonly ProjectItemCodeDocument _codeitem;
         int _maxLine = 0;
 
         #endregion
 
-        public DocumentCodeSegmentService(ProjectItemCode codeitem) {
+        public DocumentCodeSegmentService(ProjectItemCodeDocument codeitem) {
             _codeitem = codeitem; 
         }
 

@@ -9,7 +9,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
 {
     public class CodeMemberMethodExAHK : CodeMemberMethodEx
     {
-        public CodeMemberMethodExAHK(ProjectItemCode codeDocumentItem)
+        public CodeMemberMethodExAHK(ProjectItemCodeDocument codeDocumentItem)
             : base(codeDocumentItem) {
 
             IsTraditionalCommand = false;

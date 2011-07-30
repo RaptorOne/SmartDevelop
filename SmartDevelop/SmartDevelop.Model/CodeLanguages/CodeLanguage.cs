@@ -72,6 +72,10 @@ namespace SmartDevelop.Model.CodeLanguages
         /// </summary>
         public bool SELFREF_CAN_BE_OMITTED = true;
 
+        /// <summary>
+        /// Specifies that in a Project a Code Document can be specified as startup file
+        /// </summary>
+        public bool SUPPORTS_STARTUP_CODEDOCUMENT = false;
 
         public abstract StringComparison NameComparisation { get; }
 
@@ -84,7 +88,7 @@ namespace SmartDevelop.Model.CodeLanguages
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public abstract Tokenizer CreateTokenizer(ProjectItemCode codeitem, ITextSource source);
+        public abstract Tokenizer CreateTokenizer(ProjectItemCodeDocument codeitem, ITextSource source);
 
         /// <summary>
         /// Creates a new DomService for this Language
@@ -109,7 +113,7 @@ namespace SmartDevelop.Model.CodeLanguages
         public abstract AbstractFoldingStrategy CreateFoldingStrategy(SmartDevelop.Model.Tokening.DocumentCodeSegmentService segmentService);
 
 
-        public virtual IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCode projectitem) {
+        public virtual IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCodeDocument projectitem) {
             return new List<EditorDocumentExtension>();
         }
 

@@ -20,41 +20,49 @@
                 </MenuItem>
             </Menu>
 
-            <ToolBar>
+            <ToolBar >
 
-                <Button Command="{Binding OpenFileCommand}" >
-                    <Image Source="../Images/Open.png" Height="16"/>
+                <Button Command="{Binding OpenFileCommand}" MinWidth="0" >
+                    <Image Source="../Images/Open.png" Height="18" Margin="2"/>
                 </Button>
 
-                <Button Command="{Binding SaveCurrentFileCommand}" ToolTip="Save current file">
-                    <Image Source="../Images/document-save-5.ico" Height="16"/>
+                <Button Command="{Binding SaveCurrentFileCommand}" MinWidth="0" ToolTip="Save current file">
+                    <Image Source="../Images/document-save-5.ico" Height="18" Margin="2"/>
                 </Button>
-                <Button Command="{Binding SaveAllCommand}" ToolTip="Save all files">
-                    <Image Source="../Images/document-save-all.ico" Height="16"/>
+                <Button Command="{Binding SaveAllCommand}" MinWidth="0" ToolTip="Save all files">
+                    <Image Source="../Images/document-save-all.ico" Height="18" Margin="2"/>
                 </Button>
 
                 <Separator/>
-                <Button Command="Cut">
-                    <Image Source="../Images/Cut.png" Height="16"/>
+                <Button Command="Cut" MinWidth="0">
+                    <Image Source="../Images/Cut.png" Height="18" Margin="2"/>
                 </Button>
-                <Button Command="Copy">
-                    <Image Source="../Images/Copy.png" Height="16"/>
+                <Button Command="Copy" MinWidth="0">
+                    <Image Source="../Images/Copy.png" Height="18" Margin="2"/>
                 </Button>
-                <Button Command="Paste">
-                    <Image Source="../Images/Paste.png" Height="16"/>
+                <Button Command="Paste" MinWidth="0">
+                    <Image Source="../Images/Paste.png" Height="18" Margin="2"/>
                 </Button>
-                <Button Command="Delete">
-                    <Image Source="../Images/Delete.png" Height="16"/>
+                <Button Command="Delete" MinWidth="0" >
+                    <Image Source="../Images/Delete.png" Height="18" Margin="2"/>
                 </Button>
                 <Separator/>
                 <Button Command="Undo">
-                    <Image Source="../Images/Undo.png" Height="16"/>
+                    <Image Source="../Images/Undo.png" Height="18" />
                 </Button>
                 <Button Command="Redo">
-                    <Image Source="../Images/Redo.png" Height="16"/>
+                    <Image Source="../Images/Redo.png" Height="18"/>
                 </Button>
-                <Separator/>
+                
+                <Separator Margin="2"/>
 
+                <Button Command="{Binding RunActiveProjetCommand}" MinWidth="0" ToolTip="Runs the active Project">
+                    <Image Source="../Images/arrow-right-3.ico" Height="18" Margin="2"/>
+                </Button>
+
+
+                <Separator/>
+                
                 <CheckBox IsChecked="{Binding ElementName=textEditor,Path=WordWrap}">
                     <Image Source="../Images/WordWrap.png" Height="16"/>
                 </CheckBox>
@@ -88,7 +96,7 @@
                             <errorsV:ErrorListView DataContext="{Binding Path=ErrorListVM, Source={x:Static localviewModel:Globals.MainVM}}" />
                         </ad:DockableContent>
                         <ad:DockableContent Title="Output" x:Name="output">
-                            <TextBox IsReadOnly="True" AcceptsReturn="True"/>
+                            <TextBox IsReadOnly="True" Text="{Binding Path=OutputData, Source={x:Static localviewModel:Globals.MainVM}, Mode=OneWay}" AcceptsReturn="True"/>
                         </ad:DockableContent>
                     </ad:DockablePane>
 

@@ -15,7 +15,7 @@ namespace SmartDevelop.Model.Tokenizing
     {
         #region Fields
 
-        readonly ProjectItemCode _codeDocument;
+        readonly ProjectItemCodeDocument _codeDocument;
         readonly SimpleSegment _codesegment;
         readonly Token _type;
         readonly string _tokenstring;
@@ -38,7 +38,7 @@ namespace SmartDevelop.Model.Tokenizing
             _previous = null;
         }
 
-        public CodeSegment(ProjectItemCode codeDocument, Token token, string tokenstr, SimpleSegment anchorsegment, int line, int colstart, CodeSegment previous) {
+        public CodeSegment(ProjectItemCodeDocument codeDocument, Token token, string tokenstr, SimpleSegment anchorsegment, int line, int colstart, CodeSegment previous) {
             _type = token;
             _tokenstring = tokenstr;
             _codesegment = anchorsegment;

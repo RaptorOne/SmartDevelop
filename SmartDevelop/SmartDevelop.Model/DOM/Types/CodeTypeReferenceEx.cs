@@ -24,7 +24,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Constructor
 
-        public CodeTypeReferenceEx(ProjectItemCode item, string name, CodeTypeDeclarationEx enclosingType)
+        public CodeTypeReferenceEx(ProjectItemCodeDocument item, string name, CodeTypeDeclarationEx enclosingType)
             : base(name) {
 
                 ThrowUtil.ThrowIfNull(item);
@@ -34,7 +34,7 @@ namespace SmartDevelop.Model.DOM.Types
                 _enclosingType = enclosingType;
         }
 
-        public CodeTypeReferenceEx(ProjectItemCode item, Type type)
+        public CodeTypeReferenceEx(ProjectItemCodeDocument item, Type type)
             : base(type) {
 
             ThrowUtil.ThrowIfNull(item);
@@ -65,9 +65,9 @@ namespace SmartDevelop.Model.DOM.Types
 
 
         SmartCodeProject _project;
-        Projecting.ProjectItemCode _codeDocumentItem;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
 
-        public ProjectItemCode CodeDocumentItem {
+        public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
             set { _codeDocumentItem = value; }
         }

@@ -20,7 +20,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         #region Fields
 
         TextEditor _texteditor;
-        ProjectItemCode _projectitem;
+        ProjectItemCodeDocument _projectitem;
         CompletionWindow _completionWindow;
 
         #endregion
@@ -35,7 +35,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
         #endregion
 
-        public CompletionDataProviderAHK(TextEditor texteditor, ProjectItemCode projectitem) {
+        public CompletionDataProviderAHK(TextEditor texteditor, ProjectItemCodeDocument projectitem) {
             ThrowUtil.ThrowIfNull(texteditor);
             ThrowUtil.ThrowIfNull(projectitem);
 

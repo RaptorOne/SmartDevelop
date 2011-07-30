@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -22,9 +23,19 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        public string FolderPath {
-            get;
-            set;
+        public string FolderName {
+            get { return _name; }
+            set { _name = value; }
+        }
+
+        public override string FilePath {
+            get {
+                string directory = "";
+                if(Parent != null) {
+                    directory = Path.GetDirectoryName(Parent.FilePath);
+                }
+                return Path.Combine(directory, this.Name);
+            }
         }
     }
 }

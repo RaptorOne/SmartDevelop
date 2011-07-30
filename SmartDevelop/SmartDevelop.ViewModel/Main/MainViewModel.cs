@@ -16,6 +16,7 @@ namespace SmartDevelop.ViewModel.Main
 {
     /// <summary>
     /// Main ViewModel
+    /// This is actually a singleton
     /// </summary>
     public class MainViewModel : WorkspaceViewModel
     {
@@ -24,16 +25,31 @@ namespace SmartDevelop.ViewModel.Main
         DockingManager _dockManager;
         IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
         SolutionExplorerVM _solutionVM;
+        ErrorListViewModel _errorListVM;
         SmartSolution _solution;
 
         #endregion
 
-        public MainViewModel(SmartSolution solution) 
+        #region Constrcutor
+
+        public MainViewModel() 
         {
             Globals.MainVM = this;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        public void SetSolution(SmartSolution solution) {
             _solution = solution;
-            _solutionVM = new SolutionExplorerVM(solution);
-            _errorListVM = new ErrorListViewModel(solution.ErrorService);
+
+            _solution.OutputDataChanged += (s, e) => {
+                    OnPropertyChanged(() => OutputData);
+                };
+
+            SolutionVM = new SolutionExplorerVM(_solution);
+            ErrorListVM = new ErrorListViewModel(_solution.ErrorService);
         }
 
         public void SetDockManager(DockingManager dockmanager) {
@@ -41,16 +57,34 @@ namespace SmartDevelop.ViewModel.Main
             ServiceLocator.Instance.Resolve<IAvalonService>().PrimaryDockManager = _dockManager;
         }
         
+        #endregion
+
+        public string OutputData {
+            get {
+                if(_solution != null)
+                    return _solution.OutputData;
+                return "Ready...";
+            }
+        }
+
         #region Child VMs
 
         public SolutionExplorerVM SolutionVM {
             get { return _solutionVM; }
+            protected set { 
+                _solutionVM = value;
+                OnPropertyChanged(() => SolutionVM);
+            }
         }
 
-        ErrorListViewModel _errorListVM;
+        
 
         public ErrorListViewModel ErrorListVM {
             get { return _errorListVM; }
+            protected set { 
+                _errorListVM = value;
+                OnPropertyChanged(() => ErrorListVM);
+            }
         }
 
         #endregion
@@ -74,9 +108,10 @@ namespace SmartDevelop.ViewModel.Main
                             openFileDialog1.Title = "Select a Script File";
 
                             if(openFileDialog1.ShowDialog() == DialogResult.OK) {
-                                var file = ProjectItemCode.FromFile(openFileDialog1.FileName, currentProject);
+                                var file = ProjectItemCodeDocument.FromFile(openFileDialog1.FileName, currentProject);
                                 if(file != null)
                                     currentProject.Add(file);
+                                file.ShowDocument();
                             }
 
                         }
@@ -109,6 +144,26 @@ namespace SmartDevelop.ViewModel.Main
 
         public ICommand SaveAllCommand {
             get { return null; }
+        }
+
+        #endregion
+
+        #region Run Active Projet Command
+
+        ICommand _runActiveProjetCommand;
+
+        public ICommand RunActiveProjetCommand {
+            get {
+                if(_runActiveProjetCommand == null) {
+                    _runActiveProjetCommand = new RelayCommand(x => {
+                        _solution.Current.Run();
+                        }, 
+                        x => {
+                            return _solution != null && _solution.Current != null && _solution.Current.CanRun;
+                            });
+                }
+                return _runActiveProjetCommand;
+            }
         }
 
         #endregion

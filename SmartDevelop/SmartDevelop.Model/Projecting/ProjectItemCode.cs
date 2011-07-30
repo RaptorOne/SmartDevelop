@@ -24,7 +24,7 @@ namespace SmartDevelop.Model.Projecting
     /// <summary>
     /// Represents a single Codefile
     /// </summary>
-    public class ProjectItemCode : ProjectItem
+    public class ProjectItemCodeDocument : ProjectItem
     {
         #region Fields
 
@@ -36,21 +36,31 @@ namespace SmartDevelop.Model.Projecting
         DocumentCodeSegmentService _codeSegmentService;
         bool _documentdirty = false;
         bool _isModified = false;
-
         string _name;
 
         #endregion
 
         #region Events
 
+        /// <summary>
+        /// Raised when a text location is requestet
+        /// </summary>
         public event EventHandler<EventArgs<int>> RequestTextPosition;
 
         /// <summary>
-        /// 
+        /// Raised when the TextRender has to update its content unexpected.
         /// </summary>
         public event EventHandler RequestTextInvalidation;
 
+        /// <summary>
+        /// Raised when the HasUnsavedChanges Property has changed
+        /// </summary>
         public event EventHandler HasUnsavedChangesChanged;
+
+        /// <summary>
+        /// Raised when the IsStartUpDocument Property has changed
+        /// </summary>
+        public event EventHandler IsStartUpDocumentChanged;
 
         #endregion
 
@@ -61,13 +71,13 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         /// <param name="filepath"></param>
         /// <returns></returns>
-        public static ProjectItemCode FromFile(string filepath, ProjectItem parent) {
+        public static ProjectItemCodeDocument FromFile(string filepath, ProjectItem parent) {
             if(!File.Exists(filepath))
                 return null;
 
             var language = ServiceLocator.Instance.Resolve<ICodeLanguageService>().GetByExtension(Path.GetExtension(filepath));
-            ProjectItemCode newp = new ProjectItemCode(language, parent);
-            newp.FilePath = filepath;
+            ProjectItemCodeDocument newp = new ProjectItemCodeDocument(language, parent);
+            newp.OverrideFilePath = filepath;
             try
             {
                 using(StreamReader sr = new StreamReader(filepath))
@@ -85,7 +95,7 @@ namespace SmartDevelop.Model.Projecting
             return newp;
         }
 
-        public ProjectItemCode(CodeLanguage languageId, ProjectItem parent) 
+        public ProjectItemCodeDocument(CodeLanguage languageId, ProjectItem parent) 
             : base(parent) {
 
             if(languageId == null)
@@ -102,7 +112,7 @@ namespace SmartDevelop.Model.Projecting
             _tokenizer.FinishedSucessfully += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
                 //// notify that we have a new token base to parse
-                OnTokenizerUpdated(this, new EventArgs<ProjectItemCode>(this));
+                OnTokenizerUpdated(this, new EventArgs<ProjectItemCodeDocument>(this));
                 //OnRequestTextInvalidation();
             };
 
@@ -113,6 +123,8 @@ namespace SmartDevelop.Model.Projecting
         }
 
         #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// Request that this document is shown in the editor view
@@ -132,6 +144,7 @@ namespace SmartDevelop.Model.Projecting
 
         /// <summary>
         /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
+        /// Warning: Calling this Method may result in a notable delay
         /// </summary>
         public void EnsureTokenizerHasWorked() {
             while(_tokenizer.IsBusy) {
@@ -145,11 +158,18 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
+        /// <summary>
+        /// This Metthod ensures that the AST is updated. 
+        /// Warning: Calling this Method may result in a notable delay
+        /// </summary>
         public void EnsureASTIsUpdated() {
             Project.DOMService.EnsureIsUpdated();
         }
 
 
+
+
+        #endregion
 
         #region Save the document
 
@@ -165,7 +185,7 @@ namespace SmartDevelop.Model.Projecting
                 var saver = new SaveFileDialog()
                 {
                     FileName = this.Name,
-                    Filter = "Code Files|*" + CodeLanguage.Extensions.First(),
+                    Filter = "Code Files|*" + (CodeLanguage.Extensions.Any() ? CodeLanguage.Extensions.First() : ""),
                     Title = "Select a Script File",
                     AddExtension = true
                 };
@@ -202,13 +222,12 @@ namespace SmartDevelop.Model.Projecting
         /// <summary>
         /// Saves the text to the file and updates filepath and HasUnsavedChanges.
         /// </summary>
-        public void Save(string fileName) {
+        public void Save(string fileName = null) {
             ThrowUtil.ThrowIfNull(fileName);
             if(FilePath != fileName) {
-                FilePath = fileName;
+                //FilePath = fileName;
             }
-            SaveAs(fileName);
-
+            SaveAs(FilePath);
             HasUnsavedChanges = false;
         }
 
@@ -223,7 +242,115 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+        #region Public Properties
+
+
+        /// <summary>
+        /// Used for non sulution/project files
+        /// </summary>
+        public string OverrideFilePath { 
+            get; 
+            set; 
+        }
+
+        /// <summary>
+        /// Gets the Filepath of the CodeDocument
+        /// </summary>
+        public override string FilePath {
+            get {
+                if(OverrideFilePath == null) {
+                    string directory = "";
+                    if(Parent != null) {
+                        directory = Path.GetDirectoryName(Parent.FilePath);
+                    }
+                    return Path.Combine(directory, this.Name);
+                } else {
+                    return OverrideFilePath;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets/Sets the Name of this CodeDocument
+        /// </summary>
+        public override string Name {
+            get {
+                if(OverrideFilePath == null) {
+
+                    if(string.IsNullOrEmpty(_name)) {
+                        return "unknown";
+                    } else
+                        return _name;
+                } else
+                    return Path.GetFileName(OverrideFilePath);
+            }
+            set {
+                _name = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Save-State of the Document
+        /// </summary>
+        public bool HasUnsavedChanges {
+            get { return _isModified; }
+            protected set {
+                if(_isModified == value)
+                    return;
+                _isModified = value;
+                if(HasUnsavedChangesChanged != null)
+                    HasUnsavedChangesChanged(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets the COdeLanguage of this CodeDocument
+        /// </summary>
+        public CodeLanguage CodeLanguage {
+            get { return _language; }
+        }
+
+        /// <summary>
+        /// Gets the underlying TextDocument which this CodeDocument is representing
+        /// </summary>
+        public TextDocument Document {
+            get { return _codedocument; }
+        }
+
+        /// <summary>
+        /// Gets the Segment Service
+        /// </summary>
+        public DocumentCodeSegmentService SegmentService {
+            get { return _codeSegmentService; }
+        }
+
+        /// <summary>
+        /// Gets if this Document is the StartupDocument.
+        /// Note: Startupdocuments arn't supported by all CodeLanguages
+        /// </summary>
+        public bool IsStartUpDocument {
+            get {
+                return (this.Project != null && this.Project.StartUpCodeDocument == this);
+            }
+            set {
+                if(this.Project != null) {
+                    this.Project.StartUpCodeDocument = this;
+                }
+            }
+        }
+
+        #endregion
+
         #region Event Handlers
+
+
+        /// <summary>
+        /// Occurs when the IsStartUpDocument has changed
+        /// </summary>
+        internal virtual void OnIsStartUpDocumentChanged() {
+            if(IsStartUpDocumentChanged != null)
+                IsStartUpDocumentChanged(this, EventArgs.Empty);
+        }
 
         void OnCodedocumentChanged(object sender, EventArgs e){
             _documentdirty = true;
@@ -248,53 +375,12 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-        #region Public Properties
-
-        public string FilePath {
-            get;
-            set;
-        }
-
-
-        public override string Name {
-            get {
-                if(string.IsNullOrEmpty(FilePath)) {
-                    return _name ?? "unknown";
-                } else {
-                    return Path.GetFileName(FilePath);
-                }
-            }
-            set { _name = value; }
-        }
-
-        public bool HasUnsavedChanges { 
-            get { return _isModified; } 
-            protected set {
-                if(_isModified == value)
-                    return;
-                _isModified = value;
-                if(HasUnsavedChangesChanged != null)
-                    HasUnsavedChangesChanged(this, EventArgs.Empty);
-            } 
-        }
-
-        public CodeLanguage CodeLanguage {
-            get { return _language; }
-        }
-
-        public TextDocument Document {
-            get { return _codedocument; }
-        }
-
-        public DocumentCodeSegmentService SegmentService {
-            get { return _codeSegmentService; }
-        }
-
-        #endregion
 
         public override string ToString() {
             return string.Format("{0} ({1})", this.Name);
         }
 
+
+        
     }
 }

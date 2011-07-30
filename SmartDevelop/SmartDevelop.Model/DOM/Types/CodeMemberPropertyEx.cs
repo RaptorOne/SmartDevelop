@@ -15,7 +15,7 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Constrcutors
 
-        public CodeMemberPropertyEx(ProjectItemCode codeItem) : base() {
+        public CodeMemberPropertyEx(ProjectItemCodeDocument codeItem) : base() {
             ThrowUtil.ThrowIfNull(codeItem);
             CodeDocumentItem = codeItem;
         }
@@ -37,7 +37,7 @@ namespace SmartDevelop.Model.DOM.Types
             set;
         }
 
-        public Projecting.ProjectItemCode CodeDocumentItem {
+        public Projecting.ProjectItemCodeDocument CodeDocumentItem {
             get;
             set;
         }

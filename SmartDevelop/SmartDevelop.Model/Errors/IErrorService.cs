@@ -9,10 +9,10 @@ namespace SmartDevelop.Model.Errors
         void Add(ErrorItem error);
         void Remove(ErrorItem error);
 
-        void ClearAllErrorsFrom(SmartDevelop.Model.Projecting.ProjectItemCode codeDocument);
+        void ClearAllErrorsFrom(SmartDevelop.Model.Projecting.ProjectItemCodeDocument codeDocument);
 
         System.Collections.Generic.IEnumerable<ErrorItem> GetAllErrors();
-        System.Collections.Generic.IEnumerable<ErrorItem> GetErrorsFromDocument(SmartDevelop.Model.Projecting.ProjectItemCode codeDocument);
+        System.Collections.Generic.IEnumerable<ErrorItem> GetErrorsFromDocument(SmartDevelop.Model.Projecting.ProjectItemCodeDocument codeDocument);
         System.Collections.Generic.IEnumerable<ErrorItem> GetErrorsFromProject(SmartDevelop.Model.Projecting.SmartCodeProject codeProject);
         
     }

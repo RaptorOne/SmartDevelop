@@ -86,14 +86,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         Token _currentToken = Token.Unknown;
         BackgroundWorker _tokenizerworker;
 
-        readonly ProjectItemCode _codeitem;
+        readonly ProjectItemCodeDocument _codeitem;
         readonly ITextSource _document;
 
         #endregion
 
         #region Constructor
 
-        public SimpleTokinizerIA(ProjectItemCode codeitem, ITextSource document)
+        public SimpleTokinizerIA(ProjectItemCodeDocument codeitem, ITextSource document)
          {
             _document = document;
             _codeitem = codeitem;
@@ -552,6 +552,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         bool IsWhiteSpace(int index) {
             return (_text[index] == ' ') || (_text[index] == '\t');
         }
+
 
 
         /// <summary>

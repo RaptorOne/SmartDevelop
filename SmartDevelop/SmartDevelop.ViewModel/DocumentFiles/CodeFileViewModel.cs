@@ -23,7 +23,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
     {
         #region Fields
 
-        readonly ProjectItemCode _projectitem;
+        readonly ProjectItemCodeDocument _projectitem;
         readonly TextEditor _texteditor = new TextEditor();
         FoldingManager _foldingManager;
         AbstractFoldingStrategy _foldingStrategy;
@@ -45,7 +45,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         /// </summary>
         /// <param name="projectitem"></param>
         /// <returns></returns>
-        public static CodeFileViewModel Create(ProjectItemCode projectitem) {
+        public static CodeFileViewModel Create(ProjectItemCodeDocument projectitem) {
             var viewModelPoolService = ServiceLocator.Instance.Resolve<IViewModelPoolService>();
             CodeFileViewModel vm;
             vm = viewModelPoolService.Resolve<CodeFileViewModel>(projectitem);
@@ -60,7 +60,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         /// Internal Constructor
         /// </summary>
         /// <param name="projectitem"></param>
-        CodeFileViewModel(ProjectItemCode projectitem) {
+        CodeFileViewModel(ProjectItemCodeDocument projectitem) {
 
             if(projectitem == null)
                 throw new ArgumentNullException("projectitem");
