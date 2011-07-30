@@ -15,6 +15,7 @@ using Archimedes.Patterns;
 using System.Windows.Forms;
 using Archimedes.Patterns.Utils;
 using SmartDevelop.Model.Tokenizing;
+using System.ComponentModel;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -51,6 +52,11 @@ namespace SmartDevelop.Model.Projecting
         /// Raised when the TextRender has to update its content unexpected.
         /// </summary>
         public event EventHandler RequestTextInvalidation;
+
+        /// <summary>
+        /// Raised when this Document wants it self removed from the editor workspace
+        /// </summary>
+        public event EventHandler RequestClosing;
 
         /// <summary>
         /// Raised when the HasUnsavedChanges Property has changed
@@ -166,7 +172,21 @@ namespace SmartDevelop.Model.Projecting
             Project.DOMService.EnsureIsUpdated();
         }
 
+        public virtual void ReloadDocument() {
+            if(File.Exists(FilePath)) {
+                using(StreamReader sr = new StreamReader(FilePath)) {
+                    _codedocument.Text = sr.ReadToEnd();
+                }
+            }
+        }
 
+        /// <summary>
+        /// Attempts to close this Document
+        /// </summary>
+        /// <returns></returns>
+        public virtual void RequestRemoveFromWorkspace() {
+            OnRequestRemoveFromWorkspace();
+        }
 
 
         #endregion
@@ -343,9 +363,21 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
+        /// <summary>
+        /// Gets/Sets if this document currently is on the editor workspace
+        /// </summary>
+        public bool IsOnWorkspace { get; set; }
+
+
         #endregion
 
         #region Event Handlers
+
+
+        protected virtual void OnRequestRemoveFromWorkspace() {
+            if(RequestClosing != null)
+                RequestClosing(this, EventArgs.Empty);
+        }
 
 
         /// <summary>
@@ -384,5 +416,6 @@ namespace SmartDevelop.Model.Projecting
             return string.Format("{0} ({1})", this.Name);
         }
 
+        
     }
 }

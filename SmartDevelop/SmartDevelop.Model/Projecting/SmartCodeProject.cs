@@ -159,9 +159,15 @@ namespace SmartDevelop.Model.Projecting
             get { return false; }
         }
 
-
-
-
+        public virtual bool Close() {
+            var codefiles = this.FindAllItems<ProjectItemCodeDocument>();
+            foreach(var file in codefiles) {
+                file.RequestRemoveFromWorkspace();
+                if(file.IsOnWorkspace)
+                    return false;
+            }
+            return true;
+        }
 
         #endregion
 
@@ -186,6 +192,8 @@ namespace SmartDevelop.Model.Projecting
         }
 
         #endregion
+
+
 
 
 

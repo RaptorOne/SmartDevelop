@@ -20,11 +20,9 @@ namespace SmartDevelop.ViewModel.TextTransformators
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
         Brush _stringBrush = new SolidColorBrush(Colors.Crimson);
         Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
-        //readonly CodeDOMService _domservice;
 
         public ContextHighlightTransformator(ProjectItemCodeDocument codeProject) {
             _codeProject = codeProject;
-            //_domservice = _codeProject.Project.DOMService;
         }
 
 
@@ -44,7 +42,8 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
                 if(segment.Token == Token.TraditionalString) {
 
-                    try {
+                    if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
+
 
                         base.ChangeLinePart(
                             segment.Range.Offset, // startOffset
@@ -53,12 +52,14 @@ namespace SmartDevelop.ViewModel.TextTransformators
                                 Typeface tf = element.TextRunProperties.Typeface;
                                 element.TextRunProperties.SetForegroundBrush(_stringBrush);
                             });
-                    } catch { }
+                    }
+
                 } else if(segment.CodeDOMObject is CodeMethodReferenceExpressionEx) {
 
                     var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
                     if(methodRef.ResolvedMethodMember != null) {
-                        try {
+
+                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
                             base.ChangeLinePart(
                             segment.Range.Offset, // startOffset
                             segment.Range.EndOffset, // endOffset
@@ -75,15 +76,15 @@ namespace SmartDevelop.ViewModel.TextTransformators
                                     tf.Stretch
                                 ));
                             });
-                        } catch {
-
                         }
                     }
 
                 } else if(segment.CodeDOMObject is CodeTypeReferenceEx) {
 
                     if(((CodeTypeReferenceEx)segment.CodeDOMObject).ResolvedTypeDeclaration != null) {
-                        try {
+
+
+                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
                             base.ChangeLinePart(
                             segment.Range.Offset, // startOffset
                             segment.Range.EndOffset, // endOffset
@@ -97,30 +98,13 @@ namespace SmartDevelop.ViewModel.TextTransformators
                                     tf.Stretch
                                 ));
                             });
-                        } catch {
 
                         }
+
                     }
                 }
             }
 
-        }
-
-        void HandleSegmentError(CodeSegment segment) {
-            try {
-                base.ChangeLinePart(
-                segment.Range.Offset, // startOffset
-                segment.Range.EndOffset, // endOffset
-                (VisualLineElement element) => {
-                    // This lambda gets called once for every VisualLineElement
-                    // between the specified offsets.
-                    Typeface tf = element.TextRunProperties.Typeface;
-                    // Replace the typeface with a modified version of
-                    // the same typeface
-                    element.TextRunProperties.SetBackgroundBrush(_errorBrush);
-                });
-            } catch {
-            }
         }
     }
 }

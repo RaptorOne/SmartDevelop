@@ -46,6 +46,13 @@ namespace SmartDevelop
             _mainView.DataContext = _mainVM;
             _mainView.WindowState = WindowState.Maximized;
             _mainView.Loaded += OnMainWindowLoaded;
+            _mainView.Closing += (s, ex) => {
+                if(!ex.Cancel && _solution != null) {
+                    if(!_solution.Close()) {
+                        ex.Cancel = true;
+                    }
+                }
+                };
             _mainView.Show();
         }
 
@@ -93,6 +100,8 @@ namespace SmartDevelop
             langserv.Register(new CodeLanguageAHKv1());
 
         }
+
+        
 
 
         #region Demoe Code

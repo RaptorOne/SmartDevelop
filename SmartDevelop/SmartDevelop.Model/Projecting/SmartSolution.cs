@@ -107,7 +107,22 @@ namespace SmartDevelop.Model.Projecting
             return new List<SmartCodeProject>(_projects);
         }
 
+        /// <summary>
+        /// Closes this Solution.
+        /// Invokes close on all child project of this solution.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool Close() {
+            foreach(var p in _projects) {
+                if(!p.Close())
+                    return false;
+            }
+            return true;
+        }
+
         #endregion
+
+
     }
 
 

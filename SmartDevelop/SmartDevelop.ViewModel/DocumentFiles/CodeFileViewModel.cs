@@ -16,9 +16,13 @@ using SmartDevelop.ViewModel.TextTransformators;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.Model.DOM.Types;
+using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
+    /// <summary>
+    /// Represents a CodeDocument in the Workspace
+    /// </summary>
     public class CodeFileViewModel : WorkspaceViewModel, ICacheable
     {
         #region Fields
@@ -71,6 +75,10 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _projectitem.RequestTextPosition += (s, e) => {
                     _texteditor.TextArea.Caret.Offset = e.Value;
                     _texteditor.TextArea.Caret.BringCaretToView();
+                };
+
+            _projectitem.RequestClosing += (s, e) => {
+                    this.CloseCommand.Execute(e);
                 };
 
 
@@ -271,6 +279,38 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         #region Event Handlers
 
 
+        public override void OnClosing(System.ComponentModel.CancelEventArgs e) {
+
+            if(e.Cancel)
+                return;
+
+            if(_projectitem.HasUnsavedChanges) {
+                this.ShowCommand.CanExecute(null);
+                this.ShowCommand.Execute(null);
+                var res = _workbenchservice.MessageBox("This File has unsaved changes. Do you want to Save them before closing?", "File Closing"
+                    , MessageBoxType.Information, MessageBoxWPFButton.YesNoCancel);
+                if(res == DialogWPFResult.Yes) {
+                    _projectitem.QuickSave();
+                } else if ( res == DialogWPFResult.No) {
+                    _projectitem.ReloadDocument();
+                } else if(res == DialogWPFResult.Abort || res == DialogWPFResult.Cancel) {
+                    e.Cancel = true;
+                }
+            }
+
+            base.OnClosing(e);
+        }
+
+        public override void OnClosed() {
+            this.Dispose();
+        }
+
+        protected virtual void OnCacheExpired() {
+            if(CacheExpired != null)
+                CacheExpired(this, EventArgs.Empty);
+        }
+
+
         void OnDocumentTextChanged(object sender, EventArgs e) {
             _foldingDirty = true;
         }
@@ -287,6 +327,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _toolTip.IsOpen = false;
             // Do not set e.Handled=true.
             // We still want to insert the character that was typed.
+        }
+
+        protected override void OnIsOnWorkspaceChanged() {
+            _projectitem.IsOnWorkspace = this.IsOnWorkspace;
+            base.OnIsOnWorkspaceChanged();
         }
 
         #region ToolTip
@@ -339,5 +384,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         #endregion
 
         #endregion
+
+        protected override void OnDispose() {
+            OnCacheExpired();
+            base.OnDispose();
+        }
+
     }
 }
