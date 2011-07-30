@@ -32,7 +32,10 @@ namespace SmartDevelop.Model.Projecting
             get {
                 string directory = "";
                 if(Parent != null) {
-                    directory = Path.GetDirectoryName(Parent.FilePath);
+                    if(Path.GetExtension(Parent.FilePath) != "") {
+                        directory = Path.GetDirectoryName(Parent.FilePath);
+                    } else
+                        directory = Parent.FilePath;
                 }
                 return Path.Combine(directory, this.Name);
             }

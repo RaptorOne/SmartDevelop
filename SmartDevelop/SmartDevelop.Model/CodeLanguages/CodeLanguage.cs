@@ -13,6 +13,7 @@ using SmartDevelop.Model.DOM.Types;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Tokenizing;
+using System.IO;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -45,6 +46,14 @@ namespace SmartDevelop.Model.CodeLanguages
         public string LanguageID {
             get;
             set;
+        }
+
+        static string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartDevelop");
+
+        public static string AppSettingsFolder {
+            get {
+                return appData;
+            }
         }
 
         public virtual List<CodeKeyWord> LanguageKeywords {

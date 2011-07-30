@@ -24,12 +24,16 @@ using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.Tokenizing;
 using System.Windows;
+using Archimedes.Patterns.Serializing;
 
 namespace SmartDevelop.AHK.AHKv1
 {
     public class CodeLanguageAHKv1 : CodeLanguage
     {
         AHKSettings _settings;
+        static string AHKSettingsFolder = AppSettingsFolder;
+        string _settingsFilePath = Path.Combine(AHKSettingsFolder, "ahksettings.xml");
+
         #region Constructor
 
         public CodeLanguageAHKv1() 
@@ -39,10 +43,14 @@ namespace SmartDevelop.AHK.AHKv1
             SELFREF_CAN_BE_OMITTED = false;
             SUPPORTS_STARTUP_CODEDOCUMENT = true;
 
-            // those settings actualy are taken from deserialized settings file
-            _settings = new AHKSettings();
-
-
+            if(File.Exists(_settingsFilePath)){
+                _settings = SerializerHelper.DeserializeObjectFromFile<AHKSettings>(_settingsFilePath);
+            }else{
+                // load default settings
+                _settings = new AHKSettings(_settingsFilePath);
+                _settings.Save();
+            }
+            
             #region Define Language Syntax
             // todo
             // those data is actually thougt to be read out of confic files

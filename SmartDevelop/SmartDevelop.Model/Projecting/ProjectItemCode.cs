@@ -234,7 +234,8 @@ namespace SmartDevelop.Model.Projecting
 
         public void SaveAs(string fileName) {
             ThrowUtil.ThrowIfNull(fileName);
-
+            if(!Directory.Exists(Path.GetDirectoryName(fileName)))
+                Directory.CreateDirectory(Path.GetDirectoryName(fileName));
             using(FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)) {
                 Save(fs);
             }
@@ -261,7 +262,10 @@ namespace SmartDevelop.Model.Projecting
                 if(OverrideFilePath == null) {
                     string directory = "";
                     if(Parent != null) {
-                        directory = Path.GetDirectoryName(Parent.FilePath);
+                        if(Path.GetExtension(Parent.FilePath) != "") {
+                            directory = Path.GetDirectoryName(Parent.FilePath);
+                        } else
+                            directory = Parent.FilePath;
                     }
                     return Path.Combine(directory, this.Name);
                 } else {
