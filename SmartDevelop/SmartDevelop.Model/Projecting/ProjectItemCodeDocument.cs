@@ -384,7 +384,5 @@ namespace SmartDevelop.Model.Projecting
             return string.Format("{0} ({1})", this.Name);
         }
 
-
-        
     }
 }

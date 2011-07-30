@@ -59,6 +59,24 @@ namespace SmartDevelop.Model.Projecting
 
         public abstract string Name { get; set; }
 
+
+        /// <summary>
+        /// Traveles down the tree and finds all items in the childs
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IEnumerable<T> FindAllItems<T>() 
+            where T : ProjectItem {
+            List<T> _items = new List<T>(); ;
+            foreach(var c in this.Children) {
+                if(c is T)
+                    _items.Add(c as T);
+                _items.AddRange(c.FindAllItems<T>());
+            }
+            return _items;
+        }
+
+
         #endregion
 
         #region ProjectItem Access

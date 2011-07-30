@@ -24,7 +24,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
             string output = "";
             string errOutput = "";
 
-
+            QuickSaveAll();
 
             Solution.ClearOutput();
             Solution.AddNewOutputLine("Running: " + this.StartUpCodeDocument.FilePath);
@@ -42,6 +42,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
                     if(openFileDialog1.ShowDialog() == DialogResult.OK) {
                         _language.Settings.InterpreterPath = openFileDialog1.FileName;
+                        _language.Settings.Save();
                     }
                 }
 

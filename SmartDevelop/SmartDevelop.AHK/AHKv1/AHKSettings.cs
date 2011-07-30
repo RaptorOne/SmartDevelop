@@ -15,7 +15,7 @@ namespace SmartDevelop.AHK.AHKv1
         public AHKSettings(string path) { SettingsSerialisationPath = path; }
 
         [NonSerialized()]
-        protected string SettingsSerialisationPath;
+        internal string SettingsSerialisationPath;
 
         public void Save() {
             SerializerHelper.SerializeObjectToFile(this, SettingsSerialisationPath);

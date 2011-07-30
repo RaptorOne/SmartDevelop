@@ -45,6 +45,7 @@ namespace SmartDevelop.AHK.AHKv1
 
             if(File.Exists(_settingsFilePath)){
                 _settings = SerializerHelper.DeserializeObjectFromFile<AHKSettings>(_settingsFilePath);
+                _settings.SettingsSerialisationPath = _settingsFilePath;
             }else{
                 // load default settings
                 _settings = new AHKSettings(_settingsFilePath);

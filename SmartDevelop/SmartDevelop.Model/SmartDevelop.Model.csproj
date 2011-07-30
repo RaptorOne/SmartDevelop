@@ -72,7 +72,7 @@
     <Compile Include="Errors\IErrorService.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
-    <Compile Include="Projecting\ProjectItemCode.cs" />
+    <Compile Include="Projecting\ProjectItemCodeDocument.cs" />
     <Compile Include="Projecting\ProjectItemEventArgs.cs" />
     <Compile Include="Projecting\ProjectItemFolder.cs" />
     <Compile Include="Projecting\SmartSolution.cs" />

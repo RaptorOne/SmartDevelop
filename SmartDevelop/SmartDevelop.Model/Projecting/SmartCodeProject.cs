@@ -143,13 +143,24 @@ namespace SmartDevelop.Model.Projecting
         /// <summary>
         /// Runs this Project
         /// </summary>
-        
         public virtual void Run() {
+            
+        }
+
+        public virtual void QuickSaveAll() {
+            var codefiles = this.FindAllItems<ProjectItemCodeDocument>();
+            foreach(var file in codefiles) {
+                if(file.HasUnsavedChanges)
+                    file.QuickSave();
+            }
         }
 
         public virtual bool CanRun {
             get { return false; }
         }
+
+
+
 
 
         #endregion
