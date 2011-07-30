@@ -42,7 +42,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
                 if(segment.Token == Token.TraditionalString) {
 
-                    if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
+                    if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset <= line.EndOffset) {
 
 
                         base.ChangeLinePart(
@@ -59,7 +59,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
                     var methodRef = segment.CodeDOMObject as CodeMethodReferenceExpressionEx;
                     if(methodRef.ResolvedMethodMember != null) {
 
-                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
+                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset <= line.EndOffset) {
                             base.ChangeLinePart(
                             segment.Range.Offset, // startOffset
                             segment.Range.EndOffset, // endOffset
@@ -84,7 +84,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
                     if(((CodeTypeReferenceEx)segment.CodeDOMObject).ResolvedTypeDeclaration != null) {
 
 
-                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset < line.EndOffset) {
+                        if(segment.Range.Offset >= lineStartOffset && segment.Range.EndOffset <= line.EndOffset) {
                             base.ChangeLinePart(
                             segment.Range.Offset, // startOffset
                             segment.Range.EndOffset, // endOffset
