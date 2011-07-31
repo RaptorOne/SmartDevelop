@@ -53,7 +53,9 @@
     <Compile Include="CodeLanguages\ICodeLanguageService.cs" />
     <Compile Include="CodeLanguages\Extensions\EditorDocumentExtension.cs" />
     <Compile Include="CodeLanguages\PreProcessorDirective.cs" />
+    <Compile Include="DOM\ASTManager.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
+    <Compile Include="DOM\CodeDocumentDOMService.cs" />
     <Compile Include="DOM\DOMMathEx.cs" />
     <Compile Include="DOM\Ranges\CodeRange.cs" />
     <Compile Include="DOM\Ranges\CodeRangeManager.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Tokenizing\Token.cs" />
     <Compile Include="Tokenizing\TokenHelper.cs" />
     <Compile Include="Tokenizing\Tokenizer.cs" />
+    <Compile Include="Tokenizing\TokenizerSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.CodeDOM\Archimedes.CodeDOM.csproj">

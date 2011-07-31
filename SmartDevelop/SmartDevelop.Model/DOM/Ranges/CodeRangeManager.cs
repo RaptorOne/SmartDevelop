@@ -7,16 +7,27 @@ using System.CodeDom;
 
 namespace SmartDevelop.Model.DOM.Ranges
 {
+    /// <summary>
+    /// Thread save Range Manager
+    /// </summary>
     public class CodeRangeManager
     {
         List<CodeRange> _ranges = new List<CodeRange>();
 
+
+        /// <summary>
+        /// Add a Range to this Manager
+        /// </summary>
+        /// <param name="range"></param>
         public void Add(CodeRange range) {
             lock(_ranges) {
                 _ranges.Add(range);
             }
         }
 
+        /// <summary>
+        /// Clears all Ranges
+        /// </summary>
         public void Clear() {
             lock(_ranges) {
                 _ranges.Clear();

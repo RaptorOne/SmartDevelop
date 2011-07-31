@@ -139,13 +139,38 @@ namespace SmartDevelop
             demoProject.Add(libFolder);
             dp = new ProjectItemCodeDocument(language, libFolder) { Name = "DemoIncludeMe.ahk" };
             libFolder.Add(dp);
-            dp.Document.Text = InitialDemoIncludeCode();
+            dp.Document.Text = InitialDemoIncludeLibCode();
             dp.QuickSave();
-           
+
+
+            dp = new ProjectItemCodeDocument(language, demoProject) { Name = "Car.ahk" };
+            demoProject.Add(dp);
+            dp.Document.Text = InitialDemoIncludeFilePathCode();
+            dp.QuickSave();
+
+
         }
 
+        static string InitialDemoIncludeFilePathCode() {
+            return
+@"
+; Demo Include filepath
 
-        static string InitialDemoIncludeCode() {
+/*
+    This is a Method in a include file
+*/
+class Car
+{
+    var Wheels
+    
+    Run(){
+        ; run it! :D
+    }
+}
+";
+        }
+
+        static string InitialDemoIncludeLibCode() {
             return 
 @"
 ; Demo Include
@@ -163,8 +188,8 @@ IncludeTestMethod(){
         static string InitialDemoCode() {
     return @"
     ; Demo Code
-
     #Include <DemoIncludeMe>
+    #Include Car.ahk
 
 	; dynamic mini expression evaluator:
 	sk += !(a3 == """" ? (sub != """")

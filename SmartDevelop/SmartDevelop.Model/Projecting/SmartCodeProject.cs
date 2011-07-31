@@ -22,12 +22,14 @@ namespace SmartDevelop.Model.Projecting
 
         readonly CodeDOMService _domservice;
         readonly CodeLanguage _language;
-
+        readonly ASTManager _ASTManager;
 
         string _name = "";
         string _projectPath;
         ProjectItemCodeDocument _startUpCodeDocument = null;
         SmartSolution _solution;
+
+        List<ProjectItemCodeDocument> _codeDocuments = new List<ProjectItemCodeDocument>();
 
         #endregion
 
@@ -43,6 +45,16 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler StartUpCodeDocumentChanged;
 
+        /// <summary>
+        /// Raised when a CodeDocument was added to this Project
+        /// </summary>
+        public event EventHandler CodeDocumentAdded;
+
+        /// <summary>
+        /// Raised when a CodeDocument was removed from this Project
+        /// </summary>
+        public event EventHandler CodeDocumentRemoved;
+
         #endregion
 
         #region Constructor
@@ -54,6 +66,7 @@ namespace SmartDevelop.Model.Projecting
             Name = name;
             _language = language;
             _domservice = language.CreateDOMService(this);
+            _ASTManager = language.CreateASTManager(this);
         }
 
         #endregion
@@ -65,6 +78,13 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public CodeDOMService DOMService {
             get { return _domservice; }
+        }
+
+        /// <summary>
+        /// Gets the DOM Service for this Project
+        /// </summary>
+        public ASTManager ASTManager {
+            get { return _ASTManager; }
         }
 
         /// <summary>
@@ -114,6 +134,13 @@ namespace SmartDevelop.Model.Projecting
         }
 
         
+        public IEnumerable<ProjectItemCodeDocument> CodeDocuments {
+            get {
+                return _codeDocuments;
+            }
+        }
+
+        
         public override string Name {
             get { return _name; }
             set { _name = value; }
@@ -148,7 +175,7 @@ namespace SmartDevelop.Model.Projecting
         }
 
         public virtual void QuickSaveAll() {
-            var codefiles = this.FindAllItems<ProjectItemCodeDocument>();
+            var codefiles = this.FindAllItemsRecursive<ProjectItemCodeDocument>();
             foreach(var file in codefiles) {
                 if(file.HasUnsavedChanges)
                     file.QuickSave();
@@ -160,7 +187,7 @@ namespace SmartDevelop.Model.Projecting
         }
 
         public virtual bool Close() {
-            var codefiles = this.FindAllItems<ProjectItemCodeDocument>();
+            var codefiles = this.FindAllItemsRecursive<ProjectItemCodeDocument>();
             foreach(var file in codefiles) {
                 file.RequestRemoveFromWorkspace();
                 if(file.IsOnWorkspace)
@@ -172,7 +199,6 @@ namespace SmartDevelop.Model.Projecting
         #endregion
 
         #region Event Handlers
-
 
         protected virtual void OnStartUpCodeDocumentChanged() {
             if(StartUpCodeDocumentChanged != null)
@@ -191,12 +217,47 @@ namespace SmartDevelop.Model.Projecting
                 RequestShowDocument(this, new EventArgs<ProjectItem>(documentToShow));
         }
 
+        protected override void OnChildItemAdded(object sender, ProjectItemEventArgs e) {
+            var codeDoc = e.Item as ProjectItemCodeDocument;
+            if(codeDoc != null) {
+                _codeDocuments.Add(codeDoc);
+                OnCodeDocumentAdded(codeDoc);
+            }
+            base.OnChildItemAdded(sender, e);
+        }
+
+        protected override void OnChildItemRemoved(object sender, ProjectItemEventArgs e) {
+            var codeDoc = e.Item as ProjectItemCodeDocument;
+            if(codeDoc != null) {
+                _codeDocuments.Remove(codeDoc);
+                OnCodeDocumentRemoved(codeDoc);
+            }
+            base.OnChildItemRemoved(sender, e);
+        }
+
+        /// <summary>
+        /// Occurs when a CodeDoucument was added to this project
+        /// </summary>
+        protected virtual void OnCodeDocumentAdded(ProjectItemCodeDocument doc) {
+            if(CodeDocumentAdded != null)
+                CodeDocumentAdded(this, new EventArgs<ProjectItemCodeDocument>(doc));
+
+            _ASTManager.Add(doc);
+
+        }
+
+        /// <summary>
+        /// Occurs when the CodeDoucument Collection has been changed
+        /// </summary>
+        protected virtual void OnCodeDocumentRemoved(ProjectItemCodeDocument doc) {
+            if(CodeDocumentRemoved != null)
+                CodeDocumentRemoved(this, new EventArgs<ProjectItemCodeDocument>(doc));
+
+            _ASTManager.Remove(doc);
+        }
+
+
         #endregion
-
-
-
-
-
     }
 
 

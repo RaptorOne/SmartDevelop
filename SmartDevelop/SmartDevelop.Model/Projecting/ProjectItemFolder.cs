@@ -23,11 +23,6 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        public string FolderName {
-            get { return _name; }
-            set { _name = value; }
-        }
-
         public override string FilePath {
             get {
                 string directory = "";

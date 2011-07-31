@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using Archimedes.Patterns.Utils;
 using SmartDevelop.Model.Tokenizing;
 using System.ComponentModel;
+using SmartDevelop.Model.DOM;
 
 
 namespace SmartDevelop.Model.Projecting
@@ -35,6 +36,8 @@ namespace SmartDevelop.Model.Projecting
         CodeLanguage _language;
         Tokenizer _tokenizer;
         DocumentCodeSegmentService _codeSegmentService;
+        CodeDocumentDOMService _ast;
+
         bool _documentdirty = false;
         bool _isModified = false;
         string _name;
@@ -121,6 +124,9 @@ namespace SmartDevelop.Model.Projecting
                 OnTokenizerUpdated(this, new EventArgs<ProjectItemCodeDocument>(this));
                 //OnRequestTextInvalidation();
             };
+
+            _ast = languageId.CreateDOMService(this);
+
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
             tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(500);
@@ -347,6 +353,14 @@ namespace SmartDevelop.Model.Projecting
         public DocumentCodeSegmentService SegmentService {
             get { return _codeSegmentService; }
         }
+        
+        
+        /// <summary>
+        /// Gets the AST
+        /// </summary>
+        public CodeDocumentDOMService AST {
+            get { return _ast; }
+        }
 
         /// <summary>
         /// Gets if this Document is the StartupDocument.
@@ -413,7 +427,7 @@ namespace SmartDevelop.Model.Projecting
 
 
         public override string ToString() {
-            return string.Format("{0} ({1})", this.Name);
+            return string.Format("{0}, IsStartUp: {1}", this.Name, this.IsStartUpDocument);
         }
 
         

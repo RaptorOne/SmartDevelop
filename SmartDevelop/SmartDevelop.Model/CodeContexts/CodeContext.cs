@@ -7,15 +7,20 @@ using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.DOM;
 using System.CodeDom;
 using SmartDevelop.Model.Tokenizing;
+using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.Model.CodeContexts
 {
     public class CodeContext
     {
 
-        public CodeContext(CodeDOMService domservice) { CodeDOMService = domservice; } 
+        public CodeContext(CodeDocumentDOMService domservice) {
+            ThrowUtil.ThrowIfNull(domservice);
+            CodeDOMService = domservice; 
+        }
+        CodeContext() { }
 
-        public CodeDOMService CodeDOMService { get; protected set; }
+        public CodeDocumentDOMService CodeDOMService { get; protected set; }
 
         public CodeTypeDeclarationEx EnclosingType { get; set; }
 
@@ -26,20 +31,20 @@ namespace SmartDevelop.Model.CodeContexts
 
         public virtual IEnumerable<CodeTypeMember> GetVisibleMembers() {
             var members = new List<CodeTypeMember>();
+            if(CodeDOMService != null) {
+                members.AddRange(from m in CodeDOMService.RootType.Members.Cast<CodeTypeMember>()
+                                 let mimp = m as ICodeMemberEx
+                                 where mimp == null || !mimp.IsHidden
+                                 select m);
 
-            members.AddRange(from m in CodeDOMService.RootType.Members.Cast<CodeTypeMember>() 
-                             let mimp = m as ICodeMemberEx
-                             where mimp == null || !mimp.IsHidden
-                             select m);
-
-            if(EnclosingType != CodeDOMService.RootType) {
-                members.AddRange(EnclosingType.GetInheritedMembers());
+                if(EnclosingType != null && EnclosingType != CodeDOMService.RootType) {
+                    members.AddRange(EnclosingType.GetInheritedMembers());
+                }
             }
-
             return members; 
         }
 
-
-
+        static CodeContext _empty = new CodeContext();
+        public static CodeContext Empty { get { return _empty; } }
     }
 }

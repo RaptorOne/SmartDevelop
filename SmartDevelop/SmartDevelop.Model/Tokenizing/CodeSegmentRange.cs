@@ -7,7 +7,7 @@ namespace SmartDevelop.Model.Tokenizing
 {
 
     /// <summary>
-    /// Defines a range in a CodeSegment-Stream
+    /// Defines an enumerable range in a CodeSegment-Stream
     /// </summary>
     public class CodeSegmentRange : IEnumerable<CodeSegment>
     {

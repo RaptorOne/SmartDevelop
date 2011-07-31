@@ -25,6 +25,7 @@ using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.Tokenizing;
 using System.Windows;
 using Archimedes.Patterns.Serializing;
+using SmartDevelop.AHK.AHKv1.DOM;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -66,6 +67,8 @@ namespace SmartDevelop.AHK.AHKv1
                      new CodeKeyWord("GoTo"), new CodeKeyWord("GoSub"),
                     new CodeKeyWord("loop"), new CodeKeyWord("for"), new CodeKeyWord("while"), new CodeKeyWord("in")
                 });
+
+            this.LanguageDirectives.AddRange(CodeLanguageAHKBuildinMethods.GetDirectives());
 
             var buildins = CodeLanguageAHKBuildinMethods.ReadMembers();
             BuildInMembers.AddRange(buildins);
@@ -179,5 +182,13 @@ namespace SmartDevelop.AHK.AHKv1
             return extes;
         }
 
+
+        public override CodeDocumentDOMService CreateDOMService(ProjectItemCodeDocument document) {
+            return new CodeDOMDocumentServiceAHK(document);
+        }
+
+        public override ASTManager CreateASTManager(SmartCodeProject project) {
+            return new ASTManagerAHK(project);
+        }
     }
 }

@@ -49,10 +49,15 @@
     <Compile Include="AHKv1\CodeCompletion\CompletionDataProviderAHK.cs" />
     <Compile Include="AHKv1\CodeLanguageAHKBuildinMethods.cs" />
     <Compile Include="AHKv1\CodeLanguageAHKv1.cs" />
+    <Compile Include="AHKv1\DOM\ASTManagerAHK.cs" />
     <Compile Include="AHKv1\DOM\CodeDOMServiceIA.cs" />
+    <Compile Include="AHKv1\DOM\CodeDOMDocumentServiceAHK.cs" />
+    <Compile Include="AHKv1\DOM\CompilerArgument.cs" />
+    <Compile Include="AHKv1\DOM\SyntaxException.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMemberMethodExAHK.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMethodReferenceExpressionExAHK.cs" />
     <Compile Include="AHKv1\Folding\FoldingStrategyAHKv1.cs" />
+    <Compile Include="AHKv1\Projecting\ProjectItemFolderSTdLib.cs" />
     <Compile Include="AHKv1\Projecting\SmartCodeProjectAHK.cs" />
     <Compile Include="AHKv1\Tokenizing\SimpleTokinizerIA.cs" />
     <Compile Include="AHKv1\Tokenizing\TokenMapIA.cs" />

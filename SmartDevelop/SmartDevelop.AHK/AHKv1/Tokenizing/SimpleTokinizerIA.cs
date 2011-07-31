@@ -58,7 +58,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char ESCAPECHAR = '`';
         const char VARIABLEDEREF = '%';
         const char TRADITIONAL_ASIGNMENT = '=';
-        
+        const char DIRECTIVE_START = '#';
+
+
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '^' , '-', '|' , '?' };
         readonly List<string> KEYWORDS;
@@ -69,12 +71,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         #region Fields
 
-        
         List<CodeSegment> _codesegmentsWorker = new List<CodeSegment>();
+        List<CodeSegment> _directivesWorker = new List<CodeSegment>();
+
+
         List<CodeSegment> _codesegmentsSave = new List<CodeSegment>();
+        List<CodeSegment> _directivesSave = new List<CodeSegment>();
         object __codesegmentsSaveLock = new object();
 
-        
         string _text;
         int _textlen = 0;
 
@@ -160,12 +164,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         /// <summary>
-        /// Get imutalble List of segments
+        /// Gets an imutalble snapshot of the Tokenizer
         /// </summary>
         /// <returns></returns>
-        public override IEnumerable<CodeSegment> GetSegmentsSnapshot() {
+        public override TokenizerSnapshot GetSegmentsSnapshot() {
             lock(__codesegmentsSaveLock) {
-                return new List<CodeSegment>(_codesegmentsSave);
+                return new TokenizerSnapshot(_codesegmentsSave, _directivesSave);
             }
         }
 
@@ -193,6 +197,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         #endregion
+
         bool _traditionalMode = false;
 
         #region Tokenizer
@@ -204,8 +209,6 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             bool ensureNewToken = false;
             
             int i;
-
-
             bool inTradEscapeBefore = false;
             bool inderef = false;
             bool inTraditionalContext = false;
@@ -215,13 +218,14 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             //clean things up
             _activeToken = Token.Unknown;
             _codesegmentsWorker.Clear();
+            _directivesWorker.Clear();
             _currentRangeStart = 0;
             _currentColStart = 0;
             _currentLine = 1;
             _currentColumn = 0;
             _traditionalMode = false;
 
-
+            string tempstr = "";
 
             char currentChar;
             for(i = 0; i < _textlen; i++) {
@@ -396,6 +400,11 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         inTraditionalAsignment = true;
                     } else if(!_traditionalMode && OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.OperatorFlow;
+
+                    } else if(!_traditionalMode && (_activeToken == Token.WhiteSpace || _activeToken == Token.NewLine ) && IsDirective(i, out tempstr)) {
+                        _currentToken = Token.Directive;
+                        inTraditionalContext = true;
+
                     } else if(!_traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
                         _currentToken = Token.Unknown;
                     
@@ -450,7 +459,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             EndActiveToken(_textlen);
             lock(__codesegmentsSaveLock) {
                 _codesegmentsSave.Clear();
+                _directivesSave.Clear();
                 _codesegmentsSave.AddRange(_codesegmentsWorker);
+                _directivesSave.AddRange(_directivesWorker);
             }
             lock(_tokenizerworkerLock) {
                 _asynctokenizerworkerBusy = false; //_tokenizerworker.IsBusy;
@@ -503,15 +514,19 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         --linenumber;
 
 
-                    if((_activeToken == Token.TraditionalCommandInvoke || _activeToken == Token.TraditionalAssign) && _currentToken != Token.NewLine)
+                    if((_activeToken == Token.TraditionalCommandInvoke || _activeToken == Token.TraditionalAssign || _activeToken == Token.Directive) && _currentToken != Token.NewLine)
                         _traditionalMode = true;
 
-                    var current = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
+                    var currentsegment = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
                         str, new SimpleSegment(_currentRangeStart, l), linenumber, _currentColStart, _previous);
                     if(_previous != null)
-                        _previous.Next = current;
-                    _previous = current;
-                    _codesegmentsWorker.Add(current);
+                        _previous.Next = currentsegment;
+                    _previous = currentsegment;
+                    _codesegmentsWorker.Add(currentsegment);
+
+                    if(currentsegment.Token == Token.Directive)
+                        _directivesWorker.Add(currentsegment);
+
                 }
             }
             _currentRangeStart = index;
@@ -553,6 +568,18 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             return (_text[index] == ' ') || (_text[index] == '\t');
         }
 
+        bool IsDirective(int index, out string directivename){
+            directivename = "";
+            if(_text[index] == DIRECTIVE_START &&  _text.Next(index) != '\0') {
+                var possibledirective = ExtractWord(index + 1);
+                var directive = _codeitem.CodeLanguage.LanguageDirectives.Find(x => x.Name.Equals(possibledirective));
+                if(directive != null) {
+                    directivename = directive.Name;
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
         /// <summary>

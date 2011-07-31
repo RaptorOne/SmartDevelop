@@ -23,9 +23,9 @@ namespace SmartDevelop.Model.DOM
 {
 
     /// <summary>
-    ///  CodeDOM Service Impl. for IA
+    ///  CodeDOM Service Impl. for AHK
     /// </summary>
-    public class CodeDOMServiceIA : CodeDOMService
+    public class CodeDOMDocumentServiceAHK : CodeDocumentDOMService
     {    
         #region Fields
 
@@ -41,13 +41,13 @@ namespace SmartDevelop.Model.DOM
 
         #region Constructor
 
-        public CodeDOMServiceIA(SmartCodeProject project)
-            : base(project) {
+        public CodeDOMDocumentServiceAHK(ProjectItemCodeDocument document)
+            : base(document) {
 
                 var _checkQueueTimer = new System.Timers.Timer(); // Timer anlegen
                 _checkQueueTimer.Interval = 100; // Intervall festlegen, hier 100 ms
                 _checkQueueTimer.Elapsed += (s, e) => CheckQueue();
-                _checkQueueTimer.Start(); // Timer starten
+                _checkQueueTimer.Start(); 
 
 
                 _fileCompileWorker = new BackgroundWorker();
@@ -71,7 +71,7 @@ namespace SmartDevelop.Model.DOM
                     ReturnType = new CodeTypeReference(typeof(void)),
                     LinePragma = new CodeLinePragma("all", 0),
                     IsHidden = true,
-                    Project = project
+                    Project = document.Project
                 });
 
                 #endregion
@@ -80,7 +80,7 @@ namespace SmartDevelop.Model.DOM
 
                 var baseobj = new CodeTypeDeclarationEx(null, "Object")
                 {
-                    Project = project,
+                    Project = document.Project,
                     IsClass = true,
                     IsBuildInType = true
                 };
@@ -94,7 +94,7 @@ namespace SmartDevelop.Model.DOM
                 method = new CodeMemberMethodExAHK(true)
                 {
                     Name = "Insert",
-                    Project = project,
+                    Project = document.Project,
                     IsDefaultMethodInvoke = true,
                     IsTraditionalCommand = false,
                 };
@@ -111,7 +111,7 @@ namespace SmartDevelop.Model.DOM
                 method = new CodeMemberMethodExAHK(true)
                 {
                     Name = "Remove",
-                    Project = project,
+                    Project = document.Project,
                     IsDefaultMethodInvoke = true,
                     IsTraditionalCommand = false
                 };
@@ -123,115 +123,115 @@ namespace SmartDevelop.Model.DOM
 
                 #endregion
 
-                #region Object.Clone
+                //#region Object.Clone
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "Clone",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
-                method.ReturnType = new CodeTypeReference(typeof(object));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "Clone",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(object));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object.MinIndex
+                //#region Object.MinIndex
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "MinIndex",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                method.ReturnType = new CodeTypeReference(typeof(int));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "MinIndex",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(int));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object.MaxIndex
+                //#region Object.MaxIndex
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "MaxIndex",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                method.ReturnType = new CodeTypeReference(typeof(int));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "MaxIndex",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(int));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object.SetCapacity
+                //#region Object.SetCapacity
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "SetCapacity",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
-                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                method.ReturnType = new CodeTypeReference(typeof(int));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "SetCapacity",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
+                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
+                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(int));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object.GetCapacity
+                //#region Object.GetCapacity
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "GetCapacity",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-                method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
-                method.ReturnType = new CodeTypeReference(typeof(int));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "GetCapacity",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                //method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(int));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object.HasKey
+                //#region Object.HasKey
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "HasKey",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-                method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
-                method.ReturnType = new CodeTypeReference(typeof(bool));
-                baseobj.Members.Add(method);
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "HasKey",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
+                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                //method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(bool));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
-                #region Object._NewEnum
+                //#region Object._NewEnum
 
-                method = new CodeMemberMethodExAHK(true)
-                {
-                    Name = "_NewEnum",
-                    Project = project,
-                    IsDefaultMethodInvoke = true,
-                    IsTraditionalCommand = false
-                };
+                //method = new CodeMemberMethodExAHK(true)
+                //{
+                //    Name = "_NewEnum",
+                //    Project = project,
+                //    IsDefaultMethodInvoke = true,
+                //    IsTraditionalCommand = false
+                //};
 
-                method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
-                method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
-                baseobj.Members.Add(method);
+                //method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
+                //method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
+                //baseobj.Members.Add(method);
 
-                #endregion
+                //#endregion
 
 
                 _languageRoot.Members.Add(baseobj);
@@ -239,10 +239,10 @@ namespace SmartDevelop.Model.DOM
                 #endregion
 
                 // Import build-in members
-                foreach(var m in project.Language.BuildInMembers) {
+                foreach(var m in document.CodeLanguage.BuildInMembers) {
                     var codeobj = m as ICodeMemberEx;
                     if(codeobj != null) {
-                        codeobj.Project = project;
+                        codeobj.Project = document.Project;
                     }
                     _languageRoot.Members.Add(m);
                 }
@@ -312,8 +312,8 @@ namespace SmartDevelop.Model.DOM
         }
 
 
-        public override void CompileTokenFileAsync(ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx initialparent) {
-            lock(startcompilerLock){
+        public override void CompileTokenFileAsync(ProjectItemCodeDocument codeitem) {
+            lock(startcompilerLock) {
                 // enqueue the given codedocument
                 // the queue will be checked by a timer
                 lock(_itemsToCompileLock) {
@@ -322,6 +322,7 @@ namespace SmartDevelop.Model.DOM
                 }
             }
         }
+
 
         #endregion
 
@@ -354,11 +355,11 @@ namespace SmartDevelop.Model.DOM
                 foreach(var m in oldMembers)
                     _languageRoot.Members.Remove(m);
 
-                if(CodeRanges.ContainsKey(codeitem))
-                    CodeRanges[codeitem].Clear();
+                if(_codeRanges.ContainsKey(codeitem))
+                    _codeRanges[codeitem].Clear();
                 else
-                    CodeRanges.Add(codeitem, new CodeRangeManager());
-                var currentRanges = CodeRanges[codeitem];
+                    _codeRanges.Add(codeitem, new CodeRangeManager());
+                var currentRanges = _codeRanges[codeitem];
 
                 // cleanup errors
                 codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
@@ -1033,6 +1034,8 @@ namespace SmartDevelop.Model.DOM
         public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
             throw new NotImplementedException();
         }
+
+
 
 
     }

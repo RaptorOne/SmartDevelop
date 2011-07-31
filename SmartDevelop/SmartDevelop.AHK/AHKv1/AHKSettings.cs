@@ -10,12 +10,15 @@ namespace SmartDevelop.AHK.AHKv1
     public class AHKSettings
     {
         public string InterpreterPath = @"C:\Program Files (x86)\AutoHotkey\AutoHotkey.exe";
+        public string LocalLibName = "Lib";
+        public string StdLibName = "Lib";
 
         public AHKSettings() { }
         public AHKSettings(string path) { SettingsSerialisationPath = path; }
 
         [NonSerialized()]
         internal string SettingsSerialisationPath;
+        
 
         public void Save() {
             SerializerHelper.SerializeObjectToFile(this, SettingsSerialisationPath);

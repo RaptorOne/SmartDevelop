@@ -18,6 +18,7 @@ namespace SmartDevelop.Model.Tokening
         readonly object _codesegmentsLock = new object();
         readonly Dictionary<int, CodeTokenLine> _codeLineSegments = new Dictionary<int, CodeTokenLine>();
         IEnumerable<CodeSegment> _segments;
+        IEnumerable<CodeSegment> _directives;
         readonly ProjectItemCodeDocument _codeitem;
         int _maxLine = 0;
 
@@ -40,11 +41,12 @@ namespace SmartDevelop.Model.Tokening
 
         #region CodeSegment Access
 
-        public void Reset(IEnumerable<CodeSegment> newtokens) {
+        public void Reset(TokenizerSnapshot tokensnapshot) {
             lock(_codesegmentsLock) {
-                _segments = new List<CodeSegment>(newtokens);
+                _segments = new List<CodeSegment>(tokensnapshot);
+                _directives = new List<CodeSegment>(tokensnapshot.GetDirectives());
                 _codeLineSegments.Clear();
-                foreach(var t in newtokens) {
+                foreach(var t in tokensnapshot) {
                     if(_codeLineSegments.ContainsKey(t.LineNumber))
                         _codeLineSegments[t.LineNumber].Add(t);
                     else {
@@ -74,6 +76,15 @@ namespace SmartDevelop.Model.Tokening
                 return new List<CodeSegment>(_segments);
             }
         }
+
+        
+        public IEnumerable<CodeSegment> GetDirectiveSegments() {
+            lock(_codesegmentsLock) {
+                return new List<CodeSegment>(_directives);
+            }
+        }
+
+
 
         #endregion
 

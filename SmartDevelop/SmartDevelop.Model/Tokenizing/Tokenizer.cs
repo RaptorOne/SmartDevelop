@@ -33,10 +33,10 @@ namespace SmartDevelop.Model.Tokenizing
         public abstract void TokenizeSync();
 
         /// <summary>
-        /// Get imutalble List of segments
+        /// Get imutalble List of code segments
         /// </summary>
         /// <returns></returns>
-        public abstract IEnumerable<CodeSegment> GetSegmentsSnapshot();
+        public abstract TokenizerSnapshot GetSegmentsSnapshot();
 
         #endregion
 

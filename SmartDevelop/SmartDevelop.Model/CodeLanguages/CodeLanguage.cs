@@ -27,6 +27,7 @@ namespace SmartDevelop.Model.CodeLanguages
         List<CodeKeyWord> _languageKeywords = new List<CodeKeyWord>();
         List<CodeTypeMember> _buildInMembers = new List<CodeTypeMember>();
         List<EditorDocumentExtension> _documentExtensions = new List<EditorDocumentExtension>();
+        List<PreProcessorDirective> _languageDirectives = new List<PreProcessorDirective>();
 
         #endregion
 
@@ -58,6 +59,11 @@ namespace SmartDevelop.Model.CodeLanguages
 
         public virtual List<CodeKeyWord> LanguageKeywords {
             get { return _languageKeywords; }
+        }
+        
+
+        public virtual List<PreProcessorDirective> LanguageDirectives {
+            get { return _languageDirectives; }
         }
 
         public virtual List<CodeTypeMember> BuildInMembers {
@@ -107,6 +113,14 @@ namespace SmartDevelop.Model.CodeLanguages
         public abstract CodeDOMService CreateDOMService(SmartCodeProject codeProject);
 
         /// <summary>
+        /// Creates a new DOMService for the given Document
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        public abstract CodeDocumentDOMService CreateDOMService(ProjectItemCodeDocument document);
+
+
+        /// <summary>
         /// Creates a new Syntax Highlighter for this Language
         /// </summary>
         /// <returns></returns>
@@ -143,5 +157,7 @@ namespace SmartDevelop.Model.CodeLanguages
         }
 
         #endregion
+
+        public abstract ASTManager CreateASTManager(SmartCodeProject project);
     }
 }

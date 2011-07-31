@@ -7,6 +7,9 @@ using System.CodeDom;
 
 namespace SmartDevelop.Model.DOM.Ranges
 {
+    /// <summary>
+    /// Represents a Segment Range of a CodeObject
+    /// </summary>
     public class CodeRange
     {
         public CodeRange(ISegment segment, CodeObject rangedCodeObject) {

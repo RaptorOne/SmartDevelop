@@ -13,10 +13,15 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
     public class SmartCodeProjectAHK : SmartCodeProject
     {
         CodeLanguageAHKv1 _language;
+        ProjectItemFolder _localLib;
+        ProjectItemFolder _stdLibFolder;
 
         public SmartCodeProjectAHK(string name, CodeLanguage language)
             : base(name, language) {
                 _language = language as CodeLanguageAHKv1;
+
+                var stdlibdir = Path.GetDirectoryName(_language.Settings.InterpreterPath);
+                _stdLibFolder = new ProjectItemFolderSTdLib("StdLib", stdlibdir, this);
         }
 
 
@@ -71,6 +76,31 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
             Solution.AddNewOutputLine(errOutput);
             return;
         }
+
+        #region Specail Folders
+
+
+        /// <summary>
+        /// Gets the local lib from this project (actually from the current startup code document)
+        /// </summary>
+        public ProjectItemFolder LocalLib {
+            get {
+                if(this.StartUpCodeDocument != null && this.StartUpCodeDocument.Parent != null) {
+                    return this.StartUpCodeDocument.Parent.Children
+                            .Find(x => (
+                                x is ProjectItemFolder &&
+                                x.Name.Equals(_language.Settings.LocalLibName, StringComparison.InvariantCultureIgnoreCase)))
+                                as ProjectItemFolder;
+                }
+                return null;
+            }
+        }
+
+        public ProjectItemFolder StdLib {
+            get { return _stdLibFolder; }
+        }
+
+        #endregion
 
         public override bool CanRun {
             get {

@@ -175,6 +175,8 @@ namespace SmartDevelop.Model.Tokenizing
 
         #endregion
 
+        Directive,
+
         // Legacy
         TraditionalString,
         TraditionalCommandInvoke,

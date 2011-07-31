@@ -33,6 +33,9 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+        /// <summary>
+        /// Raised when the CodeDOM (AST) has been updated
+        /// </summary>
         public event EventHandler ASTUpdated;
 
         #region Constructor
@@ -53,6 +56,9 @@ namespace SmartDevelop.Model.DOM
             get { lock(_languageRootLock) { return _languageRoot; } }
         }
 
+        /// <summary>
+        /// Unsave access the RootType
+        /// </summary>
         public CodeTypeDeclarationEx RootTypeUnSave {
             get {  return _languageRoot; }
         }
@@ -77,32 +83,33 @@ namespace SmartDevelop.Model.DOM
         }
 
         public virtual CodeContext GetCodeContext(ProjectItemCodeDocument codeitem, int offset, bool includeCurrentSegment = false) {
-            var context = new CodeContext(this);
+            //var context = new CodeContext(this);
 
-            if(CodeRanges.ContainsKey(codeitem)) {
-                var ranges = from r in CodeRanges[codeitem].FindEncapsulatingRanges(offset)
-                             where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
-                             select r;
+            //if(CodeRanges.ContainsKey(codeitem)) {
+            //    var ranges = from r in CodeRanges[codeitem].FindEncapsulatingRanges(offset)
+            //                 where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
+            //                 select r;
 
-                if(ranges.Any()) {
-                    var range = ranges.First();
-                    if(range.RangedCodeObject is CodeMemberMethodEx) {
-                        context.EnclosingMethod = range.RangedCodeObject as CodeMemberMethodEx;
-                        context.EnclosingType = context.EnclosingMethod.DefiningType;
-                    }
-                    if(range.RangedCodeObject is CodeTypeDeclarationEx) {
-                        context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
-                    }
-                }
-            }
+            //    if(ranges.Any()) {
+            //        var range = ranges.First();
+            //        if(range.RangedCodeObject is CodeMemberMethodEx) {
+            //            context.EnclosingMethod = range.RangedCodeObject as CodeMemberMethodEx;
+            //            context.EnclosingType = context.EnclosingMethod.DefiningType;
+            //        }
+            //        if(range.RangedCodeObject is CodeTypeDeclarationEx) {
+            //            context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
+            //        }
+            //    }
+            //}
 
-            if(includeCurrentSegment)
-                context.Segment = codeitem.SegmentService.QueryCodeSegmentAt(offset);
+            //if(includeCurrentSegment)
+            //    context.Segment = codeitem.SegmentService.QueryCodeSegmentAt(offset);
 
-            if(context.EnclosingType == null)
-                context.EnclosingType = this.RootType;
+            //if(context.EnclosingType == null)
+            //    context.EnclosingType = this.RootType;
 
-            return context;
+            //return context;
+            return CodeContext.Empty;
         }
 
         #endregion
@@ -110,7 +117,7 @@ namespace SmartDevelop.Model.DOM
         #region File Compiler
 
         /// <summary>
-        /// Enqueues the codeitem to parse it async
+        /// Compiles the codeitem to parse it async
         /// </summary>
         /// <param name="codeitem"></param>
         /// <param name="initialparent"></param>
@@ -128,7 +135,6 @@ namespace SmartDevelop.Model.DOM
         }
 
         #endregion
-
 
         public abstract void EnsureIsUpdated();
     }

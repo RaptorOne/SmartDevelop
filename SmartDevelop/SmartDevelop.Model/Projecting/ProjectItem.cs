@@ -27,19 +27,36 @@ namespace SmartDevelop.Model.Projecting
 
         public event EventHandler<ProjectItemEventArgs> ItemRemoved;
 
+        /// <summary>
+        /// Child bubbling up event
+        /// </summary>
+        public event EventHandler<ProjectItemEventArgs> ChildItemAdded;
+
+        /// <summary>
+        /// Child bubbling up event
+        /// </summary>
+        public event EventHandler<ProjectItemEventArgs> ChildItemRemoved;
+
         #endregion
 
         public ProjectItem(ProjectItem parent) {
             _parent = parent;
         }
 
-
         #region Public Properties
 
+        /// <summary>
+        /// Gets the Childern of this Item.
+        /// DO NOT use this Property to make changes to the childern -> use Add()/Remove() to do so.
+        /// This property just for performance reasons to not create swallow copys of the child list
+        /// </summary>
         public List<ProjectItem> Children {
             get { return _children; }
         }
 
+        /// <summary>
+        /// Gets the Parent of this Item
+        /// </summary>
         public ProjectItem Parent {
             get { return _parent; }
         }
@@ -60,18 +77,33 @@ namespace SmartDevelop.Model.Projecting
         public abstract string Name { get; set; }
 
 
+
         /// <summary>
-        /// Traveles down the tree and finds all items in the childs
+        /// Traveles down the tree and finds all matching child items 
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public IEnumerable<T> FindAllItems<T>() 
+        public IEnumerable<T> FindAllItems<T>()
             where T : ProjectItem {
-            List<T> _items = new List<T>(); ;
-            foreach(var c in this.Children) {
+                foreach(var c in _children) {
+                if(c is T)
+                    yield return c as T;
+            }
+        }
+
+
+        /// <summary>
+        /// Traveles down the tree and finds all items in the childs, recursively
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IEnumerable<T> FindAllItemsRecursive<T>() 
+            where T : ProjectItem {
+            List<T> _items = new List<T>();
+            foreach(var c in _children) {
                 if(c is T)
                     _items.Add(c as T);
-                _items.AddRange(c.FindAllItems<T>());
+                _items.AddRange(c.FindAllItemsRecursive<T>());
             }
             return _items;
         }
@@ -81,33 +113,38 @@ namespace SmartDevelop.Model.Projecting
 
         #region ProjectItem Access
 
+        /// <summary>
+        /// Add a Item to the childs of this Item
+        /// </summary>
+        /// <param name="item"></param>
         public void Add(ProjectItem item) {
-            Children.Add(item);
-            if(ItemAdded != null)
-                ItemAdded(this, new ProjectItemEventArgs(item));
-            item.TokenizerUpdated += OnTokenizerUpdated;
+            _children.Add(item);
+            OnItemAdded(item);
         }
 
-
+        /// <summary>
+        /// Remove an Item to the childs of this Item
+        /// </summary>
+        /// <param name="item"></param>
         public void Remove(ProjectItem item) {
-            item.TokenizerUpdated -= OnTokenizerUpdated;
-            Children.Remove(item);
-            if(ItemRemoved != null)
-                ItemRemoved(this, new ProjectItemEventArgs(item));
+            _children.Remove(item);
+            OnItemRemoved(item);
         }
 
         public IEnumerable<ProjectItem> GetAllItems() {
-            return new List<ProjectItem>(Children);
+            return new List<ProjectItem>(_children);
         }
 
         public IEnumerable<T> GetAllItems<T>()
             where T : ProjectItem {
-            return from i in Children
+                return from i in _children
                    where i is T
                    select i as T;
         }
 
         #endregion
+
+        #region Event Handlers
 
         /// <summary>
         /// Occurs when the file Tokenizer has updated a single file
@@ -119,6 +156,57 @@ namespace SmartDevelop.Model.Projecting
                 TokenizerUpdated(this, codeProjectEventArgs);
             }
         }
+
+        /// <summary>
+        /// Occurs when an item was added to the childs of this item
+        /// </summary>
+        /// <param name="item"></param>
+        protected virtual void OnItemAdded(ProjectItem item) {
+            if(ItemAdded != null)
+                ItemAdded(this, new ProjectItemEventArgs(item));
+            item.TokenizerUpdated += OnTokenizerUpdated;
+            item.ItemAdded += OnChildItemAdded;
+            OnChildItemAdded(this, new ProjectItemEventArgs(item));
+        }
+
+        /// <summary>
+        /// Occurs when an item was removed form the childs of this item
+        /// </summary>
+        /// <param name="item"></param>
+        protected virtual void OnItemRemoved(ProjectItem item) {
+            if(ItemRemoved != null)
+                ItemRemoved(this, new ProjectItemEventArgs(item));
+            item.TokenizerUpdated -= OnTokenizerUpdated;
+            item.ItemAdded -= OnChildItemAdded;
+            OnChildItemRemoved(this, new ProjectItemEventArgs(item));
+        }
+
+        /// <summary>
+        /// Occurs when an item was added to this childs or to a child of child. 
+        /// This is a fully Recursively Bubbling Event.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void OnChildItemAdded(object sender,ProjectItemEventArgs e) {
+            if(ChildItemAdded != null) {
+                ChildItemAdded(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Occurs when an item was removed from this childs or to a child of child. 
+        /// This is a fully Recursively Bubbling Event.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void OnChildItemRemoved(object sender, ProjectItemEventArgs e) {
+            if(ChildItemRemoved != null) {
+                ChildItemRemoved(sender, e);
+            }
+        }
+
+
+        #endregion
 
     }
 }
