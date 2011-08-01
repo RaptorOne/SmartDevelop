@@ -68,7 +68,10 @@ namespace SmartDevelop.Model.DOM
 
         #region Event Handlers
 
-        protected abstract void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e);
+        protected virtual void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e) {
+            var doc = sender as ProjectItemCodeDocument;
+            doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc);
+        }
 
 
         protected virtual void OnDocumentCompileOrderChanged() {

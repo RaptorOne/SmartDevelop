@@ -25,6 +25,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
 
         protected override void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e) {
             var document = sender as ProjectItemCodeDocument;
+            document.Project.Solution.ErrorService.ClearAllErrorsFrom(document);
             var directives = document.SegmentService.GetDirectiveSegments();
 
             // Update the code documents Include Flow.
@@ -35,11 +36,14 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                         var includedDoc = ParseIncludeDirective(d, document);
                         if(includedDoc != null) {
                             _codeDocuments[document].Add(includedDoc);
+                        } else {
+                            RegisterError(document, d, "This Include can't be analyzed because it is not member of the current Project.");
                         }
                     }
                 }
             }
             UpdateDocumentOrder();
+            
         }
 
         protected override void UpdateDocumentOrder() {

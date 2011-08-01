@@ -231,7 +231,7 @@ IncludeTestMethod(){
 
     fooinst := new Foo
     str := fooinst.Helper()
-    msgbox, 0, I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33) . also inline expressions are supported!
+    msgbox, 0, I'm a traditional String with a Variable %str%`, and with escape sequecnces `% which is really cool``, % Sin(33) . ""also inline expressions are supported!""
     val = I'm a traditional assignment, for sure!`nThe Result is %str%!
     Run, C:\Folder\%str%
     RunFail

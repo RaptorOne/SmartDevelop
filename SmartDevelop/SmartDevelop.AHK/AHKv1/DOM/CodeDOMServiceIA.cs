@@ -361,7 +361,7 @@ namespace SmartDevelop.Model.DOM
                 var currentRanges = CodeRanges[codeitem];
 
                 // cleanup errors
-                codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
+                //codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
 
                 #endregion
 
