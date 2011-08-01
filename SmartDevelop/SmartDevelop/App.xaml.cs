@@ -221,8 +221,8 @@ IncludeTestMethod(){
         static string InitialDemoCode() {
     return @"
     ; Demo Code
-    #Include <DemoIncludeMe>
-    #Include Car.ahk
+    ;#Include <DemoIncludeMe>
+    ;#Include Car.ahk
 
 	; dynamic mini expression evaluator:
 	sk += !(a3 == """" ? (sub != """")
@@ -250,7 +250,7 @@ IncludeTestMethod(){
     	Returns the sum of the given numbers
     */
     Add(a,b){
-    	return tok + n
+    	return a + b
     }
 
 

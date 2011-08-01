@@ -104,11 +104,11 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                     //ensure we have a updated tokenizer
                     _projectitem.EnsureTokenizerHasWorked();
-                    _projectitem.Project.DOMService.EnsureIsUpdated();
+                    _projectitem.AST.EnsureIsUpdated();
 
 
                     // do type lookup & list avaiable members
-                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset - 1, true);
+                    var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
 
                     if(ctx != null && ctx.Segment != null) {
                         if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
@@ -141,7 +141,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                             return;
                     }
 
-                    var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
+                    var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
                     IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
                     foreach(var item in GetStaticCompletionItems()) {
                         data.Add(item);
@@ -161,7 +161,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 if(segment != null) {
                     var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
                     if(s != null && s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase) || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
-                        var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset);
+                        var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
 
                         IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
                         bool any = false;

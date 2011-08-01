@@ -75,7 +75,6 @@ namespace SmartDevelop.Model.DOM.Types
         #endregion
 
         
-
         public virtual CodeMemberMethodEx ResolveMethodDeclarationCache() {
             var lang = Language;
 
@@ -93,10 +92,10 @@ namespace SmartDevelop.Model.DOM.Types
             }
 
             if(_methodDeclaration == null) {
-                var p = Project;
-                if(p != null && p.DOMService.RootTypeUnSave != EnclosingType) {
+                var doc = CodeDocumentItem;
+                if(doc != null && doc.AST.RootTypeUnSave != EnclosingType) {
 
-                    var members = from member in p.DOMService.RootTypeUnSave.Members.Cast<CodeTypeMember>()
+                    var members = from member in doc.AST.RootTypeUnSave.Members.Cast<CodeTypeMember>()
                                   let methodMember = member as CodeMemberMethodEx
                                   where methodMember != null && methodMember.Name.Equals(this.MethodName, lang.NameComparisation)
                                   select methodMember;

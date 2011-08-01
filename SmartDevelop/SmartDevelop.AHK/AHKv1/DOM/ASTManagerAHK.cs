@@ -10,6 +10,7 @@ using Archimedes.Patterns.Utils;
 using System.IO;
 using System.Text.RegularExpressions;
 using SmartDevelop.Model.CodeLanguages;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.AHK.AHKv1.DOM
 {
@@ -43,7 +44,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                 }
             }
             UpdateDocumentOrder();
-            
+            document.AST.CompileTokenFileAsync();
         }
 
         protected override void UpdateDocumentOrder() {

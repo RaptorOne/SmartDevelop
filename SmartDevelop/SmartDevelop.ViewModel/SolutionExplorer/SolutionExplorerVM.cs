@@ -5,6 +5,8 @@ using System.Text;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.ViewModel.DocumentFiles;
 using Archimedes.Patterns.WPF.ViewModels;
+using System.Windows.Input;
+using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
@@ -53,14 +55,15 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         }
 
-
-
         void AddProject(SmartCodeProject p) {
             _solutionRoot.Children.Add(LoadProject(p));
         }
 
 
         #endregion
+
+
+
 
         TreeViewProjectItem LoadProject(SmartCodeProject p){
             var projecttree = new TreeViewProjectItemProject(p, _solutionRoot);

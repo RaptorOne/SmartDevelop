@@ -17,7 +17,7 @@
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Add New Project"/>
+                                <MenuItem Header="Add New Project" Command="{Binding AddNewProjectCommand}"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                         <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
@@ -52,7 +52,6 @@
                                 <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}"/>
                                 <MenuItem Header="Delete" Command="{Binding DeleteItemCommand}"/>
                                 <MenuItem Header="Set as Startup File" Command="{Binding SetAsStartUpDocumentCommand}"/>
-                                <MenuItem Header="Clear"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                    

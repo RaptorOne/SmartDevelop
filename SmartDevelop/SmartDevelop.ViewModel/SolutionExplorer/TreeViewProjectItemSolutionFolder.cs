@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
+using System.Windows.Input;
+using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
@@ -26,11 +28,26 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
         }
 
-        //public override object DomainModel {
-        //    get {
-        //        return _solution;
-        //    }
-        //}
+        #region Commands
+
+        ICommand _addNewProjectCommand;
+
+        public ICommand AddNewProjectCommand {
+            get {
+                if(_addNewProjectCommand == null) {
+
+                    _addNewProjectCommand = new RelayCommand(
+                        x => x.Equals(x),
+                        x => {
+                            return false;
+                        });
+                }
+
+                return _addNewProjectCommand;
+            }
+        }
+
+        #endregion
 
     }
 }

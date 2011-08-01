@@ -59,6 +59,26 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         }
         #endregion
 
+        #region Delete Code Document Command (ToDo)
+
+        ICommand _deleteItemCommand;
+
+        public ICommand DeleteItemCommand {
+            get {
+                if(_deleteItemCommand == null) {
+
+                    _deleteItemCommand = new RelayCommand(
+                        x => x.Equals(x),
+                        x => {
+                            return false;
+                        });
+                }
+
+                return _deleteItemCommand;
+            }
+        }
+        #endregion
+
         #region Set Document as current StartUp Command
 
         ICommand _setAsStartUpDocumentCommand;

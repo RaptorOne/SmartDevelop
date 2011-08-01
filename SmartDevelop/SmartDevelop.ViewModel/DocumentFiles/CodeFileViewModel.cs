@@ -83,9 +83,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 };
 
 
-            _projectitem.Project.DOMService.ASTUpdated += (s, e) => {
+            _projectitem.AST.Updated += (s, e) => {
                 _workbenchservice.STADispatcher.Invoke(new Action(() => {
-                        _texteditor.TextArea.TextView.Redraw( DispatcherPriority.ContextIdle);
+                        _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
                     }));
                 };
 

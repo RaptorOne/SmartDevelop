@@ -175,7 +175,7 @@ namespace SmartDevelop.Model.Projecting
         /// Warning: Calling this Method may result in a notable delay
         /// </summary>
         public void EnsureASTIsUpdated() {
-            Project.DOMService.EnsureIsUpdated();
+            AST.EnsureIsUpdated();
         }
 
         public virtual void ReloadDocument() {

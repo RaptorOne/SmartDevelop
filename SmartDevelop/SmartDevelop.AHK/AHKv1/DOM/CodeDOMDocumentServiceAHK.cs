@@ -35,20 +35,15 @@ namespace SmartDevelop.Model.DOM
         BackgroundWorker _fileCompileWorker;
 
         object startcompilerLock = new object();
-        ProjectItemCodeDocument _currentItem = null;
 
         #endregion
+
+        protected readonly CodeTypeDeclarationEx _root;
 
         #region Constructor
 
         public CodeDOMDocumentServiceAHK(ProjectItemCodeDocument document)
             : base(document) {
-
-                var _checkQueueTimer = new System.Timers.Timer(); // Timer anlegen
-                _checkQueueTimer.Interval = 100; // Intervall festlegen, hier 100 ms
-                _checkQueueTimer.Elapsed += (s, e) => CheckQueue();
-                _checkQueueTimer.Start(); 
-
 
                 _fileCompileWorker = new BackgroundWorker();
                 _fileCompileWorker.DoWork += CompileTokenFile;
@@ -59,11 +54,14 @@ namespace SmartDevelop.Model.DOM
                 _fileCompileWorker.WorkerReportsProgress = false;
 
 
-            lock(_languageRootLock) {
+                #region Create Language Master Root
+
+                _root = new CodeTypeDeclarationEx(null, "Global") { CodeDocumentItem = document };
+
 
                 #region Create  auto exec method for AHK Scripts
 
-                _languageRoot.Members.Add(_autoexec = new CodeMemberMethodExAHK(true)
+                _root.Members.Add(_autoexec = new CodeMemberMethodExAHK(true)
                 {
                     Name = "AutoExec",
                     Attributes = MemberAttributes.Public | MemberAttributes.Static,
@@ -71,7 +69,7 @@ namespace SmartDevelop.Model.DOM
                     ReturnType = new CodeTypeReference(typeof(void)),
                     LinePragma = new CodeLinePragma("all", 0),
                     IsHidden = true,
-                    Project = document.Project
+                    CodeDocumentItem = document
                 });
 
                 #endregion
@@ -80,11 +78,10 @@ namespace SmartDevelop.Model.DOM
 
                 var baseobj = new CodeTypeDeclarationEx(null, "Object")
                 {
-                    Project = document.Project,
+                    CodeDocumentItem = document,
                     IsClass = true,
                     IsBuildInType = true
                 };
-                /*_superBase = new CodeTypeReferenceEx("Object", );*/
                 baseobj.Comments.Add(new CodeCommentStatement("Base Object of all other Custom Objects", true));
 
                 CodeMemberMethodExAHK method;
@@ -94,7 +91,7 @@ namespace SmartDevelop.Model.DOM
                 method = new CodeMemberMethodExAHK(true)
                 {
                     Name = "Insert",
-                    Project = document.Project,
+                    CodeDocumentItem = document,
                     IsDefaultMethodInvoke = true,
                     IsTraditionalCommand = false,
                 };
@@ -123,118 +120,118 @@ namespace SmartDevelop.Model.DOM
 
                 #endregion
 
-                //#region Object.Clone
+                #region Object.Clone
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "Clone",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(object));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "Clone",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("Returns a shallow copy of the object.", true));
+                method.ReturnType = new CodeTypeReference(typeof(object));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object.MinIndex
+                #region Object.MinIndex
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "MinIndex",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(int));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "MinIndex",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object.MaxIndex
+                #region Object.MaxIndex
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "MaxIndex",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(int));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "MaxIndex",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object.SetCapacity
+                #region Object.SetCapacity
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "SetCapacity",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
-                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
-                //method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(int));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "SetCapacity",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MaxItemsOrKey"));
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "ByteSize"));
+                method.Comments.Add(new CodeCommentStatement("If any integer keys are present, MinIndex returns the lowest and MaxIndex returns the highest. Otherwise an empty string is returned.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object.GetCapacity
+                #region Object.GetCapacity
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "GetCapacity",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-                //method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(int));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "GetCapacity",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                method.Comments.Add(new CodeCommentStatement("Returns the current capacity of an object or one of its fields.", true));
+                method.ReturnType = new CodeTypeReference(typeof(int));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object.HasKey
+                #region Object.HasKey
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "HasKey",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
-                //method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
-                //method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(bool));
-                //baseobj.Members.Add(method);
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "HasKey",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
+                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Key"));
+                method.Comments.Add(new CodeCommentStatement("Returns true if Key is associated with a value (even '') within Object, otherwise false.", true));
+                method.ReturnType = new CodeTypeReference(typeof(bool));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
-                //#region Object._NewEnum
+                #region Object._NewEnum
 
-                //method = new CodeMemberMethodExAHK(true)
-                //{
-                //    Name = "_NewEnum",
-                //    Project = project,
-                //    IsDefaultMethodInvoke = true,
-                //    IsTraditionalCommand = false
-                //};
+                method = new CodeMemberMethodExAHK(true)
+                {
+                    Name = "_NewEnum",
+                    CodeDocumentItem = document,
+                    IsDefaultMethodInvoke = true,
+                    IsTraditionalCommand = false
+                };
 
-                //method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
-                //method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
-                //baseobj.Members.Add(method);
+                method.Comments.Add(new CodeCommentStatement("Returns a new enumerator to enumerate this object's key-value pairs.", true));
+                method.ReturnType = new CodeTypeReference(typeof(IEnumerator));
+                baseobj.Members.Add(method);
 
-                //#endregion
+                #endregion
 
 
-                _languageRoot.Members.Add(baseobj);
+                _root.Members.Add(baseobj);
 
                 #endregion
 
@@ -244,48 +241,12 @@ namespace SmartDevelop.Model.DOM
                     if(codeobj != null) {
                         codeobj.Project = document.Project;
                     }
-                    _languageRoot.Members.Add(m);
+                    _root.Members.Add(m);
                 }
-            }
-        }
 
-
-
-        void CheckQueue()
-        {
-            ProjectItemCodeDocument compileme = null;
-            lock(_itemsToCompileLock) {
-                if(_compileQueue.Any()) {
-                    compileme = _compileQueue.First();
-                }
-            }
-
-            if(compileme != null) {
-                if(_fileCompileWorker.IsBusy) {
-                    if(_currentItem == compileme) { // can we cancel it?
-                        if(!_fileCompileWorker.CancellationPending)
-                            _fileCompileWorker.CancelAsync();
-
-                        while(true) {
-                            if(_fileCompileWorker.IsBusy) {
-                                System.Threading.Thread.Sleep(1);
-                            } else
-                                break;
-                        }
-                    } else
-                        return; // no change.. we have to wait until it has finished.
-                }
-                // if we are here the compiler is finished. either by completion or by cancelation
-
-                lock(_itemsToCompileLock) {
-                        _currentItem = compileme;
-                        _compileQueue.Remove(_currentItem);
-                        _fileCompileWorker.RunWorkerAsync(new CompilerArgument(compileme, null));
-                }
-            }
+                #endregion
 
         }
-
 
         #endregion
 
@@ -301,30 +262,34 @@ namespace SmartDevelop.Model.DOM
         /// </summary>
         public override void EnsureIsUpdated() {
             while(true) {
-                lock(_itemsToCompileLock) {
-                    if(!_compileQueue.Any()) {
-                        if(!IsBusy)
-                            break;
-                    }  
-                }
+                if(!IsBusy)
+                    break;
                 System.Threading.Thread.Sleep(1);
             }
         }
 
-
-        public override void CompileTokenFileAsync(ProjectItemCodeDocument codeitem) {
+        public override void CompileTokenFileAsync() {
             lock(startcompilerLock) {
-                // enqueue the given codedocument
-                // the queue will be checked by a timer
-                lock(_itemsToCompileLock) {
-                    if(!_compileQueue.Contains(codeitem))
-                        _compileQueue.Add(codeitem);
-                }
+                    if(IsBusy) {
+                        if(!_fileCompileWorker.CancellationPending)
+                            _fileCompileWorker.CancelAsync();
+                        while(true) {
+                            if(IsBusy) {
+                                System.Threading.Thread.Sleep(1);
+                            } else
+                                break;
+                        }
+                    }
+                    IsBusy = true;
+                    _fileCompileWorker.RunWorkerAsync();
             }
         }
 
 
         #endregion
+
+
+        CodeDocumentDOMService dependingOnSave;
 
         #region Token Compiler Worker
 
@@ -333,40 +298,36 @@ namespace SmartDevelop.Model.DOM
             if(e.Cancel)
                 return;
 
-
-            var arg = e.Argument as CompilerArgument;
-            ProjectItemCodeDocument codeitem = arg.Codeitem;
-
             lock(_languageRootLock) {
 
-                CodeTypeDeclarationEx initialparent = _languageRoot; //arg.Initialparent;
+                CodeTypeDeclarationEx initialparent = _languageRoot;
 
                 if(e.Cancel)
                     return;
 
+                dependingOnSave = this.DependingOn;
+
+
                 #region Clean Up
 
-                //remove all old members which are from this code file:
-
-                var oldMembers = (from CodeTypeMember m in _languageRoot.Members
-                                  let meth = m as ICodeMemberEx
-                                  where (meth == null || (!meth.IsHidden && !meth.IsBuildInType && codeitem.Equals(meth.CodeDocumentItem)))
-                                  select m).ToList();
-                foreach(var m in oldMembers)
-                    _languageRoot.Members.Remove(m);
-
-                if(_codeRanges.ContainsKey(codeitem))
-                    _codeRanges[codeitem].Clear();
-                else
-                    _codeRanges.Add(codeitem, new CodeRangeManager());
-                var currentRanges = _codeRanges[codeitem];
-
-                // cleanup errors
-                codeitem.Project.Solution.ErrorService.ClearAllErrorsFrom(codeitem);
+                _languageRoot.Members.Clear();
+                _codeRangeManager.Clear();
 
                 #endregion
 
-                var codeLineMap = codeitem.SegmentService.GetCodeSegmentLinesMap();
+                #region Merge DependingOn Members
+
+                if(dependingOnSave == null) {
+                    // merge super base members
+                    _languageRoot.Members.AddRange(_root.Members);
+                } else {
+                    dependingOnSave.EnsureIsUpdated();
+                    _languageRoot.Members.AddRange(dependingOnSave.RootType.Members);
+                }
+
+                #endregion
+
+                var codeLineMap = _document.SegmentService.GetCodeSegmentLinesMap();
                 CodeTypeDeclaration parent = initialparent;
                 Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
                 int linecnt = 0;
@@ -413,19 +374,18 @@ namespace SmartDevelop.Model.DOM
 
                                     if(refBaseClass != null) {
                                         if(refBaseClass.Token == Token.Identifier) {
-                                            refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(codeitem, refBaseClass.TokenString, thisparent);
+                                            refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(_document, refBaseClass.TokenString, thisparent);
                                             next = refBaseClass.NextOmit(whitespacetokenNewLines);
                                         } else {
-                                            RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
+                                            RegisterError(_document, next.Next, "Expected: Class Name Identifier");
                                             next = next.NextOmit(whitespacetokenNewLines);
                                         }
                                     } else {
                                         if(next.Next != null && next.Next.Token != Token.BlockOpen) {
-                                            RegisterError(codeitem, next.Next, "Expected: Class Name Identifier");
+                                            RegisterError(_document, next.Next, "Expected: Class Name Identifier");
                                             next = next.NextOmit(whitespacetokenNewLines);
                                         }
                                     }
-
                                 }
 
                                 if(next.Token == Token.BlockOpen) {
@@ -434,18 +394,18 @@ namespace SmartDevelop.Model.DOM
 
                                     CodeSegment classBodyStart = next;
 
-                                    var type = new CodeTypeDeclarationEx(codeitem, classNameSegment.TokenString)
+                                    var type = new CodeTypeDeclarationEx(_document, classNameSegment.TokenString)
                                     {
                                         IsClass = true,
-                                        LinePragma = CreatePragma(classNameSegment, codeitem.FilePath),
-                                        CodeDocumentItem = codeitem
+                                        LinePragma = CreatePragma(classNameSegment, _document.FilePath),
+                                        CodeDocumentItem = _document
                                     };
                                     classNameSegment.CodeDOMObject = type;
 
 
                                     // check if this type was alread defined in this scope
                                     if(thisparent.GetInheritedMembers().Contains(type)) {
-                                        RegisterError(codeitem, classNameSegment, "oh my dear, this class already exisits in the current scope!");
+                                        RegisterError(_document, classNameSegment, "oh my dear, this class already exisits in the current scope!");
                                     } else {
 
                                         #region Check & Resolve Baseclass
@@ -453,14 +413,14 @@ namespace SmartDevelop.Model.DOM
                                         if(basecls != null) {
                                             //check if we have a circual interhance tree
                                             var baseclassImpl = basecls.ResolveTypeDeclarationCache();
-                                            if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(codeitem, classNameSegment.TokenString, thisparent))) {
+                                            if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(_document, classNameSegment.TokenString, thisparent))) {
                                                 //circular dependency detected!!
-                                                RegisterError(codeitem, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
+                                                RegisterError(_document, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
                                             } else {
                                                 if(basecls != null)
                                                     type.BaseTypes.Add(basecls);
                                                 else
-                                                    type.BaseTypes.Add(new CodeTypeReferenceEx(codeitem, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                                    type.BaseTypes.Add(new CodeTypeReferenceEx(_document, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
                                             }
                                         }
 
@@ -483,9 +443,9 @@ namespace SmartDevelop.Model.DOM
                                     var classBodyEnd = classBodyStart.FindClosingBracked(true);
                                     if(classBodyEnd != null) {
                                         int length = (classBodyEnd.Range.Offset - startOffset);
-                                        currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
+                                        _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
                                     } else {
-                                        RegisterError(codeitem, classBodyStart, "Expected: " + Token.BlockClosed);
+                                        RegisterError(_document, classBodyStart, "Expected: " + Token.BlockClosed);
                                     }
 
                                     parentHirarchy.Push(type);
@@ -497,7 +457,7 @@ namespace SmartDevelop.Model.DOM
                                     #endregion
 
                                 } else {
-                                    RegisterError(codeitem, next, "Expected: " + Token.BlockOpen);
+                                    RegisterError(_document, next, "Expected: " + Token.BlockOpen);
                                     i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
                                 }
                             }
@@ -520,24 +480,24 @@ namespace SmartDevelop.Model.DOM
                                 // this is a class field declaration
 
                                 var propertyType = new CodeTypeReference(typeof(object));
-                                var memberprop = new CodeMemberPropertyEx(codeitem)
+                                var memberprop = new CodeMemberPropertyEx(_document)
                                 {
                                     Name = property.TokenString,
                                     Attributes = MemberAttributes.Public,
                                     Type = propertyType,
-                                    LinePragma = CreatePragma(property, codeitem.FilePath)
+                                    LinePragma = CreatePragma(property, _document.FilePath)
                                 };
                                 property.CodeDOMObject = memberprop;
                                 decl.CodeDOMObject = propertyType;
                                 parentHirarchy.Peek().Members.Add(memberprop);
                             } else {
-                                RegisterError(codeitem, property, "unexpected Token -> Expected Identifier!");
+                                RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
                             }
                         } else {
                             var err = "unexpected class field declaration -> not in class body";
                             if(property != null)
-                                RegisterError(codeitem, property, err);
-                            RegisterError(codeitem, decl, err);
+                                RegisterError(_document, property, err);
+                            RegisterError(_document, decl, err);
                         }
 
 
@@ -568,12 +528,12 @@ namespace SmartDevelop.Model.DOM
 
                                         #region Generate Method Definition DOM
 
-                                        var method = new CodeMemberMethodExAHK(codeitem)
+                                        var method = new CodeMemberMethodExAHK(_document)
                                         {
                                             Name = methodSegment.TokenString,
-                                            LinePragma = CreatePragma(methodSegment, codeitem.FilePath),
-                                            CodeDocumentItem = codeitem,
-                                            ReturnType = new CodeTypeReferenceEx(codeitem, typeof(object))
+                                            LinePragma = CreatePragma(methodSegment, _document.FilePath),
+                                            CodeDocumentItem = _document,
+                                            ReturnType = new CodeTypeReferenceEx(_document, typeof(object))
                                         };
                                         methodSegment.CodeDOMObject = method;
 
@@ -586,7 +546,7 @@ namespace SmartDevelop.Model.DOM
 
 
                                         if(equalmethods.Any()) {
-                                            RegisterError(codeitem, methodSegment,
+                                            RegisterError(_document, methodSegment,
                                                 string.Format("The Methodename '{0}' is already used in the current scope!", method.Name));
                                             hasDeclarationError = true;
                                         } else {
@@ -629,7 +589,7 @@ namespace SmartDevelop.Model.DOM
 
                                             // get method statements
                                             method.Statements.AddRange(
-                                                CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+                                                CollectAllCodeStatements(e, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
 
                                             // add it to the code DOM Tree
@@ -642,13 +602,14 @@ namespace SmartDevelop.Model.DOM
                                             // Create a CodeRange Item
                                             int startOffset = startMethodBody.Range.Offset;
                                             int length = (endMethodBody.Range.Offset - startOffset);
-                                            currentRanges.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
+
+                                            _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), method));
 
                                             // move the scanpointer to the method end:
                                             i = endMethodBody.LineNumber;
                                             continue;
                                         } else {
-                                            RegisterError(codeitem, startMethodBody, "Missing: " + Token.BlockClosed);
+                                            RegisterError(_document, startMethodBody, "Missing: " + Token.BlockClosed);
                                             
 
                                         }
@@ -681,7 +642,7 @@ namespace SmartDevelop.Model.DOM
                             }
                         }
                         _autoexec.Statements.AddRange(
-                                        CollectAllCodeStatements(e, codeitem, thisparent, codeLineMap, i, i));
+                                        CollectAllCodeStatements(e, thisparent, codeLineMap, i, i));
 
                     } else
                         continue;
@@ -691,8 +652,9 @@ namespace SmartDevelop.Model.DOM
 
                 #endregion
 
-                AnalyzeAST(codeitem, e);
+                AnalyzeAST(e);
             }
+            IsBusy = false;
         }
 
         CodeCommentStatement ExtractComment(CodeSegment identifier) {
@@ -727,9 +689,9 @@ namespace SmartDevelop.Model.DOM
         #region Analyze AST
 
 
-        void AnalyzeAST(Projecting.ProjectItemCodeDocument codeitem, DoWorkEventArgs e) {
+        void AnalyzeAST(DoWorkEventArgs e) {
 
-            var segmentService = codeitem.SegmentService;
+            var segmentService = _document.SegmentService;
             var segments = segmentService.GetSegments();
 
             foreach(var segment in segments) {
@@ -746,7 +708,7 @@ namespace SmartDevelop.Model.DOM
                     if(codeTypeRef.ResolvedTypeDeclaration == null) {
                         var refi = codeTypeRef.ResolveTypeDeclarationCache();
                         if(refi == null) {
-                            RegisterError(codeitem, segment,
+                            RegisterError(_document, segment,
                                 string.Format("Type '{0}' does not exist!", segment.TokenString));
                         }
                     }
@@ -763,7 +725,7 @@ namespace SmartDevelop.Model.DOM
                     if(methodRef.ResolvedMethodMember == null && !(methodRef.EnclosingType is CodeTypeDeclarationDynamic)) {
                         var refi = methodRef.ResolveMethodDeclarationCache();
                         if(refi == null) {
-                            RegisterError(codeitem, segment,
+                            RegisterError(_document, segment,
                                 string.Format("Method '{0}' does not exist!", segment.TokenString));
                         }
                     }
@@ -778,7 +740,7 @@ namespace SmartDevelop.Model.DOM
                     if(propRef.ResolvedPropertyMember == null && !(propRef.EnclosingType is CodeTypeDeclarationDynamic)) {
                         var refi = propRef.ResolvePropertyDeclarationCache();
                         if(refi == null) {
-                            RegisterError(codeitem, segment,
+                            RegisterError(_document, segment,
                                 string.Format("Property '{0}' does not exist!", segment.TokenString));
                         }
                     }
@@ -813,7 +775,7 @@ namespace SmartDevelop.Model.DOM
         /// <param name="startLine"></param>
         /// <param name="endLine"></param>
         /// <returns></returns>
-        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, Projecting.ProjectItemCodeDocument codeitem, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
+        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
             CodeTokenLine line;
             var codeStatements = new CodeStatementCollection();
 
@@ -830,7 +792,7 @@ namespace SmartDevelop.Model.DOM
                 CodeSegment toParse = line.CodeSegments.First();
                 CodeSegment next;
                 while(toParse != null) {
-                    var ex = ParseExpression(codeitem, toParse, out next, enclosingType);
+                    var ex = ParseExpression(toParse, out next, enclosingType);
                     codeStatements.Add(ex);
                     toParse = next;
                 }
@@ -841,7 +803,7 @@ namespace SmartDevelop.Model.DOM
         static readonly List<Token> LocalExpressionEndTokens = new List<Token>() { Token.NewLine, Token.ParameterDelemiter };
 
 
-        CodeExpression ParseExpression(Projecting.ProjectItemCodeDocument codeitem, CodeSegment tokenSegment, out CodeSegment nextToParse, CodeTypeDeclarationEx enclosingType) {
+        CodeExpression ParseExpression(CodeSegment tokenSegment, out CodeSegment nextToParse, CodeTypeDeclarationEx enclosingType) {
             CodeExpression expression = null;
             nextToParse = tokenSegment.Next;
 
@@ -861,7 +823,7 @@ namespace SmartDevelop.Model.DOM
                         ismethodDeclaration = true;
                     }
                 } else {
-                    RegisterError(codeitem, tokenSegment.Next, "Missing: )");
+                    RegisterError(_document, tokenSegment.Next, "Missing: )");
                 }
                 
 
@@ -879,7 +841,7 @@ namespace SmartDevelop.Model.DOM
 
                         #region adjust Method Context
 
-                        if(codeitem.CodeLanguage.SELFREF_CAN_BE_OMITTED)
+                        if(_document.CodeLanguage.SELFREF_CAN_BE_OMITTED)
                             methodContext = enclosingType;
 
                         if(invoker.CodeDOMObject is CodeBaseReferenceExpression) {
@@ -901,7 +863,7 @@ namespace SmartDevelop.Model.DOM
                     }
 
                     var invokeExpression = new CodeMethodInvokeExpression();
-                    var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, null, tokenSegment.TokenString, methodContext);
+                    var methodRef = new CodeMethodReferenceExpressionExAHK(_document, null, tokenSegment.TokenString, methodContext);
 
                     invokeExpression.Method = methodRef;
                     tokenSegment.CodeDOMObject = methodRef;
@@ -916,7 +878,7 @@ namespace SmartDevelop.Model.DOM
 
                 #region Parse Keywords
 
-                if(tokenSegment.TokenString.Equals("new", codeitem.CodeLanguage.NameComparisation)) {
+                if(tokenSegment.TokenString.Equals("new", _document.CodeLanguage.NameComparisation)) {
 
                     #region NEW parse for new Object Expressions
 
@@ -924,7 +886,7 @@ namespace SmartDevelop.Model.DOM
                     if(newObjectInvoke != null && newObjectInvoke.Token == Token.Identifier) {
 
                         var objectinstangicing = new CodeObjectCreateExpression();
-                        objectinstangicing.CreateType = new CodeTypeReferenceEx(codeitem, newObjectInvoke.TokenString, enclosingType);
+                        objectinstangicing.CreateType = new CodeTypeReferenceEx(_document, newObjectInvoke.TokenString, enclosingType);
                         tokenSegment.CodeDOMObject = objectinstangicing;
                         newObjectInvoke.CodeDOMObject = objectinstangicing.CreateType;
 
@@ -934,11 +896,11 @@ namespace SmartDevelop.Model.DOM
 
                     #endregion
 
-                } else if(tokenSegment.TokenString.Equals("this", codeitem.CodeLanguage.NameComparisation)) {
+                } else if(tokenSegment.TokenString.Equals("this", _document.CodeLanguage.NameComparisation)) {
                     var thisrefExpression = new CodeThisReferenceExpression();
                     tokenSegment.CodeDOMObject = thisrefExpression;
                     expression = thisrefExpression;
-                } else if(tokenSegment.TokenString.Equals("base", codeitem.CodeLanguage.NameComparisation)) {
+                } else if(tokenSegment.TokenString.Equals("base", _document.CodeLanguage.NameComparisation)) {
                     var baserefExpression = new CodeBaseReferenceExpression();
                     tokenSegment.CodeDOMObject = baserefExpression;
                     expression = baserefExpression;
@@ -955,15 +917,15 @@ namespace SmartDevelop.Model.DOM
                 if(context == null) {
                     //unexpected!
                     var err = "Unexpected Member Invoke!";
-                    RegisterError(codeitem, tokenSegment, err);
-                    RegisterError(codeitem, tokenSegment.Previous, err);
+                    RegisterError(_document, tokenSegment, err);
+                    RegisterError(_document, tokenSegment.Previous, err);
                     nextToParse = tokenSegment.Next;
-                } else if(context.Token == Token.KeyWord && context.TokenString.Equals("this", codeitem.CodeLanguage.NameComparisation)) {
+                } else if(context.Token == Token.KeyWord && context.TokenString.Equals("this", _document.CodeLanguage.NameComparisation)) {
 
-                    var propRef = new CodePropertyReferenceExpressionEx(codeitem, null, tokenSegment.TokenString, enclosingType);
+                    var propRef = new CodePropertyReferenceExpressionEx(_document, null, tokenSegment.TokenString, enclosingType);
                     tokenSegment.CodeDOMObject = propRef;
 
-                } else if(context.Token == Token.KeyWord && context.TokenString.Equals("base", codeitem.CodeLanguage.NameComparisation)) {
+                } else if(context.Token == Token.KeyWord && context.TokenString.Equals("base", _document.CodeLanguage.NameComparisation)) {
 
                     CodeTypeDeclarationEx typedeclaration = null;
                     foreach(CodeTypeReferenceEx bt in enclosingType.BaseTypes) {
@@ -972,14 +934,14 @@ namespace SmartDevelop.Model.DOM
                             break;
                         }
                     }
-                    var propRef = new CodePropertyReferenceExpressionEx(codeitem, null, tokenSegment.TokenString, typedeclaration);
+                    var propRef = new CodePropertyReferenceExpressionEx(_document, null, tokenSegment.TokenString, typedeclaration);
                     tokenSegment.CodeDOMObject = propRef;
 
                 } else if(context.Token == Token.Identifier) {
                     // we currently not supprt real expression parsing, so leave here...
 
                     context.CodeDOMObject = CodeTypeDeclarationDynamic.Default;
-                    var propRef = new CodePropertyReferenceExpressionEx(codeitem, null, tokenSegment.TokenString, CodeTypeDeclarationDynamic.Default);
+                    var propRef = new CodePropertyReferenceExpressionEx(_document, null, tokenSegment.TokenString, CodeTypeDeclarationDynamic.Default);
                     tokenSegment.CodeDOMObject = propRef;
 
                 }
@@ -1003,12 +965,12 @@ namespace SmartDevelop.Model.DOM
                 if(members.Any()) {
 
                     var invokeExpression = new CodeMethodInvokeExpression();
-                    var methodRef = new CodeMethodReferenceExpressionExAHK(codeitem, members.First());
+                    var methodRef = new CodeMethodReferenceExpressionExAHK(_document, members.First());
 
                     tokenSegment.CodeDOMObject = methodRef;
                     expression = invokeExpression;
                 } else {
-                    RegisterError(codeitem, tokenSegment, string.Format("Unknown traditional Command '{0}'", tokenSegment.TokenString));
+                    RegisterError(_document, tokenSegment, string.Format("Unknown traditional Command '{0}'", tokenSegment.TokenString));
                 }
 
                 #endregion
@@ -1022,13 +984,25 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+
+        protected override void OnDependingOnASTUpdated(object sender, EventArgs e) {
+            this.CompileTokenFileAsync();
+            base.OnDependingOnASTUpdated(sender, e);
+        }
+
         protected virtual void OnRunWorkerCompleted() {
-            _currentItem = null;
             OnASTUpdated();
         }
 
+
+        bool _isBusy = false;
+        object _isBusyLock = new object();
+
         public override bool IsBusy {
-            get { return _fileCompileWorker.IsBusy; }
+            get {  lock(_isBusyLock)  { return _isBusy; }}
+            protected set {
+                lock(_isBusyLock) { _isBusy = value; }
+            }
         }
 
         public override CodeTypeDeclarationEx GetRootTypeSnapshot() {

@@ -21,8 +21,8 @@ namespace SmartDevelop.Model.DOM
     {
         #region Fields
 
-        readonly ProjectItemCodeDocument _document;
-        readonly SmartCodeProject _project;
+        protected readonly ProjectItemCodeDocument _document;
+        protected readonly SmartCodeProject _project;
 
         protected readonly CodeTypeDeclarationEx _languageRoot;
         protected object _languageRootLock = new object();
@@ -31,7 +31,8 @@ namespace SmartDevelop.Model.DOM
         protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
         protected static List<Token> whitespacetokens = new List<Token> { Token.WhiteSpace };
         
-        protected Dictionary<ProjectItemCodeDocument, CodeRangeManager> _codeRanges = new Dictionary<ProjectItemCodeDocument, CodeRangeManager>();
+        //protected Dictionary<ProjectItemCodeDocument, CodeRangeManager> _codeRanges = new Dictionary<ProjectItemCodeDocument, CodeRangeManager>();
+        protected CodeRangeManager _codeRangeManager = new CodeRangeManager();
 
         #endregion
 
@@ -40,7 +41,7 @@ namespace SmartDevelop.Model.DOM
         /// <summary>
         /// Raised when the CodeDOM (AST) has been updated
         /// </summary>
-        public event EventHandler ASTUpdated;
+        public event EventHandler Updated;
 
         //public event EventHandler 
 
@@ -59,17 +60,22 @@ namespace SmartDevelop.Model.DOM
         #region Properties
 
 
-        CodeDocumentDOMService _depedingOnDOMServie;
+        protected CodeDocumentDOMService _depedingOn;
+        protected object _depedingOnLock = new object();
+
+
 
         /// <summary>
         /// Gets Sets the Service on which one this one depends.
         /// </summary>
         public CodeDocumentDOMService DependingOn {
-            get { return _depedingOnDOMServie; }
+            get { lock(_depedingOnLock) { return _depedingOn; } }
             set {
-                var old = _depedingOnDOMServie;
-                _depedingOnDOMServie = value;
-                OnDependingOnChanged(old, value);
+                lock(_depedingOnLock) {
+                    var old = _depedingOn;
+                    _depedingOn = value;
+                    OnDependingOnChanged(old, value);
+                }
             }
         }
 
@@ -79,12 +85,10 @@ namespace SmartDevelop.Model.DOM
         /// </summary>
         /// <param name="newPostDOMService"></param>
         protected virtual void OnDependingOnChanged(CodeDocumentDOMService old, CodeDocumentDOMService newPostDOMService) {
-
             if(old != null)
-                old.ASTUpdated -= OnDependingOnASTUpdated;
+                old.Updated -= OnDependingOnASTUpdated;
             if(newPostDOMService != null)
-                newPostDOMService.ASTUpdated += OnDependingOnASTUpdated;
-
+                newPostDOMService.Updated += OnDependingOnASTUpdated;
         }
 
         /// <summary>
@@ -128,32 +132,30 @@ namespace SmartDevelop.Model.DOM
 
         #region Public Methods
 
-        public CodeContext GetCodeContext(ProjectItemCodeDocument codeitem, TextLocation location, bool includeCurrentSegment = false) {
-            return GetCodeContext(codeitem, codeitem.Document.GetOffset(location));
+        public CodeContext GetCodeContext(TextLocation location, bool includeCurrentSegment = false) {
+            return GetCodeContext(_document.Document.GetOffset(location));
         }
 
-        public virtual CodeContext GetCodeContext(ProjectItemCodeDocument codeitem, int offset, bool includeCurrentSegment = false) {
+        public virtual CodeContext GetCodeContext(int offset, bool includeCurrentSegment = false) {
             var context = new CodeContext(this);
 
-            if(_codeRanges.ContainsKey(codeitem)) {
-                var ranges = from r in _codeRanges[codeitem].FindEncapsulatingRanges(offset)
-                             where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
-                             select r;
+            var ranges = from r in _codeRangeManager.FindEncapsulatingRanges(offset)
+                            where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
+                            select r;
 
-                if(ranges.Any()) {
-                    var range = ranges.First();
-                    if(range.RangedCodeObject is CodeMemberMethodEx) {
-                        context.EnclosingMethod = range.RangedCodeObject as CodeMemberMethodEx;
-                        context.EnclosingType = context.EnclosingMethod.DefiningType;
-                    }
-                    if(range.RangedCodeObject is CodeTypeDeclarationEx) {
-                        context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
-                    }
+            if(ranges.Any()) {
+                var range = ranges.First();
+                if(range.RangedCodeObject is CodeMemberMethodEx) {
+                    context.EnclosingMethod = range.RangedCodeObject as CodeMemberMethodEx;
+                    context.EnclosingType = context.EnclosingMethod.DefiningType;
+                }
+                if(range.RangedCodeObject is CodeTypeDeclarationEx) {
+                    context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
                 }
             }
 
             if(includeCurrentSegment)
-                context.Segment = codeitem.SegmentService.QueryCodeSegmentAt(offset);
+                context.Segment = _document.SegmentService.QueryCodeSegmentAt(offset);
 
             if(context.EnclosingType == null)
                 context.EnclosingType = this.RootType;
@@ -170,17 +172,17 @@ namespace SmartDevelop.Model.DOM
         /// </summary>
         /// <param name="codeitem"></param>
         /// <param name="initialparent"></param>
-        public abstract void CompileTokenFileAsync(ProjectItemCodeDocument codeitem);
+        public abstract void CompileTokenFileAsync();
 
-        public abstract bool IsBusy { get; }
+        public abstract bool IsBusy { get; protected set; }
 
         #endregion
 
         #region Event Handlers
 
         protected virtual void OnASTUpdated(){
-            if(ASTUpdated != null)
-                ASTUpdated(this, EventArgs.Empty);
+            if(Updated != null)
+                Updated(this, EventArgs.Empty);
         }
 
         #endregion

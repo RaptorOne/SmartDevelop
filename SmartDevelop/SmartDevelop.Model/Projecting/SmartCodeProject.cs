@@ -65,7 +65,7 @@ namespace SmartDevelop.Model.Projecting
 
             Name = name;
             _language = language;
-            _domservice = language.CreateDOMService(this);
+            //_domservice = language.CreateDOMService(this);
             _ASTManager = language.CreateASTManager(this);
         }
 
@@ -73,12 +73,12 @@ namespace SmartDevelop.Model.Projecting
 
         #region Properties
 
-        /// <summary>
-        /// Gets the DOM Service for this Project
-        /// </summary>
-        public CodeDOMService DOMService {
-            get { return _domservice; }
-        }
+        ///// <summary>
+        ///// Gets the DOM Service for this Project
+        ///// </summary>
+        //public CodeDOMService DOMService {
+        //    get { return _domservice; }
+        //}
 
         /// <summary>
         /// Gets the DOM Service for this Project
@@ -206,9 +206,9 @@ namespace SmartDevelop.Model.Projecting
         }
 
         protected override void OnTokenizerUpdated(object sender, EventArgs<ProjectItemCodeDocument> codeProjectEventArgs) {
-            Task.Factory.StartNew(() => {
-                    _domservice.CompileTokenFileAsync(codeProjectEventArgs.Value, null);
-                });
+            //Task.Factory.StartNew(() => {
+            //        _domservice.CompileTokenFileAsync(codeProjectEventArgs.Value, null);
+            //    });
             base.OnTokenizerUpdated(sender, codeProjectEventArgs);
         }
 

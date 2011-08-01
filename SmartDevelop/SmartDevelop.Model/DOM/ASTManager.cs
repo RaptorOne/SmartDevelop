@@ -73,14 +73,25 @@ namespace SmartDevelop.Model.DOM
             doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc);
         }
 
-
+        /// <summary>
+        /// Occurs when the DocumentCompilerOrder has changed
+        /// </summary>
         protected virtual void OnDocumentCompileOrderChanged() {
-
+            // Ensure that the DOM Compilers are conected in the right order
+            // Updates all depending-on properties which have changed
+            ProjectItemCodeDocument prev = null;
+            foreach(var doc in _documentCompileOrder) {
+                if(prev == null) {
+                    if(doc.AST.DependingOn != null)
+                        doc.AST.DependingOn = null;
+                } else if(doc.AST.DependingOn != prev.AST) {
+                    doc.AST.DependingOn = prev.AST;
+                }
+                prev = doc;
+            }
         }
 
         #endregion
-
-
 
         protected void RegisterError(Projecting.ProjectItemCodeDocument codeitem, CodeSegment segment, string errorDescription) {
             var errorService = codeitem.Project.Solution.ErrorService;

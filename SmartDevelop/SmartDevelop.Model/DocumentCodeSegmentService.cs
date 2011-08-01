@@ -17,8 +17,8 @@ namespace SmartDevelop.Model.Tokening
 
         readonly object _codesegmentsLock = new object();
         readonly Dictionary<int, CodeTokenLine> _codeLineSegments = new Dictionary<int, CodeTokenLine>();
-        IEnumerable<CodeSegment> _segments;
-        IEnumerable<CodeSegment> _directives;
+        IEnumerable<CodeSegment> _segments = new List<CodeSegment>();
+        IEnumerable<CodeSegment> _directives = new List<CodeSegment>();
         readonly ProjectItemCodeDocument _codeitem;
         int _maxLine = 0;
 
