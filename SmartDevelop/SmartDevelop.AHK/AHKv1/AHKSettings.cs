@@ -9,6 +9,9 @@ namespace SmartDevelop.AHK.AHKv1
     [Serializable]
     public class AHKSettings
     {
+
+        public event EventHandler SettingsChanged;
+
         public string InterpreterPath = @"C:\Program Files (x86)\AutoHotkey\AutoHotkey.exe";
         public string LocalLibName = "Lib";
         public string StdLibName = "Lib";
@@ -22,6 +25,12 @@ namespace SmartDevelop.AHK.AHKv1
 
         public void Save() {
             SerializerHelper.SerializeObjectToFile(this, SettingsSerialisationPath);
+            OnSettingsChanged();
+        }
+
+        protected virtual void OnSettingsChanged() {
+            if(SettingsChanged != null)
+                SettingsChanged(this, EventArgs.Empty);
         }
     }
 }

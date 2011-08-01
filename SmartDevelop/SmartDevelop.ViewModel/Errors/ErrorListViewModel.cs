@@ -58,7 +58,7 @@ namespace SmartDevelop.ViewModel.Errors
                         .Segment.BringIntoView();
                 } else {
                     CurrentError.ErrorItem
-                        .CodeItem.ShowDocument();
+                        .CodeItem.ShowInWorkSpace();
                 }
             }
         }

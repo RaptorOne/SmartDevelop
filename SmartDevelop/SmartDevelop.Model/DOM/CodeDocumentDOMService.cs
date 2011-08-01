@@ -187,7 +187,7 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-        public abstract void EnsureIsUpdated();
+        public abstract bool WaitUntilUpdated(int timeout);
     }
  
 }

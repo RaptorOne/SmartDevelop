@@ -45,6 +45,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
             }
             UpdateDocumentOrder();
             document.AST.CompileTokenFileAsync();
+            //UpdateFullAST();
         }
 
         protected override void UpdateDocumentOrder() {
@@ -133,11 +134,13 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                     sb.Append(current.TokenString);
                 else if(current.Token == Token.Deref) {
                     if(current.Next != null && current.Next.Token == Token.Identifier) {
-                        if(current.Next.Equals(WORKINGDIR_VAR)) {
+                        if(current.Next.TokenString.Equals(WORKINGDIR_VAR, StringComparison.InvariantCultureIgnoreCase)) {
                             sb.Append(workingDir);
                         } else {
                             RegisterError(codeDoc, current.Next, "Unknown precompiler Variable!");
                         }
+                        if(current.Next != null && current.Next.Next != null)
+                            next = current.Next.Next.Next;
                     } else if(current.Next != null) {
                         RegisterError(codeDoc, current.Next, "Expected Identifier after Deref!");
                     }
@@ -147,8 +150,12 @@ namespace SmartDevelop.AHK.AHKv1.DOM
             }
             var path = sb.ToString();
 
-            if(!path.Contains(':')) {
-                path = Path.Combine(workingDir, path);
+            try {
+                if(!path.Contains(':')) {
+                    path = Path.Combine(workingDir, path);
+                }
+            } catch {
+                path = "";
             }
 
             var directive = new IncludeDirective() { ResolvedFilePath = path };

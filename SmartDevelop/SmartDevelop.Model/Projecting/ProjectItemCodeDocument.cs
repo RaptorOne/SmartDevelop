@@ -141,11 +141,15 @@ namespace SmartDevelop.Model.Projecting
         /// <summary>
         /// Request that this document is shown in the editor view
         /// </summary>
-        public void ShowDocument() {
+        public override void ShowInWorkSpace() {
             var p = this.Project;
             if(p == null)
                 throw new NotSupportedException("Must be atached to a project to use this Method");
             p.ShowDocument(this);
+        }
+
+        public override bool CanShow {
+            get { return true; }
         }
 
 
@@ -174,8 +178,8 @@ namespace SmartDevelop.Model.Projecting
         /// This Metthod ensures that the AST is updated. 
         /// Warning: Calling this Method may result in a notable delay
         /// </summary>
-        public void EnsureASTIsUpdated() {
-            AST.EnsureIsUpdated();
+        public bool EnsureASTIsUpdated(int maxtimeout) {
+            return AST.WaitUntilUpdated(maxtimeout);
         }
 
         public virtual void ReloadDocument() {

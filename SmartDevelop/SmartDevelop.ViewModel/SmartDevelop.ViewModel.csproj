@@ -59,6 +59,8 @@
     <Compile Include="Errors\ErrorListViewModel.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Main\MainViewModel.cs" />
+    <Compile Include="Projecting\AddItemViewModel.cs" />
+    <Compile Include="Projecting\NewItemViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorerVM.cs" />
     <Compile Include="SolutionExplorer\TreeViewProjectItem.cs" />

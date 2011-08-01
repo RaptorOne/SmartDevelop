@@ -15,8 +15,15 @@
         <StackPanel>
             <Menu>
                 <MenuItem Header="File">
-                    <MenuItem Header="New" Command="{Binding NewFileCommand}"/>
+                    <MenuItem Header="New" Command="{Binding AddNewItemCommand}"/>
                     <MenuItem Header="Open" Command="{Binding OpenFileCommand}" />
+                </MenuItem>
+                <MenuItem Header="Settings">
+                    <MenuItem Header="Current Language..." Command="{Binding ShowCurrentLanguageSettingsCommand}"/>
+                </MenuItem>
+                <MenuItem Header="About">
+                    <MenuItem Header="Help..." Command="{Binding ShowHelpCommand}"/>
+                    <MenuItem Header="About..." Command="{Binding ShowAboutCommand}" />
                 </MenuItem>
             </Menu>
 

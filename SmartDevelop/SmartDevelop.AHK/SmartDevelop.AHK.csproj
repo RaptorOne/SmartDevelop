@@ -58,11 +58,17 @@
     <Compile Include="AHKv1\DOM\Types\CodeMemberMethodExAHK.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMethodReferenceExpressionExAHK.cs" />
     <Compile Include="AHKv1\Folding\FoldingStrategyAHKv1.cs" />
+    <Compile Include="AHKv1\Projecting\Items\NewProjectItemAHK.cs" />
+    <Compile Include="AHKv1\Projecting\Items\NewProjectItemAHKClass.cs" />
     <Compile Include="AHKv1\Projecting\ProjectItemFolderSTdLib.cs" />
     <Compile Include="AHKv1\Projecting\SmartCodeProjectAHK.cs" />
     <Compile Include="AHKv1\Tokenizing\SimpleTokinizerIA.cs" />
     <Compile Include="AHKv1\Tokenizing\TokenMapIA.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\CodeLanguageSettingsViewModel.cs" />
+    <Compile Include="View\CodeLanguageSettingsView.xaml.cs">
+      <DependentUpon>CodeLanguageSettingsView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AHKv2\" />
@@ -72,6 +78,14 @@
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.CodeDOM\Archimedes.CodeDOM.csproj">
       <Project>{5FFA870A-6811-438E-B111-B36DD3651CEE}</Project>
       <Name>Archimedes.CodeDOM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns.Services.WPF\Archimedes.Services.WPF.csproj">
+      <Project>{EA929451-8342-492C-8C16-6E4B15355E7C}</Project>
+      <Name>Archimedes.Services.WPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns.WPF\Archimedes.Patterns.WPF.csproj">
+      <Project>{59FAD24F-15FE-4A5F-B5DE-0E8ADBDF14D7}</Project>
+      <Name>Archimedes.Patterns.WPF</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Archimedes\Archimedes.Patterns\Archimedes.Patterns.csproj">
       <Project>{5C5031E6-C6A4-4D8F-A473-CDB08DB8E282}</Project>
@@ -89,6 +103,16 @@
       <Project>{F658A346-3514-4D78-8CC0-12B99AD3ED5B}</Project>
       <Name>SmartDevelop.ViewModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\AHK_Icon_ClassFile.png" />
+    <Resource Include="Images\AHK_Icon_EmpyFile.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="View\CodeLanguageSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

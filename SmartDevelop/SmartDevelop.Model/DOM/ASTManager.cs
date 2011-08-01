@@ -26,7 +26,6 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-
         public ASTManager(SmartCodeProject project) { _project = project; }
 
         #region Document Handling
@@ -57,6 +56,13 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+
+        public void UpdateFullAST() {
+            lock(_documentCompileOrderLOCK) {
+                if(_documentCompileOrder.Any())
+                    _documentCompileOrder.First().AST.CompileTokenFileAsync(); // in updating the first item all depending will update itself
+            }
+        }
 
         /// <summary>
         /// This Method gets called when anything in _codeDocuments List has changed and will update

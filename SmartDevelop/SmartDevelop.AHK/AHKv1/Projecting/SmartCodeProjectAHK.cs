@@ -22,8 +22,42 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
                 var stdlibdir = Path.GetDirectoryName(_language.Settings.InterpreterPath);
                 _stdLibFolder = new ProjectItemFolderSTdLib("StdLib", stdlibdir, this);
+                this.Add(_stdLibFolder);
+
+                _localLib = new ProjectItemFolder("Lib", this);
+                this.Add(_localLib);
+
+                UpdateStdLib();
+
+                _language.Settings.SettingsChanged += (s, e) => {
+                        UpdateStdLib();
+                    };
+                
+
         }
 
+
+        void UpdateStdLib() {
+
+           // foreach(var item in this.StdLib.GetAllItems()){
+           //     item.Remove(item);
+           // }
+
+           //var folder = Path.GetDirectoryName(_language.Settings.InterpreterPath);
+           //var dir = Path.Combine(folder, _language.Settings.StdLibName);
+
+           // if(Directory.Exists(dir)) {
+           //     foreach(var file in Directory.GetFiles(dir)) {
+           //         if(_language.Extensions.Contains(Path.GetExtension(file))) {
+           //             var codeItem = ProjectItemCodeDocument.FromFile(file, this);
+           //             if(codeItem != null)
+           //                 this.StdLib.Add(codeItem);
+
+           //         }
+           //     }
+           // }
+
+        }
 
         public override void Run() {
             string output = "";
@@ -53,6 +87,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
                 if(!File.Exists(_language.Settings.InterpreterPath)) {
                     output = "Can't find AHK Interpreter!";
+                    return;
                 }
 
                 // Start the child process.

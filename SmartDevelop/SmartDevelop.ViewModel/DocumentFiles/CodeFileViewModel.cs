@@ -214,7 +214,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #endregion
 
-        #region Find Declaration Command (ToDo)
+        #region Find Declaration Command
 
         ICommand _findDeclarationCommand;
         public ICommand FindDeclarationCommand {
@@ -265,7 +265,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     var include = segment.CodeDOMObject as IncludeDirective;
                     var doc = include.ResolvedCodeDocument;
                     if(doc != null)
-                        doc.ShowDocument();
+                        doc.ShowInWorkSpace();
                 }
 
             }
@@ -274,7 +274,16 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         bool CanFindDeclaration {
             get {
-                return true; // todo
+                var segment = _projectitem.SegmentService
+                .QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
+
+                if(segment != null &&
+                    (segment.CodeDOMObject is CodeMethodReferenceExpressionEx || segment.CodeDOMObject is CodeTypeReferenceEx ||
+                    segment.CodeDOMObject is CodePropertyReferenceExpressionEx || segment.CodeDOMObject is IncludeDirective)) {
+                        return true;
+                }
+                return false;
+
             }
         }
 

@@ -111,6 +111,16 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+
+        /// <summary>
+        /// Request that this item is shown in the workspace view
+        /// </summary>
+        public virtual void ShowInWorkSpace() { }
+
+        public virtual bool CanShow {
+            get { return false; }
+        }
+
         #region ProjectItem Access
 
         /// <summary>

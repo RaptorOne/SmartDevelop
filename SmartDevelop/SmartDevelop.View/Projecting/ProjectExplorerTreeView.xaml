@@ -28,14 +28,24 @@
                 <!-- Project Node-->
                 <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemProject}" ItemsSource="{Binding Children}" >
                     <StackPanel Orientation="Horizontal">
-                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                    <StackPanel.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add New Item" Command="{Binding AddNewItemCommand}"/>
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
+                    <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
                         <TextBlock Text="{Binding DisplayName}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
-            <!-- Folder Node-->
+            <!-- Folder Node -->
             <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemFolder}" ItemsSource="{Binding Children}" >
                 <StackPanel Orientation="Horizontal">
+                    <StackPanel.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add New Item" Command="{Binding AddNewItemCommand}"/>
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
                     <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
                     <TextBlock Text="{Binding DisplayName}" />
                 </StackPanel>

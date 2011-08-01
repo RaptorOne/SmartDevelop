@@ -18,6 +18,8 @@ using SmartDevelop.View.Main;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.AHK.AHKv1;
 using SmartDevelop.AHK.AHKv1.Projecting;
+using SmartDevelop.ViewModel.Projecting;
+using SmartDevelop.View.Projecting;
 
 namespace SmartDevelop
 {
@@ -84,6 +86,8 @@ namespace SmartDevelop
             var viewmodelMapping = _serviceLocator.Resolve<IWindowViewModelMappings>();
 
             viewmodelMapping.RegisterMapping(typeof(CodeFileViewModel), typeof(CodeDocumentView));
+            viewmodelMapping.RegisterMapping(typeof(AddItemViewModel), typeof(AddItemView));
+
         }
 
         #endregion
@@ -101,9 +105,6 @@ namespace SmartDevelop
 
         }
 
-        
-
-
         #region Demoe Code
 
 
@@ -120,7 +121,7 @@ namespace SmartDevelop
 
             _solution = new SmartSolution();
             _mainVM.SetSolution(_solution);
-            SmartCodeProject demoProject = new SmartCodeProjectAHK("Demo Project", language);
+            SmartCodeProjectAHK demoProject = new SmartCodeProjectAHK("Demo Project", language);
             demoProject.SetProjectFilePath(tempProjectPath);
 
             //DemoProjectLoader.AddStdLibTo(demoProject);
@@ -133,12 +134,11 @@ namespace SmartDevelop
             dp.Document.Text = InitialDemoCode();
             dp.QuickSave();
             dp.IsStartUpDocument = true;
-            dp.ShowDocument(); // present our demo file to the user
+            dp.ShowInWorkSpace(); // present our demo file to the user
 
-            var libFolder = new ProjectItemFolder("Lib", demoProject);
-            demoProject.Add(libFolder);
-            dp = new ProjectItemCodeDocument(language, libFolder) { Name = "DemoIncludeMe.ahk" };
-            libFolder.Add(dp);
+
+            dp = new ProjectItemCodeDocument(language, demoProject.LocalLib) { Name = "DemoIncludeMe.ahk" };
+            demoProject.LocalLib.Add(dp);
             dp.Document.Text = InitialDemoIncludeLibCode();
             dp.QuickSave();
 
@@ -181,7 +181,7 @@ class AeroPlane
         static string CarFileCode() {
             return
 @"
-#Include AeroPlane.ahk
+#Include %A_ScriptDir%\AeroPlane.ahk
 
 
 ; Demo Include filepath
@@ -221,8 +221,8 @@ IncludeTestMethod(){
         static string InitialDemoCode() {
     return @"
     ; Demo Code
-    ;#Include <DemoIncludeMe>
-    ;#Include Car.ahk
+    #Include <DemoIncludeMe>
+    #Include %A_ScriptDir%\Car.ahk
 
 	; dynamic mini expression evaluator:
 	sk += !(a3 == """" ? (sub != """")
@@ -239,6 +239,9 @@ IncludeTestMethod(){
     msgbox =msgbox
     msgbox % msgbox
     msgbox % Add(44, 33)
+
+    plane := new AeroPlane
+    mycar := new Car
 
     ExitApp
     

@@ -140,6 +140,8 @@ namespace SmartDevelop.Model.CodeLanguages
             return new List<EditorDocumentExtension>();
         }
 
+        public abstract void ShowLanguageSettings();
+
         #endregion
 
         #region IEquatable
@@ -159,5 +161,7 @@ namespace SmartDevelop.Model.CodeLanguages
         #endregion
 
         public abstract ASTManager CreateASTManager(SmartCodeProject project);
+
+        public abstract IEnumerable<NewProjectItem> GetAvaiableItemsForNew(ProjectItem _folder);
     }
 }

@@ -104,7 +104,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                     //ensure we have a updated tokenizer
                     _projectitem.EnsureTokenizerHasWorked();
-                    _projectitem.AST.EnsureIsUpdated();
+                    _projectitem.AST.WaitUntilUpdated(2000);
 
 
                     // do type lookup & list avaiable members

@@ -258,13 +258,17 @@ namespace SmartDevelop.Model.DOM
 
 
         /// <summary>
-        /// Ensures that there is no item queued and the parser is finished.
+        /// Ensures that the parser is finished.
         /// </summary>
-        public override void EnsureIsUpdated() {
+        public override bool WaitUntilUpdated(int timeout) {
             while(true) {
                 if(!IsBusy)
-                    break;
+                    return true;
+                else if(timeout < 0) {
+                    return false;
+                }
                 System.Threading.Thread.Sleep(1);
+                timeout--;
             }
         }
 
@@ -273,15 +277,11 @@ namespace SmartDevelop.Model.DOM
                     if(IsBusy) {
                         if(!_fileCompileWorker.CancellationPending)
                             _fileCompileWorker.CancelAsync();
-                        while(true) {
-                            if(IsBusy) {
-                                System.Threading.Thread.Sleep(1);
-                            } else
-                                break;
-                        }
+                        WaitUntilUpdated(200);
                     }
                     IsBusy = true;
-                    _fileCompileWorker.RunWorkerAsync();
+                    if(!_fileCompileWorker.IsBusy)
+                        _fileCompileWorker.RunWorkerAsync();
             }
         }
 
@@ -292,6 +292,9 @@ namespace SmartDevelop.Model.DOM
         CodeDocumentDOMService dependingOnSave;
 
         #region Token Compiler Worker
+
+        bool firstAfterNull = true;
+        bool ignoreDependingOnce = false;
 
         protected virtual void CompileTokenFile(object sender, DoWorkEventArgs e) {
 
@@ -320,8 +323,14 @@ namespace SmartDevelop.Model.DOM
                 if(dependingOnSave == null) {
                     // merge super base members
                     _languageRoot.Members.AddRange(_root.Members);
+                    firstAfterNull = true;
                 } else {
-                    dependingOnSave.EnsureIsUpdated();
+                    if(firstAfterNull) {
+                        ignoreDependingOnce = true;
+                        dependingOnSave.CompileTokenFileAsync();
+                        firstAfterNull = false;
+                    }
+                    dependingOnSave.WaitUntilUpdated(2000);
                     _languageRoot.Members.AddRange(dependingOnSave.RootType.Members);
                 }
 
@@ -986,8 +995,12 @@ namespace SmartDevelop.Model.DOM
 
 
         protected override void OnDependingOnASTUpdated(object sender, EventArgs e) {
-            this.CompileTokenFileAsync();
-            base.OnDependingOnASTUpdated(sender, e);
+            if(!ignoreDependingOnce) {
+                this.CompileTokenFileAsync();
+                base.OnDependingOnASTUpdated(sender, e);
+            } else {
+                ignoreDependingOnce = false;
+            }
         }
 
         protected virtual void OnRunWorkerCompleted() {
@@ -999,7 +1012,14 @@ namespace SmartDevelop.Model.DOM
         object _isBusyLock = new object();
 
         public override bool IsBusy {
-            get {  lock(_isBusyLock)  { return _isBusy; }}
+            get {  
+                lock(_isBusyLock)  {
+                    //if(_isBusy && !_fileCompileWorker.IsBusy) {
+                    //    _isBusy = ;
+                    //}
+                    return _fileCompileWorker.IsBusy;
+                }
+            }
             protected set {
                 lock(_isBusyLock) { _isBusy = value; }
             }

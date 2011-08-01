@@ -1,39 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SmartDevelop.Model.CodeLanguages;
-using ICSharpCode.AvalonEdit.Document;
-using SmartDevelop.AHK.AHKv1.Tokenizing;
-using SmartDevelop.Model.DOM;
-using ICSharpCode.AvalonEdit.Highlighting;
-using System.CodeDom;
-using SmartDevelop.Model.DOM.Types;
-using SmartDevelop.AHK.AHKv1.DOM.Types;
-using SmartDevelop.AHK.AHKv1.Folding;
-using SmartDevelop.Model.Tokening;
-using ICSharpCode.AvalonEdit.Folding;
 using System.IO;
-using System.Xml;
-using System.Windows.Media;
-using SmartDevelop.Model.Highlighning;
 using System.Text.RegularExpressions;
-using SmartDevelop.AHK.AHKv1.CodeCompletion;
-using ICSharpCode.AvalonEdit;
-using SmartDevelop.Model.Projecting;
-using SmartDevelop.Model.CodeLanguages.Extensions;
-using SmartDevelop.Model.Tokenizing;
 using System.Windows;
+using System.Windows.Media;
+using System.Xml;
 using Archimedes.Patterns.Serializing;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Highlighting;
+using SmartDevelop.AHK.AHKv1.CodeCompletion;
 using SmartDevelop.AHK.AHKv1.DOM;
+using SmartDevelop.AHK.AHKv1.DOM.Types;
+using SmartDevelop.AHK.AHKv1.Tokenizing;
+using SmartDevelop.Model.CodeLanguages;
+using SmartDevelop.Model.CodeLanguages.Extensions;
+using SmartDevelop.Model.DOM;
+using SmartDevelop.Model.Highlighning;
+using SmartDevelop.Model.Projecting;
+using SmartDevelop.Model.Tokening;
+using SmartDevelop.Model.Tokenizing;
+using SmartDevelop.AHK.AHKv1.Projecting.Items;
+using Archimedes.Patterns.Services;
+using Archimedes.Services.WPF.WindowViewModelMapping;
+using SmartDevelop.AHK.View;
+using SmartDevelop.AHK.ViewModel;
+using Archimedes.Services.WPF.WorkBenchServices;
 
 namespace SmartDevelop.AHK.AHKv1
 {
     public class CodeLanguageAHKv1 : CodeLanguage
     {
+        #region Fields
+
         AHKSettings _settings;
+        CodeLanguageSettingsViewModel _settingsVM;
+
         static string AHKSettingsFolder = AppSettingsFolder;
         string _settingsFilePath = Path.Combine(AHKSettingsFolder, "ahksettings.xml");
+        IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+
+        #endregion
 
         #region Constructor
 
@@ -52,7 +60,11 @@ namespace SmartDevelop.AHK.AHKv1
                 _settings = new AHKSettings(_settingsFilePath);
                 _settings.Save();
             }
-            
+
+            var viewmodelMapping = ServiceLocator.Instance.Resolve<IWindowViewModelMappings>();
+
+            viewmodelMapping.RegisterMapping(typeof(CodeLanguageSettingsViewModel), typeof(CodeLanguageSettingsView));
+
             #region Define Language Syntax
             // todo
             // those data is actually thougt to be read out of confic files
@@ -189,6 +201,23 @@ namespace SmartDevelop.AHK.AHKv1
 
         public override ASTManager CreateASTManager(SmartCodeProject project) {
             return new ASTManagerAHK(project);
+        }
+
+        static readonly NewProjectItem[] _avaiableItems = { new NewProjectItemAHK(), new NewProjectItemAHKClass()};
+
+        public override IEnumerable<NewProjectItem> GetAvaiableItemsForNew(ProjectItem contextItem) {
+            return _avaiableItems;
+        }
+
+
+        public override void ShowLanguageSettings() {
+            if(_settingsVM == null) {
+                _settingsVM = new CodeLanguageSettingsViewModel(_settings)
+                {
+                    DisplayName = "Settings of " + this.LanguageID
+                };
+            }
+            _workbenchservice.ShowDialog(_settingsVM, SizeToContent.WidthAndHeight);
         }
     }
 }

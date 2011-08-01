@@ -11,6 +11,7 @@ using Archimedes.Patterns.WPF.Commands;
 using System.Linq;
 using System.Windows.Forms;
 using SmartDevelop.ViewModel.Errors;
+using SmartDevelop.ViewModel.Projecting;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -91,6 +92,33 @@ namespace SmartDevelop.ViewModel.Main
 
         #region Commands
 
+        #region New File Command
+        ICommand _addNewItemCommand;
+
+        public ICommand AddNewItemCommand {
+            get {
+                if(_addNewItemCommand == null) {
+
+                    _addNewItemCommand = new RelayCommand(x => {
+                        var vms = from item in _solution.Current.Language.GetAvaiableItemsForNew(_solution.Current)
+                                  select new NewItemViewModel(item);
+
+                        var vm = new AddItemViewModel(_solution.Current, vms)
+                        {
+                            DisplayName = "Add an new Item to this Project"
+                        };
+
+                        _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
+                    }, x => {
+                        return _solution != null && _solution.Current != null;
+                    });
+
+                }
+                return _addNewItemCommand;
+            }
+        }
+        #endregion 
+
         #region Open File Command
 
         ICommand _openFileCommand;
@@ -111,7 +139,7 @@ namespace SmartDevelop.ViewModel.Main
                                 var file = ProjectItemCodeDocument.FromFile(openFileDialog1.FileName, currentProject);
                                 if(file != null)
                                     currentProject.Add(file);
-                                file.ShowDocument();
+                                file.ShowInWorkSpace();
                             }
 
                         }
@@ -167,6 +195,68 @@ namespace SmartDevelop.ViewModel.Main
         }
 
         #endregion
+
+        #region Show Current Language Settings Command
+
+        ICommand _ShowCurrentLanguageSettingsCommand;
+
+        public ICommand ShowCurrentLanguageSettingsCommand {
+            get {
+                if(_ShowCurrentLanguageSettingsCommand == null) {
+                    _ShowCurrentLanguageSettingsCommand = new RelayCommand(x => {
+                        _solution.Current.Language.ShowLanguageSettings();
+                    },
+                        x => {
+                            return _solution != null && _solution.Current != null;
+                        });
+                }
+                return _ShowCurrentLanguageSettingsCommand;
+            }
+        }
+
+        #endregion
+
+        #region Show About Command (todo)
+
+        ICommand _showAboutCommand;
+
+        public ICommand ShowAboutCommand {
+            get {
+                if(_showAboutCommand == null) {
+                    _showAboutCommand = new RelayCommand(x => {
+                        //toDo!
+                    },
+                        x => {
+                            return false;
+                        });
+                }
+                return _showAboutCommand;
+            }
+        }
+
+        #endregion
+
+        #region Show Help Command (todo)
+
+        ICommand _showHelpCommand;
+
+        public ICommand ShowHelpCommand {
+            get {
+                if(_showHelpCommand == null) {
+                    _showHelpCommand = new RelayCommand(x => {
+                        //toDo!
+                    },
+                        x => {
+                            return false;
+                        });
+                }
+                return _showHelpCommand;
+            }
+        }
+
+        #endregion
+
+
 
         #endregion
     }

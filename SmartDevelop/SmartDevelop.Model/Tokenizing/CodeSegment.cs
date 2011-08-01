@@ -316,7 +316,7 @@ namespace SmartDevelop.Model.Tokenizing
         #endregion
 
         public void BringIntoView() {
-            _codeDocument.ShowDocument();
+            _codeDocument.ShowInWorkSpace();
             _codeDocument.SetDocumentPosition(this.Range.Offset);
         }
 
