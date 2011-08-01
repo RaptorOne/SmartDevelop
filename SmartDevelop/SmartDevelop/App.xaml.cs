@@ -145,19 +145,49 @@ namespace SmartDevelop
 
             dp = new ProjectItemCodeDocument(language, demoProject) { Name = "Car.ahk" };
             demoProject.Add(dp);
-            dp.Document.Text = InitialDemoIncludeFilePathCode();
+            dp.Document.Text = CarFileCode();
+            dp.QuickSave();
+
+            dp = new ProjectItemCodeDocument(language, demoProject) { Name = "AeroPlane.ahk" };
+            demoProject.Add(dp);
+            dp.Document.Text = AeroPlaneFileCode();
             dp.QuickSave();
 
 
         }
 
-        static string InitialDemoIncludeFilePathCode() {
+
+        static string AeroPlaneFileCode() {
             return
 @"
 ; Demo Include filepath
 
 /*
-    This is a Method in a include file
+    This is an AeroPlane
+*/
+class AeroPlane
+{
+    var JetSets ; :-P
+    
+    Fly(){
+        ; run it! :D
+    }
+}
+";
+        }
+
+
+
+        static string CarFileCode() {
+            return
+@"
+#Include AeroPlane.ahk
+
+
+; Demo Include filepath
+
+/*
+    This is a Car
 */
 class Car
 {
@@ -171,8 +201,11 @@ class Car
         }
 
         static string InitialDemoIncludeLibCode() {
-            return 
+            return
 @"
+
+#Include AeroPlane.ahk
+
 ; Demo Include
 
 /*

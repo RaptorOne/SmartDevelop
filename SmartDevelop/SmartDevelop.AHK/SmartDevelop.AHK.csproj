@@ -53,6 +53,7 @@
     <Compile Include="AHKv1\DOM\CodeDOMServiceIA.cs" />
     <Compile Include="AHKv1\DOM\CodeDOMDocumentServiceAHK.cs" />
     <Compile Include="AHKv1\DOM\CompilerArgument.cs" />
+    <Compile Include="AHKv1\DOM\IncludeTreeBuilder.cs" />
     <Compile Include="AHKv1\DOM\SyntaxException.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMemberMethodExAHK.cs" />
     <Compile Include="AHKv1\DOM\Types\CodeMethodReferenceExpressionExAHK.cs" />

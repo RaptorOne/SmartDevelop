@@ -17,6 +17,8 @@ namespace SmartDevelop.AHK.AHKv1.DOM
     {
         const string INCLUDE_ONCE = "#Include";
 
+        IncludeTreeBuilder _includeTreeBuilder = new IncludeTreeBuilder();
+
         public ASTManagerAHK(SmartCodeProject project) 
             : base(project) { }
 
@@ -43,28 +45,19 @@ namespace SmartDevelop.AHK.AHKv1.DOM
         protected override void UpdateDocumentOrder() {
             lock(_documentCompileOrderLOCK) {
                 _documentCompileOrder.Clear();
-
+                //_handledDocuments.Clear();
                 var startUpDoc = _codeDocuments.Keys.ToList().Find(x => x.IsStartUpDocument);
                 if(startUpDoc != null) {
-                    _documentCompileOrder.Add(startUpDoc);
-                    _documentCompileOrder.AddRange(GenerateDependcyHirarchy(startUpDoc));
+                    try {
+                        _documentCompileOrder.AddRange(_includeTreeBuilder.BuildHirarchy(_codeDocuments, startUpDoc));
+                    } catch(DependencyTreeException e) {
+                        RegisterError(e.Document, null, e.Message);
+                    }
                 }
+                _documentCompileOrder.Add(startUpDoc); // the last file
             }
-            _documentCompileOrder.Reverse(); // we have generated the list Top-Down, reverse it to get the compiler flow
             base.UpdateDocumentOrder();
         }
-
-
-        List<ProjectItemCodeDocument> GenerateDependcyHirarchy(ProjectItemCodeDocument document) {
-            List<ProjectItemCodeDocument> _hirarchy = new List<ProjectItemCodeDocument>();
-            foreach(var doc in _codeDocuments[document]) {
-                _hirarchy.AddRange(GenerateDependcyHirarchy(doc));
-                _hirarchy.Add(doc);
-            }
-            return _hirarchy;
-        }
-
-
 
 
         ProjectItemCodeDocument ParseIncludeDirective(CodeSegment includeDirective, ProjectItemCodeDocument document) {
@@ -99,7 +92,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                                 .Find(x => Path.GetFileNameWithoutExtension(x.FilePath).Equals(docName));
                         }
                         if(doc != null) {
-                            var directive = new SmartDevelop.Model.CodeLanguages.PreProcessorDirective() { ResolvedFilePath = doc.FilePath };
+                            var directive = new IncludeDirective() { ResolvedFilePath = doc.FilePath, ResolvedCodeDocument = doc };
                             next.CodeDOMObject = directive;
                         } else {
                             next.ErrorContext = new CodeError() { Description = string.Format("File not found!") };
@@ -107,18 +100,21 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                         return doc;
                     } else {
                         // parse direct/relative path
+                        var directive = ParseIncludePath(document, next);
+                        var includeFilePath = directive.ResolvedFilePath;
 
-                        var includeFilePath = ParseIncludePath(document, next);
-                         return project.CodeDocuments.ToList()
+                         var doc = project.CodeDocuments.ToList()
                             .Find(x => x.FilePath.Equals(includeFilePath, StringComparison.InvariantCultureIgnoreCase));
+                         directive.ResolvedCodeDocument = doc;
+                         return doc;
                     }
                 }
             }
             return null;
         }
         static string WORKINGDIR_VAR = "A_ScriptDir";
-        
-        string ParseIncludePath(ProjectItemCodeDocument codeDoc, CodeSegment segment) {
+
+        IncludeDirective ParseIncludePath(ProjectItemCodeDocument codeDoc, CodeSegment segment) {
             string workingDir = Path.GetDirectoryName(_project.StartUpCodeDocument.FilePath);
             StringBuilder sb = new StringBuilder();
 
@@ -150,7 +146,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                 path = Path.Combine(workingDir, path);
             }
 
-            var directive = new PreProcessorDirective() { ResolvedFilePath = path };
+            var directive = new IncludeDirective() { ResolvedFilePath = path };
             CodeError fail = null;
             if(!File.Exists(path)){
                 var err = string.Format("File not found!\n" + path);
@@ -164,7 +160,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                     s.ErrorContext = fail;
                 }
             }
-            return path;
+            return directive;
         }
 
     }

@@ -5,6 +5,7 @@ using System.Text;
 using SmartDevelop.TokenizerBase;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokenizing;
+using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.Model.Errors
 {
@@ -15,10 +16,25 @@ namespace SmartDevelop.Model.Errors
     {
         readonly CodeSegment _errorSegment;
         readonly ProjectItemCodeDocument _codeProjectItem;
+        readonly CodeError _error;
 
         public ErrorItem(CodeSegment errorSegment, ProjectItemCodeDocument codeItem) {
+
+            ThrowUtil.ThrowIfNull(errorSegment);
+            ThrowUtil.ThrowIfNull(codeItem);
+
             _errorSegment = errorSegment;
             _codeProjectItem = codeItem;
+            _error = _errorSegment.ErrorContext;
+        }
+
+        public ErrorItem(CodeError err, ProjectItemCodeDocument codeItem) {
+
+            ThrowUtil.ThrowIfNull(err);
+            ThrowUtil.ThrowIfNull(codeItem);
+
+            _codeProjectItem = codeItem;
+            _error = err;
         }
 
         /// <summary>
@@ -27,6 +43,11 @@ namespace SmartDevelop.Model.Errors
         public CodeSegment Segment {
             get { return _errorSegment; }
         }
+
+        public CodeError Error {
+            get { return _error; }
+        }
+
 
         /// <summary>
         /// Gets the Code Projectitem 

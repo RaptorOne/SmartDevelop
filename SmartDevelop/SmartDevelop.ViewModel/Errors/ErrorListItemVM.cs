@@ -28,15 +28,26 @@ namespace SmartDevelop.ViewModel.Errors
 
         
         public string Description {
-            get { return _errorItem.Segment.ErrorContext.Description; }
+            get { 
+
+                return _errorItem.Error.Description;
+            }
         }
 
         public int Line {
-            get { return _errorItem.Segment.LineNumber; }
+            get {
+                if(_errorItem.Segment != null)
+                    return _errorItem.Segment.LineNumber;
+                return 0;
+            }
         }
 
         public int Column {
-            get { return _errorItem.Segment.ColumnStart; }
+            get {
+                if(_errorItem.Segment != null)
+                    return _errorItem.Segment.ColumnStart;
+                return 0;
+            }
         }
 
         public string File {

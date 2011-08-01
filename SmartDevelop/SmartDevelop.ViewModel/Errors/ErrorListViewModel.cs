@@ -52,8 +52,14 @@ namespace SmartDevelop.ViewModel.Errors
 
         void JumpToSelectedError() {
             if(CurrentError != null) {
-                CurrentError.ErrorItem
-                    .Segment.BringIntoView();
+
+                if(CurrentError.ErrorItem.Segment != null) {
+                    CurrentError.ErrorItem
+                        .Segment.BringIntoView();
+                } else {
+                    CurrentError.ErrorItem
+                        .CodeItem.ShowDocument();
+                }
             }
         }
 

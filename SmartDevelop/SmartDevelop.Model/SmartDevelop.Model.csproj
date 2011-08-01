@@ -56,6 +56,7 @@
     <Compile Include="DOM\ASTManager.cs" />
     <Compile Include="DOM\CodeDOMService.cs" />
     <Compile Include="DOM\CodeDocumentDOMService.cs" />
+    <Compile Include="DOM\DependencyTreeException.cs" />
     <Compile Include="DOM\DOMMathEx.cs" />
     <Compile Include="DOM\Ranges\CodeRange.cs" />
     <Compile Include="DOM\Ranges\CodeRangeManager.cs" />

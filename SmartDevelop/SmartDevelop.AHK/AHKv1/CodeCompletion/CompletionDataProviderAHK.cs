@@ -109,17 +109,20 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                     // do type lookup & list avaiable members
                     var ctx = _projectitem.Project.DOMService.GetCodeContext(_projectitem, _texteditor.CaretOffset - 1, true);
-                    if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
-                        foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
-                            data.Add(CompletionItem.Build(m));
-                        }
-                    } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
-                        foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
 
-                            var td = basetype.ResolveTypeDeclarationCache();
-                            if(td != null) {
-                                foreach(var m in td.GetInheritedMembers())
-                                    data.Add(CompletionItem.Build(m));
+                    if(ctx != null && ctx.Segment != null) {
+                        if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
+                            foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
+                                data.Add(CompletionItem.Build(m));
+                            }
+                        } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
+                            foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
+
+                                var td = basetype.ResolveTypeDeclarationCache();
+                                if(td != null) {
+                                    foreach(var m in td.GetInheritedMembers())
+                                        data.Add(CompletionItem.Build(m));
+                                }
                             }
                         }
                     }

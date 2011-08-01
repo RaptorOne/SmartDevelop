@@ -81,8 +81,13 @@ namespace SmartDevelop.Model.DOM
 
         protected void RegisterError(Projecting.ProjectItemCodeDocument codeitem, CodeSegment segment, string errorDescription) {
             var errorService = codeitem.Project.Solution.ErrorService;
-            segment.ErrorContext = new CodeError() { Description = errorDescription };
-            errorService.Add(new Errors.ErrorItem(segment, codeitem));
+            var err = new CodeError() { Description = errorDescription };
+            if(segment != null) {
+                segment.ErrorContext = err;
+                errorService.Add(new Errors.ErrorItem(segment, codeitem));
+            } else {
+                errorService.Add(new Errors.ErrorItem(err, codeitem));
+            }
         }
 
     }

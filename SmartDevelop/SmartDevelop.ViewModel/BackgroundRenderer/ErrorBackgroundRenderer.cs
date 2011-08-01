@@ -47,9 +47,11 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
             var errorsToVisualize = _solution.ErrorService.GetErrorsFromDocument(_codeitem);
 
             foreach(var err in errorsToVisualize) {
-                foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, err.Segment.Range)) {
-                    //drawingContext.DrawRectangle(null, _errorPen, r);
-                    drawingContext.DrawLine(_errorPen, r.BottomLeft, r.BottomRight);
+                if(err.Segment != null) {
+                    foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, err.Segment.Range)) {
+                        //drawingContext.DrawRectangle(null, _errorPen, r);
+                        drawingContext.DrawLine(_errorPen, r.BottomLeft, r.BottomRight);
+                    }
                 }
             }
 

@@ -17,6 +17,7 @@ using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.Model.DOM.Types;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -260,6 +261,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         if(s != null)
                             s.BringIntoView();
                     }
+                } else if(segment.CodeDOMObject is IncludeDirective) {
+                    var include = segment.CodeDOMObject as IncludeDirective;
+                    var doc = include.ResolvedCodeDocument;
+                    if(doc != null)
+                        doc.ShowDocument();
                 }
 
             }
