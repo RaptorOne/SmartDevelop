@@ -20,6 +20,8 @@ using SmartDevelop.AHK.AHKv1;
 using SmartDevelop.AHK.AHKv1.Projecting;
 using SmartDevelop.ViewModel.Projecting;
 using SmartDevelop.View.Projecting;
+using SmartDevelop.ViewModel.About;
+using SmartDevelop.View.About;
 
 namespace SmartDevelop
 {
@@ -87,6 +89,8 @@ namespace SmartDevelop
 
             viewmodelMapping.RegisterMapping(typeof(CodeFileViewModel), typeof(CodeDocumentView));
             viewmodelMapping.RegisterMapping(typeof(AddItemViewModel), typeof(AddItemView));
+            viewmodelMapping.RegisterMapping(typeof(AboutViewModel), typeof(AboutView));
+            
 
         }
 

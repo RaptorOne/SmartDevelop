@@ -12,6 +12,7 @@ using System.Linq;
 using System.Windows.Forms;
 using SmartDevelop.ViewModel.Errors;
 using SmartDevelop.ViewModel.Projecting;
+using SmartDevelop.ViewModel.About;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -220,14 +221,18 @@ namespace SmartDevelop.ViewModel.Main
 
         ICommand _showAboutCommand;
 
+        AboutViewModel _aboutVM;
+
         public ICommand ShowAboutCommand {
             get {
                 if(_showAboutCommand == null) {
                     _showAboutCommand = new RelayCommand(x => {
-                        //toDo!
+                        if(_aboutVM == null)
+                            _aboutVM = new AboutViewModel();
+                        _workbenchService.ShowDialog(_aboutVM, System.Windows.SizeToContent.WidthAndHeight);
                     },
                         x => {
-                            return false;
+                            return true;
                         });
                 }
                 return _showAboutCommand;

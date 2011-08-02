@@ -30,7 +30,11 @@
                     <StackPanel Orientation="Horizontal">
                     <StackPanel.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Add New Item" Command="{Binding AddNewItemCommand}"/>
+                            <MenuItem Header="Add">
+                                <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                                <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
+                            </MenuItem>
+                            <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
                         </ContextMenu>
                     </StackPanel.ContextMenu>
                     <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
@@ -43,7 +47,11 @@
                 <StackPanel Orientation="Horizontal">
                     <StackPanel.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Add New Item" Command="{Binding AddNewItemCommand}"/>
+                            <MenuItem Header="Add">
+                                <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                                <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
+                            </MenuItem>
+                            <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
                         </ContextMenu>
                     </StackPanel.ContextMenu>
                     <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
@@ -60,7 +68,7 @@
                         <StackPanel.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}"/>
-                                <MenuItem Header="Delete" Command="{Binding DeleteItemCommand}"/>
+                                <MenuItem Header="Remove" Command="{Binding DeleteItemCommand}"/>
                                 <MenuItem Header="Set as Startup File" Command="{Binding SetAsStartUpDocumentCommand}"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>

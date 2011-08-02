@@ -45,5 +45,18 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
         }
 
+        public ICommand AddNewFolderCommand {
+            get {
+                return WrapperCommand.Empty;
+            }
+        }
+
+        public ICommand RemoveCommand {
+            get {
+                return WrapperCommand.Empty;
+            }
+        }
+
+
     }
 }
