@@ -79,6 +79,8 @@
     <Compile Include="Projecting\ProjectItemCodeDocument.cs" />
     <Compile Include="Projecting\ProjectItemEventArgs.cs" />
     <Compile Include="Projecting\ProjectItemFolder.cs" />
+    <Compile Include="Projecting\Serializer\SerializeableSmartCodeProject.cs" />
+    <Compile Include="Projecting\Serializer\SProjectItem.cs" />
     <Compile Include="Projecting\SmartSolution.cs" />
     <Compile Include="Projecting\SmartCodeProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -112,6 +114,7 @@
   <ItemGroup>
     <Content Include="Tokenizing\Info\Info.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

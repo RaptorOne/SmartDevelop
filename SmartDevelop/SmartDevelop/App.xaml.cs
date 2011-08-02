@@ -102,7 +102,6 @@ namespace SmartDevelop
             // for the time being, we staticaly link to the plugin assembly 
             // and register the languages manually
             langserv.Register(new CodeLanguageAHKv1());
-
         }
 
         #region Demoe Code
@@ -114,7 +113,6 @@ namespace SmartDevelop
             if(!Directory.Exists(tempProjectPath)) {
                 Directory.CreateDirectory(tempProjectPath);
             }
-
 
             var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
             var language = serviceLang.GetById("ahk-v1.1");
@@ -153,7 +151,7 @@ namespace SmartDevelop
             dp.Document.Text = AeroPlaneFileCode();
             dp.QuickSave();
 
-
+            language.SerializeToFile(demoProject, null);
         }
 
 

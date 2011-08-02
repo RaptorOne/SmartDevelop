@@ -289,7 +289,7 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public override string FilePath {
             get {
-                if(OverrideFilePath == null) {
+                if(string.IsNullOrEmpty(OverrideFilePath)) {
                     string directory = "";
                     if(Parent != null) {
                         if(Path.GetExtension(Parent.FilePath) != "") {
@@ -309,8 +309,7 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public override string Name {
             get {
-                if(OverrideFilePath == null) {
-
+                if(string.IsNullOrEmpty(OverrideFilePath)) {
                     if(string.IsNullOrEmpty(_name)) {
                         return "unknown";
                     } else

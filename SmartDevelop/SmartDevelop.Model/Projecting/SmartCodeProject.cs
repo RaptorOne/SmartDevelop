@@ -10,6 +10,9 @@ using SmartDevelop.Model.CodeContexts;
 using Archimedes.Patterns.Utils;
 using Archimedes.Patterns;
 using System.Threading.Tasks;
+using SmartDevelop.Model.Projecting.Serializer;
+using Archimedes.Patterns.Serializing;
+using System.IO;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -65,20 +68,12 @@ namespace SmartDevelop.Model.Projecting
 
             Name = name;
             _language = language;
-            //_domservice = language.CreateDOMService(this);
             _ASTManager = language.CreateASTManager(this);
         }
 
         #endregion
 
         #region Properties
-
-        ///// <summary>
-        ///// Gets the DOM Service for this Project
-        ///// </summary>
-        //public CodeDOMService DOMService {
-        //    get { return _domservice; }
-        //}
 
         /// <summary>
         /// Gets the DOM Service for this Project
@@ -133,14 +128,18 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        
+        /// <summary>
+        /// Gets all CodeDocuments in this Project
+        /// </summary>
         public IEnumerable<ProjectItemCodeDocument> CodeDocuments {
             get {
                 return _codeDocuments;
             }
         }
 
-        
+        /// <summary>
+        /// Gets/Sets the Name of this Project
+        /// </summary>
         public override string Name {
             get { return _name; }
             set { _name = value; }
@@ -150,8 +149,11 @@ namespace SmartDevelop.Model.Projecting
             _projectPath = newPath;
         }
 
+        /// <summary>
+        /// Gets the filepath of this Project
+        /// </summary>
         public override string FilePath {
-            get { return _projectPath; }
+            get { return Path.Combine(_projectPath, this.Name + Language.ProjectExtension); }
         }
 
 
@@ -169,11 +171,22 @@ namespace SmartDevelop.Model.Projecting
 
         /// <summary>
         /// Runs this Project
+        /// Subclasses can override this Method to specify the run behaviour
         /// </summary>
-        public virtual void Run() {
-            
+        public virtual void Run() { }
+
+        /// <summary>
+        /// Can this Project currently be run?
+        /// Subclasses can override this Method to specify the run behaviour
+        /// </summary>
+        public virtual bool CanRun {
+            get { return false; }
         }
 
+
+        /// <summary>
+        /// Quicksaves all Files which have unsaved changes
+        /// </summary>
         public virtual void QuickSaveAll() {
             var codefiles = this.FindAllItemsRecursive<ProjectItemCodeDocument>();
             foreach(var file in codefiles) {
@@ -182,10 +195,12 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
-        public virtual bool CanRun {
-            get { return false; }
-        }
 
+        /// <summary>
+        /// Close this Project
+        /// Closes any child Document
+        /// </summary>
+        /// <returns></returns>
         public virtual bool Close() {
             var codefiles = this.FindAllItemsRecursive<ProjectItemCodeDocument>();
             foreach(var file in codefiles) {

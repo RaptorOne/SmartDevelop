@@ -32,6 +32,8 @@ namespace SmartDevelop.AHK.AHKv1
 {
     public class CodeLanguageAHKv1 : CodeLanguage
     {
+        const string PROJECTEXTENSION = ".AHKproj";
+
         #region Fields
 
         AHKSettings _settings;
@@ -218,6 +220,11 @@ namespace SmartDevelop.AHK.AHKv1
                 };
             }
             _workbenchservice.ShowDialog(_settingsVM, SizeToContent.WidthAndHeight);
+        }
+
+        
+        public override string ProjectExtension {
+            get { return PROJECTEXTENSION; }
         }
     }
 }

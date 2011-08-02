@@ -14,6 +14,8 @@ using SmartDevelop.Model.CodeLanguages.Extensions;
 using ICSharpCode.AvalonEdit;
 using SmartDevelop.Model.Tokenizing;
 using System.IO;
+using Archimedes.Patterns.Serializing;
+using SmartDevelop.Model.Projecting.Serializer;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -79,6 +81,10 @@ namespace SmartDevelop.Model.CodeLanguages
                 get;
         }
 
+        public abstract string ProjectExtension {
+            get;
+        }
+
         /// <summary>
         /// Specifies that a self reference can be omitted
         /// eg:
@@ -141,6 +147,35 @@ namespace SmartDevelop.Model.CodeLanguages
         }
 
         public abstract void ShowLanguageSettings();
+
+        #endregion
+
+        #region Serializer
+
+        /// <summary>
+        /// Serializes the project to a file
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="fileName"></param>
+        public virtual void SerializeToFile(SmartCodeProject project, string fileName) {
+
+            if(string.IsNullOrEmpty(fileName)) {
+                fileName = Path.Combine(project.FilePath);
+            }
+
+            var serializableProjectTree = SProjectItem.Build(project);
+            SerializerHelper.SerializeObjectToFile(serializableProjectTree, fileName);
+        }
+
+        /// <summary>
+        /// Loads a project from a file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public virtual SmartCodeProject DeserializeFromFile(string fileName) {
+            var p = SerializerHelper.DeserializeObjectFromFile<SSmartCodeProject>(fileName);
+            return p.CreateObj(null) as SmartCodeProject;
+        }
 
         #endregion
 
