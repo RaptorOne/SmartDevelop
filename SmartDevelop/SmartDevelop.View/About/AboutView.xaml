@@ -5,13 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              MinWidth="380" MinHeight="430"
-             d:DesignHeight="430" d:DesignWidth="380">
+             MaxWidth="600"
+             d:DesignHeight="517" d:DesignWidth="600">
     
     <GroupBox>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="263*" />
+                <RowDefinition Height="104*" />
+                <RowDefinition Height="228*" />
             </Grid.RowDefinitions>
             
             <Grid Grid.Row="0">
@@ -23,11 +25,58 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Image Source="..\Images\SmartDevelop_LogoSmall.png" Width="130" Height="130"
+                <Image Source="..\Images\SmartDevelop_LogoSmall.png" Width="100" Height="110"
                     HorizontalAlignment="Center" Margin="7" Stretch="Fill" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" HorizontalAlignment="Center" Margin="7" Text="SmartDevelop IDE" VerticalAlignment="Center" 
-                           FontSize="25"
+                <TextBlock Grid.Column="1" HorizontalAlignment="Center" Margin="7" Text="SmartDevelop IDE 2011" VerticalAlignment="Center" 
+                           FontSize="20"
                            />
+            </Grid>
+
+            <FlowDocumentScrollViewer Grid.Row="2" >
+
+                <FlowDocument Foreground="White" FontFamily="Arial"  >
+                    <Paragraph FontSize="13" FontFamily="Verdana">
+                        <Bold>SmartDevelop IDE</Bold> - the very smart IDE for your Scripts!
+                    </Paragraph>
+
+                    <Paragraph FontSize="11" FontFamily="Verdana">
+                        Enjoy!
+                    </Paragraph>
+
+                    <Paragraph FontSize="13" FontFamily="Verdana">
+                        <Bold>Credits</Bold>
+                    </Paragraph>
+                    <Paragraph FontSize="11" FontFamily="Verdana">
+                        Without the following OpenSource Projects, the development of SmartDevelop wouldn't be possible like it is now.
+                    </Paragraph>
+                    <List FontFamily="Verdana" FontSize="12">
+                        <ListItem>
+                            <Paragraph>AvalonEdit</Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>AvalonDock</Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>WPF.Themes</Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>Archimedes</Paragraph>
+                        </ListItem>
+                    </List>
+
+                </FlowDocument>
+            </FlowDocumentScrollViewer>
+            <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="151*" />
+                    <ColumnDefinition Width="437*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="25*" />
+                    <RowDefinition Height="38*" />
+                </Grid.RowDefinitions>
             </Grid>
         </Grid>
     </GroupBox>

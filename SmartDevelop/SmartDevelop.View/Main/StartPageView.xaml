@@ -3,15 +3,67 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="418" d:DesignWidth="633">
+             d:DesignHeight="399" d:DesignWidth="686">
+    <UserControl.Resources>
+
+        <Style x:Key="LinkButon2" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock TextDecorations="Underline">
+                            <ContentPresenter />
+                        </TextBlock>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="LightBlue" />
+            <Style.Triggers>
+                <Trigger  Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground"  Value="DarkRed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LinkButon" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+
+                        <TextBlock>
+                            <Hyperlink Foreground="{TemplateBinding Foreground}" Command="{TemplateBinding Command}"> 
+                                <ContentPresenter />
+                            </Hyperlink>
+                        </TextBlock>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="LightBlue" />
+            <Style.Triggers>
+                <Trigger  Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground"  Value="Yellow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+       
+    </UserControl.Resources>
+    
+    
+    
+    <GroupBox>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="531*" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="68*" />
             <RowDefinition Height="270*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Name="grid1" VerticalAlignment="Stretch">
+        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Name="grid1" VerticalAlignment="Stretch" Grid.ColumnSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="90*" />
             </Grid.RowDefinitions>
@@ -26,5 +78,27 @@
                 </Grid>
             </GroupBox>
         </Grid>
-    </Grid>
+
+            <WrapPanel Grid.Column="1" Orientation="Vertical" Margin="10">
+                <TextBlock FontSize="13">
+                    <Hyperlink Foreground="LightBlue" NavigateUri="http://securityvision.ch" >
+                        securityvision.ch
+                    </Hyperlink>
+                    presents
+                </TextBlock>
+                <TextBlock  Height="57" HorizontalAlignment="Left" Margin="10" Text="SmartDevelop IDE" FontSize="20" VerticalAlignment="Top" Width="454" />
+
+            </WrapPanel>
+               
+        
+        <Image HorizontalAlignment="Left" Margin="10" Stretch="Fill" Height="100" Width="100" Source="..\Images\SmartDevelop_LogoSmall.png" />
+
+            <WrapPanel Orientation="Vertical" Grid.ColumnSpan="2" Grid.Row="1">
+                <Button Style="{StaticResource LinkButon}" Margin="10" 
+                        Command="{Binding AddNewProjectCommand, Source={x:Static localviewModel:Globals.MainVM}}">Create New Project</Button>
+                <Button Style="{StaticResource LinkButon}" Margin="10" 
+                        Command="{Binding AddNewProjectCommand, Source={x:Static localviewModel:Globals.MainVM}}">Create Demo Project</Button>
+            </WrapPanel>
+        </Grid>
+    </GroupBox>
 </UserControl>

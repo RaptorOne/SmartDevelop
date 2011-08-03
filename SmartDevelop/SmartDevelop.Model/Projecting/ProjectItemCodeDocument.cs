@@ -85,7 +85,7 @@ namespace SmartDevelop.Model.Projecting
                 return null;
 
             var language = ServiceLocator.Instance.Resolve<ICodeLanguageService>().GetByExtension(Path.GetExtension(filepath));
-            ProjectItemCodeDocument newp = new ProjectItemCodeDocument(language, parent);
+            ProjectItemCodeDocument newp = new ProjectItemCodeDocument(Path.GetFileName(filepath), language, parent);
             newp.OverrideFilePath = filepath;
             try
             {
@@ -104,11 +104,16 @@ namespace SmartDevelop.Model.Projecting
             return newp;
         }
 
-        public ProjectItemCodeDocument(CodeLanguage languageId, ProjectItem parent) 
+        public ProjectItemCodeDocument(CodeLanguage languageId, ProjectItem parent)
+            : this(null, languageId, parent) { }
+
+        public ProjectItemCodeDocument(string name, CodeLanguage languageId, ProjectItem parent) 
             : base(parent) {
 
             if(languageId == null)
                 throw new ArgumentNullException("languageId");
+
+            this.Name = name;
 
             _codedocument = new TextDocument();
             Encoding = Encoding.UTF8;
@@ -132,6 +137,8 @@ namespace SmartDevelop.Model.Projecting
             tokenUpdateTimer.Interval = TimeSpan.FromMilliseconds(500);
             tokenUpdateTimer.Tick += CheckUpdateTokenRepresentation;
             tokenUpdateTimer.Start();
+
+            ReloadDocument();
         }
 
         #endregion
@@ -188,6 +195,7 @@ namespace SmartDevelop.Model.Projecting
                     _codedocument.Text = sr.ReadToEnd();
                 }
                 this.HasUnsavedChanges = false;
+                this.Document.UndoStack.ClearAll();
             }
         }
 

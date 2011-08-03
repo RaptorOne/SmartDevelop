@@ -223,6 +223,7 @@ namespace SmartDevelop.Model.Projecting
                 if(file.IsOnWorkspace)
                     return false;
             }
+            this.SaveProject();
             return true;
         }
 

@@ -203,6 +203,8 @@ namespace SmartDevelop.ViewModel.Main
 
                             if(openFileDialog1.ShowDialog() == DialogResult.OK) {
                                 fileToOpen = openFileDialog1.FileName;
+                            } else {
+                                return;
                             }
                         }
 
@@ -238,9 +240,37 @@ namespace SmartDevelop.ViewModel.Main
                                     }
                                 } else {
                                     _workbenchService.MessageBox(
-                                        string.Format("No Plugin knows how to handle {0} Extensions!", Path.GetExtension(fileToOpen)),
+                                        string.Format("No Plugin knows how to handle {0} Extensions in the current Project!", Path.GetExtension(fileToOpen)),
                                         "File Open Error", MessageBoxType.Error, MessageBoxWPFButton.OK);
                                 }
+                            } else {
+
+                                var lang = _languageService.GetByExtension(Path.GetExtension(fileToOpen));
+
+                                if(lang == null) {
+                                    _workbenchService.MessageBox("No Plugin knows how to handle your selected file.", "Unknown Filetype.", MessageBoxType.Error);
+                                    return;
+                                }
+
+                                if(_workbenchService.MessageBox(
+                                    string.Format("No active Project was found which can handle the file of type {0}. Do you wan't to create a new one and add this item to it?", lang.Name), "Open an Item"
+                                    , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes) {
+
+                                    var name = Path.GetFileNameWithoutExtension(fileToOpen);
+                                    var project = lang.Create(name, name, Path.GetDirectoryName(fileToOpen));
+
+                                    var doc = new ProjectItemCodeDocument(Path.GetFileName(fileToOpen), lang, project);
+                                    project.Add(doc);
+                                    doc.IsStartUpDocument = true;
+                                    doc.ReloadDocument();
+
+                                    IDE.Instance.CurrentSolution = new SmartSolution() { Name = "Solution" };
+                                    IDE.Instance.CurrentSolution.Add(project);
+
+                                    doc.ShowInWorkSpace();
+                                    project.SaveProject();
+                                }
+
                             }
                         }
 

@@ -60,6 +60,7 @@
     <Compile Include="Errors\ErrorListViewModel.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Main\MainViewModel.cs" />
+    <Compile Include="Main\StartUpPageViewModel.cs" />
     <Compile Include="Projecting\AddItemViewModel.cs" />
     <Compile Include="Projecting\CreateNewProjectVM.cs" />
     <Compile Include="Projecting\NewItemViewModel.cs" />

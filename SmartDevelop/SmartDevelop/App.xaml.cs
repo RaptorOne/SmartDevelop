@@ -33,7 +33,7 @@ namespace SmartDevelop
     public partial class App : Application
     {
         #region Fields
-
+        
         MainViewModel _mainVM;
         MainWindow _mainView;
         ServiceLocator _serviceLocator = ServiceLocator.Instance;
@@ -65,6 +65,14 @@ namespace SmartDevelop
         void OnMainWindowLoaded(object sender, EventArgs e) {
             _mainVM.SetDockManager(_mainView.DockManger);
             //AddDemoSolution();
+
+            var startPage = new StartUpPageViewModel()
+            {
+                DisplayName = "Start Page"
+            };
+            IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+            _workbenchService.ShowDockedDocument(startPage);
+
         }
 
 
@@ -96,7 +104,7 @@ namespace SmartDevelop
             viewmodelMapping.RegisterMapping(typeof(AddItemViewModel), typeof(AddItemView));
             viewmodelMapping.RegisterMapping(typeof(AboutViewModel), typeof(AboutView));
             viewmodelMapping.RegisterMapping(typeof(CreateNewProjectVM), typeof(CreateNewProjectView));
-
+            viewmodelMapping.RegisterMapping(typeof(StartUpPageViewModel), typeof(StartPageView));
         }
 
         #endregion

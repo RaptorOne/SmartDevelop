@@ -138,10 +138,9 @@ namespace SmartDevelop.Model.Projecting.Serializer
             var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
             var language = serviceLang.GetById(this.CodeLanguageID);
 
-            var doc = new ProjectItemCodeDocument(language, parent)
+            var doc = new ProjectItemCodeDocument(this.Name, language, parent)
             {
                 OverrideFilePath = this.OverrideFilePath,
-                Name = this.Name,
                 IsStartUpDocument = this.IsStartupDocument
             };
 

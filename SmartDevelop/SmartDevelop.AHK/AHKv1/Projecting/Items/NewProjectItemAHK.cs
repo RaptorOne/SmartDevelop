@@ -18,8 +18,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting.Items
         }
 
         public override ProjectItem CreateNewItem(ProjectItem parent) {
-            var doc = new ProjectItemCodeDocument(parent.Project.Language, parent);
-            doc.Name = this.FileName;
+            var doc = new ProjectItemCodeDocument(this.FileName, parent.Project.Language, parent);
             doc.Document.Text = string.Format(
 @"
 #NoEnv

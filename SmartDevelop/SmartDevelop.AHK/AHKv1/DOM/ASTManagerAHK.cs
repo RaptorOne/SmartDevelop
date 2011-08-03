@@ -38,7 +38,12 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                         if(includedDoc != null) {
                             _codeDocuments[document].Add(includedDoc);
                         } else {
-                            RegisterError(document, d, "This Include can't be analyzed because it is not member of the current Project.");
+
+                            if(_project.StartUpCodeDocument == null) {
+                                RegisterError(document, d, "This Include can't be analyzed because a start Script file is missing. Please define a Startup-Scriptfile!");
+                            } else {
+                                RegisterError(document, d, "This Include can't be analyzed because the Target it is not member of the current Project.");
+                            }
                         }
                     }
                 }
@@ -74,6 +79,10 @@ namespace SmartDevelop.AHK.AHKv1.DOM
             SmartCodeProjectAHK project = document.Project as SmartCodeProjectAHK;
             if(project == null)
                 throw new NotSupportedException("Expected an instance of SmartCodeProjectAHK!");
+
+            if(_project.StartUpCodeDocument == null)
+                return null;
+
 
             var libRegEx = new Regex(@"<(.*?)>");
 
@@ -123,6 +132,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
         static string WORKINGDIR_VAR = "A_ScriptDir";
 
         IncludeDirective ParseIncludePath(ProjectItemCodeDocument codeDoc, CodeSegment segment) {
+
             string workingDir = Path.GetDirectoryName(_project.StartUpCodeDocument.FilePath);
             StringBuilder sb = new StringBuilder();
 

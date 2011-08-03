@@ -52,8 +52,10 @@
         
         
         <Button Grid.Row="3" Content="Add" HorizontalAlignment="Right"  VerticalAlignment="Center" Margin="7" Width="100"
+                IsDefault="True"
                 Command="{Binding AddItemCommand}"/>
         <Button Grid.Row="3" Content="Cancel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="7" Width="100"
+                IsCancel="True"
                 Command="{Binding CloseCommand}"/>
 
     </Grid>
