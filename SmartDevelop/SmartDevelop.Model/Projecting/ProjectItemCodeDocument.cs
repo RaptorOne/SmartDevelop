@@ -39,7 +39,7 @@ namespace SmartDevelop.Model.Projecting
         CodeDocumentDOMService _ast;
 
         bool _documentdirty = false;
-        bool _isModified = false;
+        bool _hasUnsavedChanges = false;
         string _name;
 
         #endregion
@@ -187,6 +187,7 @@ namespace SmartDevelop.Model.Projecting
                 using(StreamReader sr = new StreamReader(FilePath)) {
                     _codedocument.Text = sr.ReadToEnd();
                 }
+                this.HasUnsavedChanges = false;
             }
         }
 
@@ -326,11 +327,11 @@ namespace SmartDevelop.Model.Projecting
         /// Gets the Save-State of the Document
         /// </summary>
         public bool HasUnsavedChanges {
-            get { return _isModified; }
+            get { return _hasUnsavedChanges; }
             protected set {
-                if(_isModified == value)
+                if(_hasUnsavedChanges == value)
                     return;
-                _isModified = value;
+                _hasUnsavedChanges = value;
                 if(HasUnsavedChangesChanged != null)
                     HasUnsavedChangesChanged(this, EventArgs.Empty);
             }
@@ -374,8 +375,12 @@ namespace SmartDevelop.Model.Projecting
                 return (this.Project != null && this.Project.StartUpCodeDocument == this);
             }
             set {
-                if(this.Project != null) {
-                    this.Project.StartUpCodeDocument = this;
+                if(value && !IsStartUpDocument) {
+                    if(this.Project != null) {
+                        this.Project.StartUpCodeDocument = this;
+                    }
+                } else if(!value && this.Equals(this.Project.StartUpCodeDocument)) {
+                    this.Project.StartUpCodeDocument = null;
                 }
             }
         }

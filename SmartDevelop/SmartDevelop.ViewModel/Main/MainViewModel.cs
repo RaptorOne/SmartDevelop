@@ -13,6 +13,10 @@ using System.Windows.Forms;
 using SmartDevelop.ViewModel.Errors;
 using SmartDevelop.ViewModel.Projecting;
 using SmartDevelop.ViewModel.About;
+using SmartDevelop.Model;
+using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
+using System.IO;
+using SmartDevelop.Model.CodeLanguages;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -23,9 +27,11 @@ namespace SmartDevelop.ViewModel.Main
     public class MainViewModel : WorkspaceViewModel
     {
         #region Fields
+        readonly IDE _ide;
 
         DockingManager _dockManager;
         IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+        ICodeLanguageService _languageService = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
         SolutionExplorerVM _solutionVM;
         ErrorListViewModel _errorListVM;
         SmartSolution _solution;
@@ -34,8 +40,17 @@ namespace SmartDevelop.ViewModel.Main
 
         #region Constrcutor
 
-        public MainViewModel() 
+        public MainViewModel(IDE ide) 
         {
+            _ide = ide;
+
+            if(_ide.CurrentSolution != null)
+                this.SetSolution(_ide.CurrentSolution);
+
+            _ide.CurrentSolutionChanged += (s, e) => {
+                this.SetSolution(e.Value);
+                };
+
             Globals.MainVM = this;
         }
 
@@ -43,15 +58,20 @@ namespace SmartDevelop.ViewModel.Main
 
         #region Public Methods
 
-        public void SetSolution(SmartSolution solution) {
+        protected void SetSolution(SmartSolution solution) {
             _solution = solution;
 
-            _solution.OutputDataChanged += (s, e) => {
+            if(solution != null) {
+                _solution.OutputDataChanged += (s, e) => {
                     OnPropertyChanged(() => OutputData);
                 };
 
-            SolutionVM = new SolutionExplorerVM(_solution);
-            ErrorListVM = new ErrorListViewModel(_solution.ErrorService);
+                SolutionVM = new SolutionExplorerVM(_solution);
+                ErrorListVM = new ErrorListViewModel(_solution.ErrorService);
+            } else {
+                SolutionVM = null;
+                ErrorListVM = null;
+            }
         }
 
         public void SetDockManager(DockingManager dockmanager) {
@@ -120,6 +140,53 @@ namespace SmartDevelop.ViewModel.Main
         }
         #endregion 
 
+        #region Create New Project Command
+
+        ICommand _addNewProjectCommand;
+
+        public ICommand AddNewProjectCommand {
+            get {
+                if(_addNewProjectCommand == null) {
+
+                    _addNewProjectCommand = new RelayCommand(x => {
+
+                            if(IDE.Instance.CurrentSolution != null) {
+
+                                if(_workbenchService.MessageBox("To create a new Project the current project must be closed. Do you wan't to continue?"
+                                    , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                                    return;
+                                }
+
+                                if(!IDE.Instance.CurrentSolution.Close()) {
+                                    return;
+                                }
+                                //IDE.Instance.CurrentSolution.Dispose();
+                                IDE.Instance.CurrentSolution = null;
+                            }
+
+                            var vm = new CreateNewProjectVM()
+                            {
+                                DisplayName = "Create a Project"
+                            };
+                            _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
+
+                            if(vm.CreatedProject != null) {
+                                IDE.Instance.CurrentSolution = new SmartSolution() { Name = "Solution" };
+                                IDE.Instance.CurrentSolution.Add(vm.CreatedProject);
+                            }
+
+                        }, x => {
+                            return true;
+                            });
+                        
+
+                }
+                return _addNewProjectCommand;
+            }
+        }
+
+        #endregion
+
         #region Open File Command
 
         ICommand _openFileCommand;
@@ -127,23 +194,56 @@ namespace SmartDevelop.ViewModel.Main
             get {
                 if(_openFileCommand == null) {
                     _openFileCommand = new RelayCommand(x => {
-                        var currentProject = _solution.Current;
-                        if(currentProject != null) {
 
-
-                            // Displays an OpenFileDialog so the user can select a Cursor.
-                            var openFileDialog1 = new OpenFileDialog();
-                            openFileDialog1.Filter = "Code Files|*" + currentProject.Language.Extensions.First();
+                        string fileToOpen = null;
+                        // Displays an OpenFileDialog so the user can select a Cursor.
+                        using(var openFileDialog1 = new OpenFileDialog()) {
+                            openFileDialog1.Filter = "Code Files|*";
                             openFileDialog1.Title = "Select a Script File";
 
                             if(openFileDialog1.ShowDialog() == DialogResult.OK) {
-                                var file = ProjectItemCodeDocument.FromFile(openFileDialog1.FileName, currentProject);
-                                if(file != null)
-                                    currentProject.Add(file);
-                                file.ShowInWorkSpace();
+                                fileToOpen = openFileDialog1.FileName;
+                            }
+                        }
+
+                        if(_languageService.IsProjectFile(fileToOpen)) {
+
+                            if(IDE.Instance.CurrentSolution != null) {
+
+                                if(_workbenchService.MessageBox("To open a Project the current project must be closed. Do you wan't to continue?"
+                                    , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                                    return;
+                                }
+
+                                if(!IDE.Instance.CurrentSolution.Close()) {
+                                    return;
+                                }
+                                IDE.Instance.CurrentSolution = null;
                             }
 
+                            var loadedProject = _languageService.LoadProjectFromFile(fileToOpen);
+
+                            IDE.Instance.CurrentSolution = new SmartSolution() { Name = "Solution" };
+                            IDE.Instance.CurrentSolution.Add(loadedProject);
+
+                        } else {
+                            if(IDE.Instance.CurrentSolution != null) {
+                                var currentProject = IDE.Instance.CurrentSolution.Current;
+                                if(currentProject.Language.Extensions.Contains(Path.GetExtension(fileToOpen))) {
+                                    if(currentProject != null) {
+                                        var file = ProjectItemCodeDocument.FromFile(fileToOpen, currentProject);
+                                        if(file != null)
+                                            currentProject.Add(file);
+                                        file.ShowInWorkSpace();
+                                    }
+                                } else {
+                                    _workbenchService.MessageBox(
+                                        string.Format("No Plugin knows how to handle {0} Extensions!", Path.GetExtension(fileToOpen)),
+                                        "File Open Error", MessageBoxType.Error, MessageBoxWPFButton.OK);
+                                }
+                            }
                         }
+
                     });
                 }
                 return _openFileCommand;
@@ -217,7 +317,7 @@ namespace SmartDevelop.ViewModel.Main
 
         #endregion
 
-        #region Show About Command (todo)
+        #region Show About Command
 
         ICommand _showAboutCommand;
 
@@ -260,8 +360,6 @@ namespace SmartDevelop.ViewModel.Main
         }
 
         #endregion
-
-
 
         #endregion
     }

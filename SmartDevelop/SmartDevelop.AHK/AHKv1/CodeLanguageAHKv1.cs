@@ -27,9 +27,14 @@ using Archimedes.Services.WPF.WindowViewModelMapping;
 using SmartDevelop.AHK.View;
 using SmartDevelop.AHK.ViewModel;
 using Archimedes.Services.WPF.WorkBenchServices;
+using SmartDevelop.AHK.AHKv1.Projecting;
+using SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates;
 
 namespace SmartDevelop.AHK.AHKv1
 {
+    /// <summary>
+    /// CodeLanguage Implementation for AHK v 1.1
+    /// </summary>
     public class CodeLanguageAHKv1 : CodeLanguage
     {
         const string PROJECTEXTENSION = ".AHKproj";
@@ -43,13 +48,20 @@ namespace SmartDevelop.AHK.AHKv1
         string _settingsFilePath = Path.Combine(AHKSettingsFolder, "ahksettings.xml");
         IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
 
+        readonly ProjectTemplate[] _templates;
+        ProjectTemplate _emptyTemplate;
         #endregion
 
         #region Constructor
 
+        /// <summary>
+        /// Creates a new CodeLanguage Implementation for AHK v 1.1
+        /// </summary>
         public CodeLanguageAHKv1() 
             : base("ahk-v1.1")
         {
+            Name = "AHK v 1.1";
+
 
             SELFREF_CAN_BE_OMITTED = false;
             SUPPORTS_STARTUP_CODEDOCUMENT = true;
@@ -66,6 +78,7 @@ namespace SmartDevelop.AHK.AHKv1
             var viewmodelMapping = ServiceLocator.Instance.Resolve<IWindowViewModelMappings>();
 
             viewmodelMapping.RegisterMapping(typeof(CodeLanguageSettingsViewModel), typeof(CodeLanguageSettingsView));
+
 
             #region Define Language Syntax
             // todo
@@ -142,13 +155,14 @@ namespace SmartDevelop.AHK.AHKv1
             HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);
 
             #endregion
+            _emptyTemplate = new ProjectTemplateEmpty(this);
+            _templates = new ProjectTemplate[] { _emptyTemplate, new ProjectTemplateDemo(this) };
+
         }
         
         #endregion
 
-        public AHKSettings Settings {
-            get { return _settings; }
-        }
+        #region Helper Methods
 
         Regex GetRegexForCommand(string name) {
             var preregex = @"^[\s]*\b";
@@ -165,6 +179,13 @@ namespace SmartDevelop.AHK.AHKv1
             return r;
         }
 
+        #endregion
+
+        #region Public Properties
+
+        public AHKSettings Settings {
+            get { return _settings; }
+        }
 
         static readonly string[] _extensions = { ".ahk" };
 
@@ -173,6 +194,19 @@ namespace SmartDevelop.AHK.AHKv1
                 return _extensions;
             }
         }
+
+        public override StringComparison NameComparisation {
+            get { return StringComparison.InvariantCultureIgnoreCase; }
+        }
+
+        public override string ProjectExtension {
+            get { return PROJECTEXTENSION; }
+        }
+
+        #endregion
+
+        
+        #region Public Methods
 
         public override Tokenizer CreateTokenizer(ProjectItemCodeDocument codeitem, ITextSource source) {
             return new SimpleTokinizerIA(codeitem, source);
@@ -186,9 +220,7 @@ namespace SmartDevelop.AHK.AHKv1
             return null; /* new FoldingStrategyAHKv1(segmentService); */
         }
 
-        public override StringComparison NameComparisation {
-            get { return StringComparison.InvariantCultureIgnoreCase; }
-        }
+
 
         public override IEnumerable<EditorDocumentExtension> CreateExtensionsForCodeDocument(TextEditor texteditor, ProjectItemCodeDocument projectitem) {
             var extes = new List<EditorDocumentExtension>();
@@ -222,9 +254,17 @@ namespace SmartDevelop.AHK.AHKv1
             _workbenchservice.ShowDialog(_settingsVM, SizeToContent.WidthAndHeight);
         }
 
+        #endregion
+
         
-        public override string ProjectExtension {
-            get { return PROJECTEXTENSION; }
+        public override IEnumerable<ProjectTemplate> GetProjectTemplates() {
+            return _templates;
+        }
+
+        public override SmartCodeProject Create(string displayname, string name, string location) {
+            var p = new SmartCodeProjectAHK(name, location, this);
+            p.DisplayName = displayname;
+            return p; //_emptyTemplate.Create(displayname, name, location);
         }
     }
 }

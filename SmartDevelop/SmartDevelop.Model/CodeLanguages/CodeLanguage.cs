@@ -51,6 +51,14 @@ namespace SmartDevelop.Model.CodeLanguages
             set;
         }
 
+        /// <summary>
+        /// Human readable name of this language
+        /// </summary>
+        public string Name {
+            get;
+            set;
+        }
+
         static string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartDevelop");
 
         public static string AppSettingsFolder {
@@ -148,6 +156,21 @@ namespace SmartDevelop.Model.CodeLanguages
 
         public abstract void ShowLanguageSettings();
 
+        /// <summary>
+        ///Gets the project Templates for this Language
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public abstract IEnumerable<ProjectTemplate> GetProjectTemplates();
+
+        /// <summary>
+        /// Creates a new SmartCodeProject for this Language
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public abstract SmartCodeProject Create(string displayname, string name, string location);
+
         #endregion
 
         #region Serializer
@@ -174,7 +197,7 @@ namespace SmartDevelop.Model.CodeLanguages
         /// <returns></returns>
         public virtual SmartCodeProject DeserializeFromFile(string fileName) {
             var p = SerializerHelper.DeserializeObjectFromFile<SSmartCodeProject>(fileName);
-            return p.CreateObj(null) as SmartCodeProject;
+            return p.CreateProject(Path.GetDirectoryName(fileName)) as SmartCodeProject;
         }
 
         #endregion

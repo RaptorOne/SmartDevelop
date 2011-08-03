@@ -55,25 +55,41 @@ namespace SmartDevelop.Model.Projecting.Serializer
     [Serializable]
     public class SSmartCodeProject : SProjectItem
     {
+        string _folderPath;
+
         public SSmartCodeProject() { }
 
         public SSmartCodeProject(SmartCodeProject project)
             : base(project) {
                 this.CodeLanguageID = project.Language.LanguageID;
+                this.DisplayName = project.DisplayName;
         }
 
 
         public string CodeLanguageID;
+        public string DisplayName;
+
+        public ProjectItem CreateProject(string projectFolder) {
+            _folderPath = projectFolder;
+            return this.CreateObj(null);
+        }
 
         public override ProjectItem CreateObj(ProjectItem parent) {
 
             var serviceLang = ServiceLocator.Instance.Resolve<ICodeLanguageService>();
             var language = serviceLang.GetById(this.CodeLanguageID);
 
-            var p = new SmartCodeProject(this.Name, language);
+            var p = language.Create(this.DisplayName, this.Name, _folderPath);
+            p.BeginProjectUpdate();
+            {
+                foreach(var c in this.Children)
+                    p.Add(c.CreateObj(p));
 
-            foreach(var c in this.Children)
-                p.Add(c.CreateObj(p));
+                foreach(var doc in p.CodeDocuments) {
+                    doc.ReloadDocument();
+                }
+            } p.EndProjectUpdate();
+
             return p;
         }
     }
@@ -110,10 +126,12 @@ namespace SmartDevelop.Model.Projecting.Serializer
             : base(doc) {
                 this.OverrideFilePath = doc.OverrideFilePath;
                 this.CodeLanguageID = doc.CodeLanguage.LanguageID;
+                this.IsStartupDocument = doc.IsStartUpDocument;
         }
 
         public string OverrideFilePath;
         public string CodeLanguageID;
+        public bool IsStartupDocument;
 
         public override ProjectItem CreateObj(ProjectItem parent) {
 
@@ -123,7 +141,8 @@ namespace SmartDevelop.Model.Projecting.Serializer
             var doc = new ProjectItemCodeDocument(language, parent)
             {
                 OverrideFilePath = this.OverrideFilePath,
-                Name = this.Name
+                Name = this.Name,
+                IsStartUpDocument = this.IsStartupDocument
             };
 
             return doc;

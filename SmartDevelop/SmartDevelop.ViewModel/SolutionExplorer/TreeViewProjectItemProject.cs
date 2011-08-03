@@ -34,10 +34,10 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         public override string DisplayName {
             get {
-                return _project.Name;
+                return _project.DisplayName;
             }
             set {
-                _project.Name = value;
+                _project.DisplayName = value;
             }
         }
 

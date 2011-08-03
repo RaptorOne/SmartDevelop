@@ -16,24 +16,16 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
         ProjectItemFolder _localLib;
         ProjectItemFolder _stdLibFolder;
 
-        public SmartCodeProjectAHK(string name, CodeLanguage language)
-            : base(name, language) {
+        internal SmartCodeProjectAHK(string name, string location, CodeLanguage language)
+            : base(name, location, language) {
+
                 _language = language as CodeLanguageAHKv1;
-
-                var stdlibdir = Path.GetDirectoryName(_language.Settings.InterpreterPath);
-                _stdLibFolder = new ProjectItemFolderSTdLib("StdLib", stdlibdir, this);
-                this.Add(_stdLibFolder);
-
-                _localLib = new ProjectItemFolder("Lib", this);
-                this.Add(_localLib);
 
                 UpdateStdLib();
 
                 _language.Settings.SettingsChanged += (s, e) => {
                         UpdateStdLib();
                     };
-                
-
         }
 
 
@@ -133,6 +125,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
         public ProjectItemFolder StdLib {
             get { return _stdLibFolder; }
+            internal set { _stdLibFolder = value; }
         }
 
         #endregion

@@ -172,6 +172,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                             }
                         }
                         if(any) {
+                            _completionWindow.StartOffset++;
                             _completionWindow.Show();
                         }
                     }

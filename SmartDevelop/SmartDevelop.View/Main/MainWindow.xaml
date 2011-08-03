@@ -15,7 +15,10 @@
         <StackPanel>
             <Menu>
                 <MenuItem Header="File">
-                    <MenuItem Header="New" Command="{Binding AddNewItemCommand}"/>
+                    <MenuItem Header="New">
+                        <MenuItem Header="New Project" Command="{Binding AddNewProjectCommand}"/>
+                        <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                    </MenuItem>
                     <MenuItem Header="Open" Command="{Binding OpenFileCommand}" />
                 </MenuItem>
                 <MenuItem Header="Settings">

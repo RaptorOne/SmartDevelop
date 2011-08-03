@@ -79,12 +79,13 @@
     <Compile Include="Projecting\ProjectItemCodeDocument.cs" />
     <Compile Include="Projecting\ProjectItemEventArgs.cs" />
     <Compile Include="Projecting\ProjectItemFolder.cs" />
-    <Compile Include="Projecting\Serializer\SerializeableSmartCodeProject.cs" />
+    <Compile Include="Projecting\ProjectTemplate.cs" />
     <Compile Include="Projecting\Serializer\SProjectItem.cs" />
     <Compile Include="Projecting\SmartSolution.cs" />
     <Compile Include="Projecting\SmartCodeProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DocumentCodeSegmentService.cs" />
+    <Compile Include="IDE.cs" />
     <Compile Include="Tokenizing\CodeError.cs" />
     <Compile Include="Tokenizing\CodeSegment.cs" />
     <Compile Include="Tokenizing\CodeSegmentRange.cs" />

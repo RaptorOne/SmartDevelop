@@ -16,15 +16,20 @@ namespace SmartDevelop.ViewModel.TextTransformators
 {
     class ContextHighlightTransformator : DocumentColorizingTransformer
     {
+        #region Fields
+
         readonly ProjectItemCodeDocument _codeProject;
         Brush _classtypeBrush = new SolidColorBrush(Colors.CadetBlue);
         Brush _stringBrush = new SolidColorBrush(Colors.Crimson);
         Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0xAA, 0xFF, 0x00, 0x00));
 
+        #endregion
+
         public ContextHighlightTransformator(ProjectItemCodeDocument codeProject) {
             _codeProject = codeProject;
         }
 
+        #region Colorizer
 
         protected override void ColorizeLine(ICSharpCode.AvalonEdit.Document.DocumentLine line) {
 
@@ -106,5 +111,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
             }
 
         }
+
+        #endregion
     }
 }

@@ -5,6 +5,11 @@
     <Application.Resources>
         <ResourceDictionary>
 
+            <Style TargetType="TextBlock" x:Key="BaseTextStyle">
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/SmartDevelop;component/Resources/TextEditorExpressionDark.xaml"/>
                 <ResourceDictionary Source="/AvalonDock.Themes;component/Themes/ExpressionDark.xaml"/>
@@ -15,5 +20,6 @@
             </ResourceDictionary.MergedDictionaries>
             
         </ResourceDictionary>
+               
     </Application.Resources>
 </Application>

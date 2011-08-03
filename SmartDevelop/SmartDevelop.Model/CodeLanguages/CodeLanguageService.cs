@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -37,6 +38,37 @@ namespace SmartDevelop.Model.CodeLanguages
                             where l.LanguageID == languageid
                             select l;
             return languages.Any() ? languages.First() : null;
+        }
+
+        public IEnumerable<CodeLanguage> GetAllLanguages() {
+            return new List<CodeLanguage>(_languages);
+        }
+
+
+        public bool IsProjectFile(string filepath) {
+           var ext = Path.GetExtension(filepath);
+           if(ext == null)
+               return false;
+           var lang = from l in _languages
+                      where ext.Equals(l.ProjectExtension, StringComparison.InvariantCultureIgnoreCase)
+                      select l;
+
+           return lang.Any();
+        }
+
+        public Projecting.SmartCodeProject LoadProjectFromFile(string filepath) {
+
+            var ext = Path.GetExtension(filepath);
+
+            var langs = from l in _languages
+                       where ext.Equals(l.ProjectExtension, StringComparison.InvariantCultureIgnoreCase)
+                       select l;
+
+            if(langs.Any()) {
+                var lang = langs.First();
+                return lang.DeserializeFromFile(filepath);
+            } else
+                return null;
         }
     }
 }

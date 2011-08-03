@@ -17,9 +17,9 @@ using System.IO;
 namespace SmartDevelop.Model.Projecting
 {
     /// <summary>
-    /// Represents a smart Project
+    /// Represents a Smart Project
     /// </summary>
-    public class SmartCodeProject : ProjectItem
+    public abstract class SmartCodeProject : ProjectItem
     {
         #region Fields
 
@@ -28,6 +28,7 @@ namespace SmartDevelop.Model.Projecting
         readonly ASTManager _ASTManager;
 
         string _name = "";
+        string _displayName = "Unknown Project";
         string _projectPath;
         ProjectItemCodeDocument _startUpCodeDocument = null;
         SmartSolution _solution;
@@ -62,11 +63,12 @@ namespace SmartDevelop.Model.Projecting
 
         #region Constructor
 
-        public SmartCodeProject(string name, CodeLanguage language)
+        protected SmartCodeProject(string name, string location, CodeLanguage language)
             : base(null) {
             ThrowUtil.ThrowIfNull(language);
 
             Name = name;
+            _projectPath = location;
             _language = language;
             _ASTManager = language.CreateASTManager(this);
         }
@@ -133,8 +135,21 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public IEnumerable<ProjectItemCodeDocument> CodeDocuments {
             get {
-                return _codeDocuments;
+                return _codeDocuments; // FindAllItemsRecursive<ProjectItemCodeDocument>();
             }
+        }
+
+        /// <summary>
+        /// Gets/Sets the Displayname of the Project
+        /// </summary>
+        public string DisplayName {
+            get {
+                if(string.IsNullOrEmpty(_displayName))
+                    return Name;
+                else
+                    return _displayName;
+            }
+            set { _displayName = value; }
         }
 
         /// <summary>
@@ -145,7 +160,7 @@ namespace SmartDevelop.Model.Projecting
             set { _name = value; }
         }
 
-        public void SetProjectFilePath(string newPath) {
+        public void SetProjectFolder(string newPath) {
             _projectPath = newPath;
         }
 
@@ -211,6 +226,24 @@ namespace SmartDevelop.Model.Projecting
             return true;
         }
 
+
+        public virtual void SaveProject() {
+            this.Language.SerializeToFile(this, null);
+        }
+
+        public bool IsInUpdate {
+            get;
+            protected set;
+        }
+
+        public virtual void BeginProjectUpdate() {
+            IsInUpdate = true;
+        }
+
+        public virtual void EndProjectUpdate() {
+            IsInUpdate = false;
+        }
+
         #endregion
 
         #region Event Handlers
@@ -238,6 +271,8 @@ namespace SmartDevelop.Model.Projecting
                 _codeDocuments.Add(codeDoc);
                 OnCodeDocumentAdded(codeDoc);
             }
+            if(!IsInUpdate)
+                SaveProject();
             base.OnChildItemAdded(sender, e);
         }
 
@@ -247,6 +282,8 @@ namespace SmartDevelop.Model.Projecting
                 _codeDocuments.Remove(codeDoc);
                 OnCodeDocumentRemoved(codeDoc);
             }
+            if(!IsInUpdate)
+                SaveProject();
             base.OnChildItemRemoved(sender, e);
         }
 

@@ -61,6 +61,8 @@
     <Compile Include="AHKv1\Projecting\Items\NewProjectItemAHK.cs" />
     <Compile Include="AHKv1\Projecting\Items\NewProjectItemAHKClass.cs" />
     <Compile Include="AHKv1\Projecting\ProjectItemFolderSTdLib.cs" />
+    <Compile Include="AHKv1\Projecting\ProjectTemplates\ProjectTemplateDemo.cs" />
+    <Compile Include="AHKv1\Projecting\ProjectTemplates\ProjectTemplateEmpty.cs" />
     <Compile Include="AHKv1\Projecting\SmartCodeProjectAHK.cs" />
     <Compile Include="AHKv1\Tokenizing\SimpleTokinizerIA.cs" />
     <Compile Include="AHKv1\Tokenizing\TokenMapIA.cs" />

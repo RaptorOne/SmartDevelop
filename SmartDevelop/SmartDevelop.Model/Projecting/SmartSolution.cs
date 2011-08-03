@@ -121,8 +121,6 @@ namespace SmartDevelop.Model.Projecting
         }
 
         #endregion
-
-
     }
 
 

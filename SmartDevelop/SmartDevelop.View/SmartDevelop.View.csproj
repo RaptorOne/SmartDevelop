@@ -55,11 +55,20 @@
     <Compile Include="Main\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Main\StartPageView.xaml.cs">
+      <DependentUpon>StartPageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Projecting\AddItemView.xaml.cs">
       <DependentUpon>AddItemView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Projecting\CreateNewProjectView.xaml.cs">
+      <DependentUpon>CreateNewProjectView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Projecting\ProjectExplorerTreeView.xaml.cs">
       <DependentUpon>ProjectExplorerTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Projecting\ProjectTemplateItemView.xaml.cs">
+      <DependentUpon>ProjectTemplateItemView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Projecting\SolutionExplorer.xaml.cs">
       <DependentUpon>SolutionExplorer.xaml</DependentUpon>
@@ -83,11 +92,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Main\StartPageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Projecting\AddItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Projecting\CreateNewProjectView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Projecting\ProjectExplorerTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Projecting\ProjectTemplateItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

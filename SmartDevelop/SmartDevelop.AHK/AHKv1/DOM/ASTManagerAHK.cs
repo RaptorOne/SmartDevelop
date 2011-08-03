@@ -51,7 +51,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
         protected override void UpdateDocumentOrder() {
             lock(_documentCompileOrderLOCK) {
                 _documentCompileOrder.Clear();
-                //_handledDocuments.Clear();
+
                 var startUpDoc = _codeDocuments.Keys.ToList().Find(x => x.IsStartUpDocument);
                 if(startUpDoc != null) {
                     try {
@@ -59,8 +59,8 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                     } catch(DependencyTreeException e) {
                         RegisterError(e.Document, null, e.Message);
                     }
+                    _documentCompileOrder.Add(startUpDoc); // the last file
                 }
-                _documentCompileOrder.Add(startUpDoc); // the last file
             }
             base.UpdateDocumentOrder();
         }
@@ -72,6 +72,8 @@ namespace SmartDevelop.AHK.AHKv1.DOM
 
 
             SmartCodeProjectAHK project = document.Project as SmartCodeProjectAHK;
+            if(project == null)
+                throw new NotSupportedException("Expected an instance of SmartCodeProjectAHK!");
 
             var libRegEx = new Regex(@"<(.*?)>");
 
@@ -90,12 +92,12 @@ namespace SmartDevelop.AHK.AHKv1.DOM
 
                         // seach local library files
                         var doc = project.LocalLib.FindAllItems<ProjectItemCodeDocument>().ToList()
-                            .Find(x => Path.GetFileNameWithoutExtension(x.FilePath).Equals(docName));
+                            .Find(x => Path.GetFileNameWithoutExtension(x.FilePath).Equals(docName, StringComparison.InvariantCultureIgnoreCase));
 
-                        if(doc == null) {
+                        if(doc == null && project.StdLib != null) {
                             // seach in standard library files
                             doc = project.StdLib.FindAllItems<ProjectItemCodeDocument>().ToList()
-                                .Find(x => Path.GetFileNameWithoutExtension(x.FilePath).Equals(docName));
+                                .Find(x => x.FilePath != null && Path.GetFileNameWithoutExtension(x.FilePath).Equals(docName, StringComparison.InvariantCultureIgnoreCase));
                         }
                         if(doc != null) {
                             var directive = new IncludeDirective() { ResolvedFilePath = doc.FilePath, ResolvedCodeDocument = doc };

@@ -177,6 +177,10 @@ namespace SmartDevelop.Model.Projecting
             item.TokenizerUpdated += OnTokenizerUpdated;
             item.ItemAdded += OnChildItemAdded;
             OnChildItemAdded(this, new ProjectItemEventArgs(item));
+
+            foreach(var newDoc in item.FindAllItemsRecursive<ProjectItemCodeDocument>()) {
+                OnChildItemAdded(this, new ProjectItemEventArgs(newDoc));
+            }
         }
 
         /// <summary>

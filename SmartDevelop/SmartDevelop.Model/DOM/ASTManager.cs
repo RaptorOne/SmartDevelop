@@ -26,7 +26,13 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-        public ASTManager(SmartCodeProject project) { _project = project; }
+        #region Constructor
+
+        public ASTManager(SmartCodeProject project) { 
+            _project = project; 
+        }
+
+        #endregion
 
         #region Document Handling
 
