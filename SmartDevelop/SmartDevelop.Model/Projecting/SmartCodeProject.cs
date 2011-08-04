@@ -203,10 +203,23 @@ namespace SmartDevelop.Model.Projecting
         /// Quicksaves all Files which have unsaved changes
         /// </summary>
         public virtual void QuickSaveAll() {
-            var codefiles = this.FindAllItemsRecursive<ProjectItemCodeDocument>();
-            foreach(var file in codefiles) {
-                if(file.HasUnsavedChanges)
-                    file.QuickSave();
+            var docstosave = from doc in CodeDocuments
+                             where doc.HasUnsavedChanges
+                             select doc;
+            if(docstosave.Any()) {
+                docstosave.ToList().ForEach(x => x.QuickSave());
+            }
+        }
+
+        /// <summary>
+        /// Retruns true if there is any document which can be saved.
+        /// </summary>
+        public bool CanQuickSaveAll {
+            get {
+                var docstosave = from doc in CodeDocuments
+                                 where doc.HasUnsavedChanges
+                                 select doc;
+                return docstosave.Any();
             }
         }
 
@@ -311,6 +324,8 @@ namespace SmartDevelop.Model.Projecting
 
 
         #endregion
+
+
     }
 
 

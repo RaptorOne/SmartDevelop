@@ -294,6 +294,14 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         #region Event Handlers
 
 
+        protected override void OnHasFocusChanged() {
+            if(_projectitem.Project != null && _projectitem.Project.Solution != null) {
+                if(this.HasFocus)
+                    _projectitem.Project.Solution.DocumentGotFocus(_projectitem);
+            }
+            base.OnHasFocusChanged();
+        }
+
         public override void OnClosing(System.ComponentModel.CancelEventArgs e) {
 
             if(e.Cancel)

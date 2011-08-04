@@ -68,7 +68,7 @@
             </FlowDocumentScrollViewer>
             <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="151*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="437*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -77,6 +77,15 @@
                     <RowDefinition Height="25*" />
                     <RowDefinition Height="38*" />
                 </Grid.RowDefinitions>
+                <TextBlock Grid.Row="1" HorizontalAlignment="Left" Margin="7" Text="Name" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="2" HorizontalAlignment="Left" Margin="7" Text="Version" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="3" HorizontalAlignment="Left" Margin="7" Text="Copyright" VerticalAlignment="Center" />
+
+                <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="7" Text="{Binding Name}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Margin="7" Text="{Binding Version}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Margin="7" Text="{Binding CopyRight}" VerticalAlignment="Center" />
+
+
             </Grid>
         </Grid>
     </GroupBox>

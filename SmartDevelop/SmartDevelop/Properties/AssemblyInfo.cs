@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("securityvision")]
 [assembly: AssemblyProduct("SmartDevelop IDE")]
-[assembly: AssemblyCopyright("Copyright ©  2011 by Pascal Büttiker")]
+[assembly: AssemblyCopyright("© securityvision.ch P. Büttiker, 2011")]
 [assembly: AssemblyTrademark("securityvision SmartDevelop")]
 [assembly: AssemblyCulture("")]
 

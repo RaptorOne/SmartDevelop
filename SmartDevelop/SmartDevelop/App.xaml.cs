@@ -20,10 +20,10 @@ using SmartDevelop.AHK.AHKv1;
 using SmartDevelop.AHK.AHKv1.Projecting;
 using SmartDevelop.ViewModel.Projecting;
 using SmartDevelop.View.Projecting;
-using SmartDevelop.ViewModel.About;
 using SmartDevelop.View.About;
 using System.Linq;
 using SmartDevelop.Model;
+using Archimedes.Patterns.WPF.ViewModels;
 
 namespace SmartDevelop
 {

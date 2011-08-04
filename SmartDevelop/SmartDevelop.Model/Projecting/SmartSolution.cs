@@ -11,6 +11,8 @@ namespace SmartDevelop.Model.Projecting
         #region Fields
 
         SmartCodeProject _current;
+        ProjectItemCodeDocument _activeDocument;
+
         List<SmartCodeProject> _projects = new List<SmartCodeProject>();
         string _name = "Default Solution";
         IErrorService _errorService;
@@ -80,11 +82,32 @@ namespace SmartDevelop.Model.Projecting
                 OutputDataChanged(this, EventArgs.Empty);
             }
         }
-        
+
+        /// <summary>
+        /// Gets the current active Document
+        /// </summary>
+        public ProjectItemCodeDocument ActiveDocument {
+            get {
+                return _activeDocument;
+            }
+            protected set {
+                _activeDocument = value;
+            }
+        }
 
         #endregion
 
         #region Methods
+
+
+
+        public virtual void DocumentGotFocus(ProjectItemCodeDocument doc) {
+            ActiveDocument = doc;
+        }
+        
+        //public virtual void DocumentLostFocus(ProjectItemCodeDocument doc) {
+
+        //}
 
         public void Add(SmartCodeProject p) {
             _projects.Add(p);

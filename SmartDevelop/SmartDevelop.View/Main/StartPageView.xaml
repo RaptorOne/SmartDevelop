@@ -86,7 +86,8 @@
                     </Hyperlink>
                     presents
                 </TextBlock>
-                <TextBlock  Height="57" HorizontalAlignment="Left" Margin="10" Text="SmartDevelop IDE" FontSize="20" VerticalAlignment="Top" Width="454" />
+                <TextBlock  Height="57" HorizontalAlignment="Left" Margin="10" FontSize="20" VerticalAlignment="Top" Width="454"
+                            Text="SmartDevelop IDE 2011"/>
 
             </WrapPanel>
                

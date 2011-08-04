@@ -12,7 +12,6 @@ using System.Linq;
 using System.Windows.Forms;
 using SmartDevelop.ViewModel.Errors;
 using SmartDevelop.ViewModel.Projecting;
-using SmartDevelop.ViewModel.About;
 using SmartDevelop.Model;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using System.IO;
@@ -282,15 +281,17 @@ namespace SmartDevelop.ViewModel.Main
 
         #endregion
 
-        #region Save Current File Command (ToDo)
+        #region Save Current File Command
 
         ICommand _saveCurrentFileCommand;
+
         public ICommand SaveCurrentFileCommand {
             get {
                 if(_saveCurrentFileCommand == null) {
-                    _saveCurrentFileCommand = new RelayCommand(x => 
-                    {
-                        //todo
+                    _saveCurrentFileCommand = new RelayCommand(x => {
+                        _solution.ActiveDocument.QuickSave();
+                    }, x => {
+                        return _solution != null && _solution.ActiveDocument != null && _solution.ActiveDocument.HasUnsavedChanges;
                     });
                 }
                 return _saveCurrentFileCommand;
@@ -299,10 +300,21 @@ namespace SmartDevelop.ViewModel.Main
 
         #endregion
 
-        #region Save Current File Command (ToDo)
+        #region Save All Files Command
+
+        ICommand _saveAllCommand;
 
         public ICommand SaveAllCommand {
-            get { return null; }
+            get {
+                if(_saveAllCommand == null) {
+                    _saveAllCommand = new RelayCommand(x => {
+                        _solution.Current.QuickSaveAll();
+                    }, x => {
+                        return _solution != null && _solution.Current != null && _solution.Current.CanQuickSaveAll;
+                    });
+                }
+                return _saveAllCommand;
+            }
         }
 
         #endregion
@@ -358,7 +370,10 @@ namespace SmartDevelop.ViewModel.Main
                 if(_showAboutCommand == null) {
                     _showAboutCommand = new RelayCommand(x => {
                         if(_aboutVM == null)
-                            _aboutVM = new AboutViewModel();
+                            _aboutVM = new AboutViewModel()
+                            {
+                                DisplayName = "About"
+                            };
                         _workbenchService.ShowDialog(_aboutVM, System.Windows.SizeToContent.WidthAndHeight);
                     },
                         x => {
