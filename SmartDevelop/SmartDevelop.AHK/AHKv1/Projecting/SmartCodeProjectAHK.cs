@@ -89,7 +89,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.StartInfo.FileName = _language.Settings.InterpreterPath;
-                p.StartInfo.Arguments = "/ErrorStdOut " + this.StartUpCodeDocument.FilePath;
+                p.StartInfo.Arguments = "/ErrorStdOut " + @"""" + this.StartUpCodeDocument.FilePath + @"""";
                 p.Start();
                 // Do not wait for the child process to exit before
                 // reading to the end of its redirected stream.
