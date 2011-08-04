@@ -9,6 +9,7 @@
     <Grid>
         
         <DataGrid 
+            VerticalAlignment="Stretch"
             acb:CommandBehavior.Event="MouseDoubleClick"
             acb:CommandBehavior.Command="{Binding JumpToSelectedErrorCommand}"
             IsSynchronizedWithCurrentItem="True"

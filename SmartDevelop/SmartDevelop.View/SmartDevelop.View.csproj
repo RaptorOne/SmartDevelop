@@ -130,6 +130,10 @@
       <Project>{87E61430-4243-45F2-B74E-0A4C096CEBF3}</Project>
       <Name>AvalonDock</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Archimedes\WPFThemes\WPF.Themes\WPF.Themes.csproj">
+      <Project>{FB80F0F6-1D04-4264-9C98-9E31903886B7}</Project>
+      <Name>WPF.Themes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lib\AvalonEdit\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
