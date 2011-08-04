@@ -143,18 +143,11 @@ namespace SmartDevelop.AHK.AHKv1
                 } 
             }
 
-            //// Add custom but static highligning rule
-            //customHighlighting.MainRuleSet.Rules.Add(new HighlightingRule()
-            //{
-            //    Color = commandColor,
-            //    Regex = GetRegexForCommand(regexstr.TrimEnd('|'))
-            //});
-
-
 
             HighlightingManager.Instance.RegisterHighlighting("ahk-v1.1", new string[] { ".ahk" }, customHighlighting);
 
             #endregion
+
             _emptyTemplate = new ProjectTemplateEmpty(this);
             _templates = new ProjectTemplate[] { _emptyTemplate, new ProjectTemplateDemo(this) };
 
@@ -204,8 +197,7 @@ namespace SmartDevelop.AHK.AHKv1
         }
 
         #endregion
-
-        
+  
         #region Public Methods
 
         public override Tokenizer CreateTokenizer(ProjectItemCodeDocument codeitem, ITextSource source) {

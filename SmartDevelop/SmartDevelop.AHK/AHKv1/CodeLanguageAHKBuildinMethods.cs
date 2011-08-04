@@ -16,7 +16,7 @@ namespace SmartDevelop.AHK.AHKv1
     public static  class CodeLanguageAHKBuildinMethods
     {
 
-        static List<char> SpecailWordCharacters = new List<char> { '_' };
+        static List<char> SpecailWordCharacters = new List<char> { '_', '#' };
 
 
         public static IEnumerable<CodeTypeMember> ReadMembers() {
@@ -583,7 +583,7 @@ namespace SmartDevelop.AHK.AHKv1
                 if(string.IsNullOrWhiteSpace(commandStr))
                     continue;
 
-                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, 1, SpecailWordCharacters);
+                var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, 0, SpecailWordCharacters);
 
                 yield return new PreProcessorDirective()
                 {
@@ -952,7 +952,6 @@ IfWinNotExist [, WinTitle, WinText, ExcludeTitle, ExcludeText]
             #region directives
             string directives =
 @"
-#Include
 #AllowSameLineComments \n(Only for .aut scripts) Allows comments on the same line.
 #ClipboardTimeout milliseconds\nChanges how long the script keeps trying to access the clipboard when the first attempt fails.
 #CommentFlag NewString

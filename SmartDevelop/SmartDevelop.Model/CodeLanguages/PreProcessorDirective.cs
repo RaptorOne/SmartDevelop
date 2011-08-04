@@ -11,9 +11,6 @@ namespace SmartDevelop.Model.CodeLanguages
 
     public class IncludeDirective : PreProcessorDirective
     {
-        public string Name { get; set; }
-
-
         public string ResolvedFilePath { get; set; }
 
         public ProjectItemCodeDocument ResolvedCodeDocument { get; set; }
@@ -23,8 +20,8 @@ namespace SmartDevelop.Model.CodeLanguages
         }
     }
 
-    public class PreProcessorDirective : CodeObject
+    public class PreProcessorDirective : CodeKeyWord
     {
-        public string Name { get; set; }
+
     }
 }

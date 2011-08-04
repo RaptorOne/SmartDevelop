@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.CodeDom;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
     [Serializable]
-    public class CodeKeyWord
+    public class CodeKeyWord : CodeObject
     {
         public CodeKeyWord() { }
         public CodeKeyWord(string name) { this.Name = name; }

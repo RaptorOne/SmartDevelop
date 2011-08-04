@@ -567,11 +567,11 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         bool IsWhiteSpace(int index) {
             return (_text[index] == ' ') || (_text[index] == '\t');
         }
-
+        List<char> _directiveChars = new List<char>() { '#' };
         bool IsDirective(int index, out string directivename){
             directivename = "";
             if(_text[index] == DIRECTIVE_START &&  _text.Next(index) != '\0') {
-                var possibledirective = ExtractWord(index + 1);
+                var possibledirective = ExtractWord(index, _directiveChars);
                 var directive = _codeitem.CodeLanguage.LanguageDirectives.Find(x => x.Name.Equals(possibledirective, StringComparison.InvariantCultureIgnoreCase));
                 if(directive != null) {
                     directivename = directive.Name;

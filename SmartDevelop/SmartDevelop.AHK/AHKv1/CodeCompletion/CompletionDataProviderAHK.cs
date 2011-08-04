@@ -12,6 +12,7 @@ using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.Tokenizing;
+using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
@@ -32,6 +33,9 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         static List<Token> t_whitespaces = new List<Token> { Token.WhiteSpace };
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
         static List<char> triggerCodeCompletion = new List<char> { '.' };
+
+        static List<char> allowedspecailChars = new List<char> { '#', '_' };
+        
 
         #endregion
 
@@ -67,7 +71,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
             char beforeChar;
             char currentChar;
-            char carretChar;
+            //char carretChar;
             CodeSegment segment;
 
             try {
@@ -75,15 +79,15 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                 if(_texteditor.CaretOffset > 1 && !triggerCodeCompletion.Contains(currentChar)) {
                     beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
-                    if(currentChar != ' ' && !(beforeChar == ' ' || beforeChar == '\t'))
+                    if(currentChar != ' ' && !(beforeChar == ' ' || beforeChar == '\t' || beforeChar == '\n'))
                         return;
                 }
 
-                carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset);
+                //carretChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset -1);
 
-                var tokenLine = _projectitem.SegmentService.QueryCodeTokenLine(_texteditor.TextArea.Caret.Line);
-                if(tokenLine.IsEmpty)
-                    return;
+                //var tokenLine = _projectitem.SegmentService.QueryCodeTokenLine(_texteditor.TextArea.Caret.Line);
+                //if(tokenLine.IsEmpty)
+                //    return;
 
                 segment = _projectitem.SegmentService.QueryCodeSegmentAt(_texteditor.TextArea.Caret.Offset);
                 if(segment.Token == Token.TraditionalString || segment.Token == Token.LiteralString)
@@ -130,8 +134,8 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                         _completionWindow.Show();
 
                 } else if(_completionWindow == null && e.Text != "\n" &&
-                    (_texteditor.Document.TextLength > _texteditor.CaretOffset) &&
-                    (AsciiHelper.IsAsciiLiteralLetter(currentChar) && !AsciiHelper.IsAsciiNum(currentChar))) { // && !whitespaces.Contains(carretChar)
+                    ((AsciiHelper.IsAsciiLiteralLetter(currentChar) || allowedspecailChars.Contains(currentChar))
+                    && !AsciiHelper.IsAsciiNum(currentChar))) { // && !whitespaces.Contains(carretChar)
                     // show avaiable global Methods & build in Methods + commands
 
                     if(segment == null) {
@@ -141,20 +145,26 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                             return;
                     }
 
-                    var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+
                     IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
                     foreach(var item in GetStaticCompletionItems()) {
                         data.Add(item);
                     }
 
-                    bool any = false;
+                    CodeContext ctx;
+                    if(_texteditor.Document.TextLength > _texteditor.CaretOffset) {
+                        ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+                    } else {
+                        // get root type context
+                        ctx = new CodeContext(_projectitem.AST);
+                        ctx.EnclosingType = _projectitem.AST.RootType;
+                    }
+
                     foreach(var m in ctx.GetVisibleMembers()) {
                         data.Add(CompletionItem.Build(m));
-                        any = true;
                     }
-                    if(any) {
-                        _completionWindow.Show();
-                    }
+
+                    _completionWindow.Show(); 
                 }
             } else if(whitespaces.Contains(currentChar)) {
 
@@ -189,6 +199,9 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 it = new CompletionCache.LanguageCompletionCache();
                 foreach(var keyword in _projectitem.CodeLanguage.LanguageKeywords) {
                     it.AddStatic(new CompletionItemKeyword(keyword));
+                }
+                foreach(var directive in _projectitem.CodeLanguage.LanguageDirectives) {
+                    it.AddStatic(new CompletionItemKeyword(directive));
                 }
                 CompletionCache.Instance[_projectitem.CodeLanguage] = it;
             }
