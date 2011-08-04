@@ -153,7 +153,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                     CodeContext ctx;
                     if(_texteditor.Document.TextLength > _texteditor.CaretOffset) {
-                        ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+                        ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset, true);
                     } else {
                         // get root type context
                         ctx = new CodeContext(_projectitem.AST);

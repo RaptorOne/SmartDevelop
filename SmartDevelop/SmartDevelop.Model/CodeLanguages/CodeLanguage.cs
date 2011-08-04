@@ -16,6 +16,7 @@ using SmartDevelop.Model.Tokenizing;
 using System.IO;
 using Archimedes.Patterns.Serializing;
 using SmartDevelop.Model.Projecting.Serializer;
+using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.Model.CodeLanguages
 {
@@ -170,6 +171,9 @@ namespace SmartDevelop.Model.CodeLanguages
         /// <param name="location"></param>
         /// <returns></returns>
         public abstract SmartCodeProject Create(string displayname, string name, string location);
+
+
+        public abstract void GetHelpFor(ProjectItemCodeDocument document, CodeContext ctx);
 
         #endregion
 

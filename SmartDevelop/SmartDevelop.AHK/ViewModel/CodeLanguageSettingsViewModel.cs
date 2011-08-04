@@ -29,6 +29,11 @@ namespace SmartDevelop.AHK.ViewModel
             set { _settings.LocalLibName = value; }
         }
 
+        public string HelpFilePath {
+            get { return _settings.HelpFilePath; }
+            set { _settings.HelpFilePath = value; }
+        }
+
 
         //public override void OnClosed() {
         //    _settings.Save();

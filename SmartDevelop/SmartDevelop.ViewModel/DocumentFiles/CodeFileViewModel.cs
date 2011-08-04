@@ -18,6 +18,7 @@ using SmartDevelop.TokenizerBase.IA.Indentation;
 using SmartDevelop.Model.DOM.Types;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using SmartDevelop.Model.CodeLanguages;
+using SmartDevelop.Model.CodeContexts;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -288,6 +289,27 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
         #endregion
+
+        ICommand _getHelpCommand;
+        public ICommand GetHelpCommand {
+            get {
+                if(_getHelpCommand == null) {
+                    _getHelpCommand = new RelayCommand(x => {
+                    CodeContext ctx;
+                    if(_texteditor.Document.TextLength > _texteditor.CaretOffset) {
+                        ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+                    } else {
+                        // get root type context
+                        ctx = new CodeContext(_projectitem.AST);
+                        ctx.EnclosingType = _projectitem.AST.RootType;
+                    }
+                    _projectitem.CodeLanguage.GetHelpFor(_projectitem, ctx);
+
+                    });
+                }
+                return _getHelpCommand;
+            }
+        }
 
         #endregion
 

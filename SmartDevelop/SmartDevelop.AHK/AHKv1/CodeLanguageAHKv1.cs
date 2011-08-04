@@ -29,6 +29,8 @@ using SmartDevelop.AHK.ViewModel;
 using Archimedes.Services.WPF.WorkBenchServices;
 using SmartDevelop.AHK.AHKv1.Projecting;
 using SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates;
+using System.Diagnostics;
+using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -246,9 +248,19 @@ namespace SmartDevelop.AHK.AHKv1
             _workbenchservice.ShowDialog(_settingsVM, SizeToContent.WidthAndHeight);
         }
 
+        public override void GetHelpFor(ProjectItemCodeDocument document, Model.CodeContexts.CodeContext ctx) {
+
+            if(File.Exists(_settings.HelpFilePath)) {
+                Process p = new Process();
+                p.StartInfo.FileName = _settings.HelpFilePath; // todo: run hh.exe and open correct theme if avaiable
+                p.Start();
+            } else
+                _workbenchservice.MessageBox(string.Format("Missing Helpfile.\n{0}", _settings.HelpFilePath), "Help Error", 
+                    MessageBoxType.Error);
+        }
+
         #endregion
 
-        
         public override IEnumerable<ProjectTemplate> GetProjectTemplates() {
             return _templates;
         }
@@ -258,5 +270,7 @@ namespace SmartDevelop.AHK.AHKv1
             p.DisplayName = displayname;
             return p; //_emptyTemplate.Create(displayname, name, location);
         }
+
+
     }
 }

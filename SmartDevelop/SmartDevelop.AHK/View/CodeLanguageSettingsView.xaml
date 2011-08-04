@@ -14,12 +14,13 @@
                 <ColumnDefinition Width="353*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="56*" />
+                <RowDefinition Height="19*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="206*" />
-                <RowDefinition Height="28*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="9*" />
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="1" HorizontalAlignment="Left" Margin="7" Text="Interpreter Path:" VerticalAlignment="Top" />
@@ -30,6 +31,11 @@
 
             <TextBlock Grid.Row="3" HorizontalAlignment="Left" Margin="7" Text="Local Lib Name:" VerticalAlignment="Top" />
             <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding LocalLibName}"  HorizontalAlignment="Stretch" Margin="7" VerticalAlignment="Top" />
+
+            <TextBlock Grid.Row="4" HorizontalAlignment="Left" Margin="7" Text="Help Filepath:" VerticalAlignment="Top" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding HelpFilePath}"  HorizontalAlignment="Stretch" Margin="7" VerticalAlignment="Top" />
+
+            
 
 
         </Grid>

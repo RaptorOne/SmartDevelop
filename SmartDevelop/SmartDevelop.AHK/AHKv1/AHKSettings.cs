@@ -15,6 +15,7 @@ namespace SmartDevelop.AHK.AHKv1
         public string InterpreterPath = @"C:\Program Files (x86)\AutoHotkey\AutoHotkey.exe";
         public string LocalLibName = "Lib";
         public string StdLibName = "Lib";
+        public string HelpFilePath = @"C:\Program Files (x86)\AutoHotkey\AutoHotkey.chm";
 
         public AHKSettings() { }
         public AHKSettings(string path) { SettingsSerialisationPath = path; }

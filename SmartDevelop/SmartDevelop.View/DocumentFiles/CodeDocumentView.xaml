@@ -9,6 +9,7 @@
 
     <UserControl.InputBindings>
         <KeyBinding Command="{Binding SaveCurrentFileCommand}" Gesture="CTRL+S"/>
+        <KeyBinding Command="{Binding GetHelpCommand}" Gesture="F1"/>
     </UserControl.InputBindings>
     
     
