@@ -19,6 +19,7 @@ using SmartDevelop.Model.DOM.Types;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.CodeContexts;
+using SmartDevelop.ViewModel.InvokeCompletion;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -100,6 +101,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             _texteditor.Document = _projectitem.Document;
             
             _texteditor.Document.TextChanged += OnDocumentTextChanged;
+            _texteditor.TextArea.TextEntered += OnTextEntered;
 
             _texteditor.SyntaxHighlighting = projectitem.CodeLanguage.GetHighlighter();
 
@@ -318,6 +320,32 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #region Event Handlers
 
+        void OnTextEntered(object sender, TextCompositionEventArgs e) {
+
+            char currentChar;
+
+            currentChar = e.Text[0];
+
+            //if(currentChar == '(') {
+
+            //    var vm = new InvokeCompletionViewModel()
+            //    {
+            //        Prefix = "Runnnnii(",
+            //        Sufix = ")",
+            //        InvokeDescription = "This is a description for Runnnnii"
+            //    };
+            //    vm.AllParameters.Add(new InvokeParameter("param1", "I'm the description for Param1"));
+            //    vm.AllParameters.Add(new InvokeParameter(", param2", "I'm the description for Param2"));
+            //    vm.AllParameters[0].IsActiveParameter = true;
+
+            //    _toolTip.PlacementTarget = _texteditor; // required for property inheritance
+            //    _toolTip.Content = vm;
+            //    _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
+            //    _toolTip.IsOpen = true;
+
+            //    return;
+            //}
+        }
 
         protected override void OnHasFocusChanged() {
             if(_projectitem.Project != null && _projectitem.Project.Solution != null) {

@@ -13,6 +13,8 @@ using System.CodeDom;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.Tokenizing;
 using SmartDevelop.Model.CodeContexts;
+using System.Windows.Controls;
+using SmartDevelop.ViewModel.InvokeCompletion;
 
 namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
@@ -67,6 +69,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
         #region Event Handlers
 
+        ToolTip _toolTip = new ToolTip();
         
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
             char beforeChar;

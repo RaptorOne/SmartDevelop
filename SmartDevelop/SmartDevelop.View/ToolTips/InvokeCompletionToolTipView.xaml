@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="SmartDevelop.View.ToolTips.InvokeCompletionToolTipView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="139" d:DesignWidth="852">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <StackPanel Orientation="Horizontal" Margin="7">
+            <TextBlock Text="{Binding Prefix, FallbackValue=Method(}" />
+
+            <ItemsControl ItemsSource="{Binding AllParameters}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding ParameterText}" FontWeight="{Binding ParameterFontWeight}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="{Binding Sufix, FallbackValue=)}" />
+        </StackPanel>
+
+        <TextBlock Margin="4" Grid.Row="1" Text="{Binding InvokeDescription, FallbackValue='This is a Method description'}"/>
+
+        <Grid  Grid.Row="2" Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="573*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding ActiveParameter.ParameterName, FallbackValue='CurrentProperty'}" FontWeight="Bold"/>
+            <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding ActiveParameter.ParameterDescripton, FallbackValue='This is a Property description'}"/>
+
+        </Grid>
+    </Grid>
+</UserControl>

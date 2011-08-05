@@ -66,6 +66,8 @@
     <Compile Include="FindAndReplace\SearchScope.cs" />
     <Compile Include="FindAndReplace\SearchScopeToInt.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="InvokeCompletion\InvokeCompletionViewModel.cs" />
+    <Compile Include="InvokeCompletion\InvokeParameter.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Main\StartUpPageViewModel.cs" />
     <Compile Include="Projecting\AddItemViewModel.cs" />
