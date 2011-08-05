@@ -57,6 +57,14 @@
     <Compile Include="DocumentFiles\CodeFileViewModel.cs" />
     <Compile Include="Errors\ErrorListItemVM.cs" />
     <Compile Include="Errors\ErrorListViewModel.cs" />
+    <Compile Include="FindAndReplace\Adapters.cs" />
+    <Compile Include="FindAndReplace\FindReplaceViewModel.cs" />
+    <Compile Include="FindAndReplace\FindReplace.cs" />
+    <Compile Include="FindAndReplace\FindReplaceDialog.xaml.cs">
+      <DependentUpon>FindReplaceDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FindAndReplace\SearchScope.cs" />
+    <Compile Include="FindAndReplace\SearchScopeToInt.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Main\MainViewModel.cs" />
     <Compile Include="Main\StartUpPageViewModel.cs" />
@@ -105,6 +113,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="About\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="FindAndReplace\FindReplaceDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

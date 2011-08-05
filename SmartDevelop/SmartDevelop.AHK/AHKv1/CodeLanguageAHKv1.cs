@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml;
 using Archimedes.Patterns.Serializing;
+using Archimedes.Patterns.Services;
+using Archimedes.Services.WPF.WindowViewModelMapping;
+using Archimedes.Services.WPF.WorkBenchServices;
+using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
@@ -13,7 +18,12 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using SmartDevelop.AHK.AHKv1.CodeCompletion;
 using SmartDevelop.AHK.AHKv1.DOM;
 using SmartDevelop.AHK.AHKv1.DOM.Types;
+using SmartDevelop.AHK.AHKv1.Projecting;
+using SmartDevelop.AHK.AHKv1.Projecting.Items;
+using SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates;
 using SmartDevelop.AHK.AHKv1.Tokenizing;
+using SmartDevelop.AHK.View;
+using SmartDevelop.AHK.ViewModel;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.CodeLanguages.Extensions;
 using SmartDevelop.Model.DOM;
@@ -21,16 +31,6 @@ using SmartDevelop.Model.Highlighning;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokening;
 using SmartDevelop.Model.Tokenizing;
-using SmartDevelop.AHK.AHKv1.Projecting.Items;
-using Archimedes.Patterns.Services;
-using Archimedes.Services.WPF.WindowViewModelMapping;
-using SmartDevelop.AHK.View;
-using SmartDevelop.AHK.ViewModel;
-using Archimedes.Services.WPF.WorkBenchServices;
-using SmartDevelop.AHK.AHKv1.Projecting;
-using SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates;
-using System.Diagnostics;
-using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 
 namespace SmartDevelop.AHK.AHKv1
 {

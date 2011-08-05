@@ -41,7 +41,7 @@ namespace SmartDevelop.Model.Projecting
         /// <summary>
         /// Active Project in this Solution
         /// </summary>
-        public SmartCodeProject Current {
+        public SmartCodeProject ActiveProject {
             get { return _current; }
             set { 
                 _current = value;
@@ -116,7 +116,7 @@ namespace SmartDevelop.Model.Projecting
                 ProjectAdded(this, new ProjectEventArgs(p));
 
             if(_current == null)
-                Current = p;
+                ActiveProject = p;
         }
 
         public void Remove(SmartCodeProject p) {

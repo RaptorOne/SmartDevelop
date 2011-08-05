@@ -446,6 +446,28 @@ namespace SmartDevelop.Model.Projecting
             return string.Format("{0}, IsStartUp: {1}", this.Name, this.IsStartUpDocument);
         }
 
-        
+        #region IEditor
+
+        public string Text {
+            get { return _codedocument.Text; }
+        }
+
+        public void Select(int start, int length) {
+            throw new NotImplementedException();
+        }
+
+        public void Replace(int start, int length, string ReplaceWith) {
+            _codedocument.Replace(start, length, ReplaceWith);
+        }
+
+        public void BeginChange() {
+            _codedocument.BeginUpdate();
+        }
+
+        public void EndChange() {
+            _codedocument.EndUpdate();
+        }
+
+        #endregion
     }
 }

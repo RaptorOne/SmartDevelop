@@ -5,13 +5,23 @@
         xmlns:errorsV="clr-namespace:SmartDevelop.View.Errors"
         xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
         xmlns:my="clr-namespace:SmartDevelop.View.Projecting"
+        xmlns:local="clr-namespace:SmartDevelop.View.Main"
         Title="SmartDevelop" Height="388" Width="642" >
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="1*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        
+        <Grid.InputBindings>
+            <KeyBinding Command="{Binding FindAndReplaceCommand}" Gesture="CTRL+F"/>
+        </Grid.InputBindings>
+       
+
+        
+
         <StackPanel>
             <Menu>
                 <MenuItem Header="File">
@@ -21,6 +31,11 @@
                     </MenuItem>
                     <MenuItem Header="Open" Command="{Binding OpenFileCommand}" />
                 </MenuItem>
+
+                <MenuItem Header="Edit">
+                    <MenuItem Header="Find and Replace..." Command="{Binding FindAndReplaceCommand}" />
+                </MenuItem>
+                
                 <MenuItem Header="Settings">
                     <MenuItem Header="Current Language..." Command="{Binding ShowCurrentLanguageSettingsCommand}"/>
                 </MenuItem>

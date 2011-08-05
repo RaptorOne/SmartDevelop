@@ -24,6 +24,8 @@ using SmartDevelop.View.About;
 using System.Linq;
 using SmartDevelop.Model;
 using Archimedes.Patterns.WPF.ViewModels;
+using SmartDevelop.ViewModel.FindAndReplace;
+using SmartDevelop.View.FindReplace;
 
 namespace SmartDevelop
 {
@@ -105,6 +107,8 @@ namespace SmartDevelop
             viewmodelMapping.RegisterMapping(typeof(AboutViewModel), typeof(AboutView));
             viewmodelMapping.RegisterMapping(typeof(CreateNewProjectVM), typeof(CreateNewProjectView));
             viewmodelMapping.RegisterMapping(typeof(StartUpPageViewModel), typeof(StartPageView));
+
+            viewmodelMapping.RegisterMapping(typeof(FindReplaceViewModel), typeof(FindReplaceView));
         }
 
         #endregion

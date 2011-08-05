@@ -74,6 +74,7 @@
     <Compile Include="Errors\ErrorService.cs" />
     <Compile Include="Errors\IErrorService.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
+    <Compile Include="Projecting\IEditor.cs" />
     <Compile Include="Projecting\NewProjectItem.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
     <Compile Include="Projecting\ProjectItemCodeDocument.cs" />

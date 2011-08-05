@@ -135,7 +135,7 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public IEnumerable<ProjectItemCodeDocument> CodeDocuments {
             get {
-                return _codeDocuments; // FindAllItemsRecursive<ProjectItemCodeDocument>();
+                return new List<ProjectItemCodeDocument>(_codeDocuments); // FindAllItemsRecursive<ProjectItemCodeDocument>();
             }
         }
 

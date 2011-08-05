@@ -16,6 +16,9 @@ using SmartDevelop.Model;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using System.IO;
 using SmartDevelop.Model.CodeLanguages;
+using ICSharpCode.AvalonEdit;
+using System.Collections.ObjectModel;
+using SmartDevelop.ViewModel.FindAndReplace;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -88,6 +91,21 @@ namespace SmartDevelop.ViewModel.Main
             }
         }
 
+        public TextEditor ActiveEditor {
+            get {
+                if(this._solution != null && this._solution.ActiveDocument != null) {
+                    return CodeFileViewModel.Create(_solution.ActiveDocument).Editor;
+                } else
+                    return null;
+            }
+        }
+
+        //public ObservableCollection<TextEditor> AllEditors {
+
+        //}
+
+
+
         #region Child VMs
 
         public SolutionExplorerVM SolutionVM {
@@ -120,17 +138,17 @@ namespace SmartDevelop.ViewModel.Main
                 if(_addNewItemCommand == null) {
 
                     _addNewItemCommand = new RelayCommand(x => {
-                        var vms = from item in _solution.Current.Language.GetAvaiableItemsForNew(_solution.Current)
+                        var vms = from item in _solution.ActiveProject.Language.GetAvaiableItemsForNew(_solution.ActiveProject)
                                   select new NewItemViewModel(item);
 
-                        var vm = new AddItemViewModel(_solution.Current, vms)
+                        var vm = new AddItemViewModel(_solution.ActiveProject, vms)
                         {
                             DisplayName = "Add an new Item to this Project"
                         };
 
                         _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
                     }, x => {
-                        return _solution != null && _solution.Current != null;
+                        return _solution != null && _solution.ActiveProject != null;
                     });
 
                 }
@@ -229,7 +247,7 @@ namespace SmartDevelop.ViewModel.Main
 
                         } else {
                             if(IDE.Instance.CurrentSolution != null) {
-                                var currentProject = IDE.Instance.CurrentSolution.Current;
+                                var currentProject = IDE.Instance.CurrentSolution.ActiveProject;
                                 if(currentProject.Language.Extensions.Contains(Path.GetExtension(fileToOpen))) {
                                     if(currentProject != null) {
                                         var file = ProjectItemCodeDocument.FromFile(fileToOpen, currentProject);
@@ -308,9 +326,9 @@ namespace SmartDevelop.ViewModel.Main
             get {
                 if(_saveAllCommand == null) {
                     _saveAllCommand = new RelayCommand(x => {
-                        _solution.Current.QuickSaveAll();
+                        _solution.ActiveProject.QuickSaveAll();
                     }, x => {
-                        return _solution != null && _solution.Current != null && _solution.Current.CanQuickSaveAll;
+                        return _solution != null && _solution.ActiveProject != null && _solution.ActiveProject.CanQuickSaveAll;
                     });
                 }
                 return _saveAllCommand;
@@ -327,10 +345,10 @@ namespace SmartDevelop.ViewModel.Main
             get {
                 if(_runActiveProjetCommand == null) {
                     _runActiveProjetCommand = new RelayCommand(x => {
-                        _solution.Current.Run();
+                        _solution.ActiveProject.Run();
                         }, 
                         x => {
-                            return _solution != null && _solution.Current != null && _solution.Current.CanRun;
+                            return _solution != null && _solution.ActiveProject != null && _solution.ActiveProject.CanRun;
                             });
                 }
                 return _runActiveProjetCommand;
@@ -347,10 +365,10 @@ namespace SmartDevelop.ViewModel.Main
             get {
                 if(_ShowCurrentLanguageSettingsCommand == null) {
                     _ShowCurrentLanguageSettingsCommand = new RelayCommand(x => {
-                        _solution.Current.Language.ShowLanguageSettings();
+                        _solution.ActiveProject.Language.ShowLanguageSettings();
                     },
                         x => {
-                            return _solution != null && _solution.Current != null;
+                            return _solution != null && _solution.ActiveProject != null;
                         });
                 }
                 return _ShowCurrentLanguageSettingsCommand;
@@ -381,6 +399,31 @@ namespace SmartDevelop.ViewModel.Main
                         });
                 }
                 return _showAboutCommand;
+            }
+        }
+
+        #endregion
+
+        #region Find And Replace Command
+
+        ICommand _findAndReplaceCommand;
+
+        public ICommand FindAndReplaceCommand {
+            get {
+                if(_findAndReplaceCommand == null){
+                    _findAndReplaceCommand = new RelayCommand(x => {
+                        var vm = new FindReplaceViewModel()
+                        {
+                            DisplayName = "Search and Replace",
+                        };
+                        vm.CurrentDocument = _solution.ActiveDocument;
+                        //vm.SetCurrentDocumentAsEditor();
+                        _workbenchService.ShowFloating(vm, System.Windows.SizeToContent.Manual);
+                    }, x => {
+                        return _solution != null;
+                    });
+                }
+                return _findAndReplaceCommand;
             }
         }
 

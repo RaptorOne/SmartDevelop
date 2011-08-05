@@ -25,7 +25,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
     /// <summary>
     /// Represents a CodeDocument in the Workspace
     /// </summary>
-    public class CodeFileViewModel : WorkspaceViewModel, ICacheable
+    public class CodeFileViewModel : WorkspaceViewModel, IEditor, ICacheable
     {
         #region Fields
 
@@ -83,6 +83,9 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     this.CloseCommand.Execute(e);
                 };
 
+
+            //_texteditor.ShowLineNumbers
+            
 
             _projectitem.AST.Updated += (s, e) => {
                 _workbenchservice.STADispatcher.Invoke(new Action(() => {
@@ -435,5 +438,38 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             base.OnDispose();
         }
 
+        #region IEditor
+
+        public string Text {
+            get { return _texteditor.Text; }
+        }
+
+        public int SelectionStart {
+            get { return _texteditor.SelectionStart; }
+        }
+
+        public int SelectionLength {
+            get { return _texteditor.SelectionLength; }
+        }
+
+        public void Select(int start, int length) {
+            _texteditor.Select(start, length);
+            var loc = _texteditor.Document.GetLocation(start);
+            _texteditor.ScrollTo(loc.Line, loc.Column);
+        }
+
+        public void Replace(int start, int length, string ReplaceWith) {
+            _texteditor.Document.Replace(start, length, ReplaceWith);
+        }
+
+        public void BeginChange() {
+            _texteditor.BeginChange();
+        }
+
+        public void EndChange() {
+            _texteditor.EndChange();
+        }
+
+        #endregion
     }
 }
