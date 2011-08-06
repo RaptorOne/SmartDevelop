@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokenizing;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -18,10 +19,8 @@ namespace SmartDevelop.Model.DOM
         #region Fields
 
         protected Dictionary<ProjectItemCodeDocument, List<ProjectItemCodeDocument>> _codeDocuments = new Dictionary<ProjectItemCodeDocument, List<ProjectItemCodeDocument>>();
-
         protected List<ProjectItemCodeDocument> _documentCompileOrder = new List<ProjectItemCodeDocument>();
         protected object _documentCompileOrderLOCK = new object();
-
         protected SmartCodeProject _project;
 
         #endregion
@@ -29,7 +28,15 @@ namespace SmartDevelop.Model.DOM
         #region Constructor
 
         public ASTManager(SmartCodeProject project) { 
-            _project = project; 
+            _project = project;
+
+            _project.StartUpdate += (s, e) => {
+                UpdateAtWill = false;
+            };
+
+            _project.UpdateDone += (s, e) => {
+                UpdateFullASTAndRelseUpdateLock();
+            };
         }
 
         #endregion
@@ -62,13 +69,53 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
+        async void UpdateFullASTAndRelseUpdateLock() {
+            await UpdateFullAST();
+            UpdateAtWill = true;
+        }
 
-        public void UpdateFullAST() {
+
+        /// <summary>
+        /// Gets true if ASTManager allows Updates initiated by others
+        /// </summary>
+        public bool UpdateAtWill { 
+            get; 
+            set; 
+        }
+
+        public void UpdateFullASTAsync() {
+            ProjectItemCodeDocument baseDoc = null;
             lock(_documentCompileOrderLOCK) {
                 if(_documentCompileOrder.Any())
-                    _documentCompileOrder.First().AST.CompileTokenFileAsync(); // in updating the first item all depending will update itself
+                    baseDoc = _documentCompileOrder.First();
+            }
+            baseDoc.AST.CompileTokenFileAsync(); // in updating the first item all depending will update itself
+        }
+
+        /// <summary>
+        /// Updates the full AST Dependency Tree
+        /// </summary>
+        /// <returns></returns>
+        public async Task UpdateFullAST() {
+
+            foreach(var doc in new List<ProjectItemCodeDocument>(_codeDocuments.Keys)) {
+                await doc.Tokenizer.TokenizeAsync();
+                UpdateDocumentIncludeFlow(doc);
+            }
+
+            UpdateDocumentOrder();
+
+            var baseDoc = new List<ProjectItemCodeDocument>();
+            lock(_documentCompileOrderLOCK) {
+                if(_documentCompileOrder.Any())
+                    baseDoc.AddRange(_documentCompileOrder);
+            }
+
+            foreach(var doc in baseDoc) {
+                await doc.AST.CompileTokenFileAsync();
             }
         }
+
 
         /// <summary>
         /// This Method gets called when anything in _codeDocuments List has changed and will update
@@ -81,8 +128,23 @@ namespace SmartDevelop.Model.DOM
         #region Event Handlers
 
         protected virtual void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e) {
-            var doc = sender as ProjectItemCodeDocument;
-            doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc);
+            if(_project.ASTManager.UpdateAtWill) {
+                var doc = sender as ProjectItemCodeDocument;
+                doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc);
+                UpdateDocumentIncludeFlow(doc);
+                UpdateDocumentOrder();
+            }
+        }
+
+        /// <summary>
+        /// Updates the Includes of the given document
+        /// </summary>
+        /// <param name="document"></param>
+        protected virtual void UpdateDocumentIncludeFlow(ProjectItemCodeDocument document) {
+
+            // sub classes can override and add include parsing here
+
+            
         }
 
         /// <summary>
@@ -92,7 +154,13 @@ namespace SmartDevelop.Model.DOM
             // Ensure that the DOM Compilers are conected in the right order
             // Updates all depending-on properties which have changed
             ProjectItemCodeDocument prev = null;
-            foreach(var doc in _documentCompileOrder) {
+
+            List<ProjectItemCodeDocument> docs;
+            lock(_documentCompileOrderLOCK) {
+                docs = new List<ProjectItemCodeDocument>(_documentCompileOrder);
+            }
+
+            foreach(var doc in docs) {
                 if(prev == null) {
                     if(doc.AST.DependingOn != null)
                         doc.AST.DependingOn = null;
@@ -116,6 +184,8 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
+
+       
     }
 }
 

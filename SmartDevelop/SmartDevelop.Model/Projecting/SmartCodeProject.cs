@@ -59,6 +59,16 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler CodeDocumentRemoved;
 
+        /// <summary>
+        /// Raised when the project has finished to update
+        /// </summary>
+        public event EventHandler UpdateDone;
+
+        /// <summary>
+        /// Raised when the project has finished to update
+        /// </summary>
+        public event EventHandler StartUpdate;
+
         #endregion
 
         #region Constructor
@@ -252,15 +262,28 @@ namespace SmartDevelop.Model.Projecting
 
         public virtual void BeginProjectUpdate() {
             IsInUpdate = true;
+            OnStartUpdate();
         }
 
         public virtual void EndProjectUpdate() {
             IsInUpdate = false;
+            OnUpdateDone();
         }
 
         #endregion
 
         #region Event Handlers
+
+
+        protected virtual void OnStartUpdate() {
+            if(StartUpdate != null)
+                StartUpdate(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnUpdateDone() {
+            if(UpdateDone != null)
+                UpdateDone(this, EventArgs.Empty);
+        }
 
         protected virtual void OnStartUpCodeDocumentChanged() {
             if(StartUpCodeDocumentChanged != null)

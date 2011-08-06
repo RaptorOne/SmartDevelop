@@ -12,6 +12,7 @@ using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
 using SmartDevelop.Model.Tokenizing;
 using Archimedes.Patterns.Threading;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -159,7 +160,7 @@ namespace SmartDevelop.Model.DOM
         /// </summary>
         /// <param name="codeitem"></param>
         /// <param name="initialparent"></param>
-        public abstract void CompileTokenFileAsync();
+        public virtual async Task CompileTokenFileAsync() { }
 
         public abstract bool IsBusy { get; protected set; }
 

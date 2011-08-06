@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.Model.Tokenizing
 {
@@ -25,7 +26,7 @@ namespace SmartDevelop.Model.Tokenizing
         /// <summary>
         /// Starts Tokenizing async
         /// </summary>
-        public abstract void TokenizeAsync();
+        public virtual async Task TokenizeAsync() { }
 
         /// <summary>
         /// Starts Tokenizing sync
@@ -43,7 +44,7 @@ namespace SmartDevelop.Model.Tokenizing
         /// <summary>
         /// Indicates that the Tokenizer is currently Busy
         /// </summary>
-        public abstract bool IsBusy { get; }
+        public abstract bool IsBusy { get; protected set; }
 
         protected virtual void OnFinishedSucessfully() {
             if(FinishedSucessfully != null)

@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.ViewModel.DocumentFiles;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace SmartDevelop.ViewModel.InvokeCompletion
 {
@@ -29,13 +30,33 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         public InvokeCompletionViewModel(CodeFileViewModel documentVM) {
             _document = documentVM.CodeDocument;
             _documentVM = documentVM;
-            
+
+            _documentVM.Editor.TextArea.TextEntered += OnTextEntered;
+            _documentVM.Editor.TextArea.KeyDown += (s, e) => {
+                if(e.Key == Key.Escape)
+                    this.CloseCommand.Execute(null);
+            };
+
+            _toolTip.Content = this;
             AllParameters = new ObservableCollection<InvokeParameter>();
         }
 
 
         public void Show() {
             this.IsShown = true;
+        }
+
+        #region Properties
+
+
+        public InvokeParameter ActiveParameter {
+            get {
+                return _activeParameter;
+            }
+            set {
+                _activeParameter = value;
+                OnPropertyChanged(() => ActiveParameter);
+            }
         }
 
         public string Prefix {
@@ -79,20 +100,24 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             }
         }
 
+        #endregion
+
+        void OnTextEntered(object sender, TextCompositionEventArgs e) {
+            char current = e.Text[0];
+
+            
+
+
+        }
+
         public override void OnRequestClose() {
             IsShown = false;
         }
 
-        public InvokeParameter ActiveParameter {
-            get {
-                return _activeParameter;
-            }
-            set {
-                _activeParameter = value;
-                OnPropertyChanged(() => ActiveParameter);
-            }
+        protected override void OnDispose() {
+            _documentVM.Editor.TextArea.TextEntered -= OnTextEntered;
+            base.OnDispose();
         }
-
 
 
     }

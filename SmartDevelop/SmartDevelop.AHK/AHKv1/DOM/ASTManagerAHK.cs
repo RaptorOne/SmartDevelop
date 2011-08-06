@@ -25,7 +25,16 @@ namespace SmartDevelop.AHK.AHKv1.DOM
 
 
         protected override void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e) {
-            var document = sender as ProjectItemCodeDocument;
+            if(_project.ASTManager.UpdateAtWill) {
+                var document = sender as ProjectItemCodeDocument;
+                UpdateDocumentIncludeFlow(document);
+                UpdateDocumentOrder();
+                document.AST.CompileTokenFileAsync();
+            }
+        }
+
+
+        protected override void UpdateDocumentIncludeFlow(ProjectItemCodeDocument document){
             document.Project.Solution.ErrorService.ClearAllErrorsFrom(document);
             var directives = document.SegmentService.GetDirectiveSegments();
 
@@ -47,11 +56,9 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                         }
                     }
                 }
-            }
-            UpdateDocumentOrder();
-            document.AST.CompileTokenFileAsync();
-            //UpdateFullAST();
+            }           
         }
+
 
         protected override void UpdateDocumentOrder() {
             lock(_documentCompileOrderLOCK) {

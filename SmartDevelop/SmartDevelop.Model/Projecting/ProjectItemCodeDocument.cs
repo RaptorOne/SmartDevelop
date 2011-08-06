@@ -365,7 +365,11 @@ namespace SmartDevelop.Model.Projecting
         public DocumentCodeSegmentService SegmentService {
             get { return _codeSegmentService; }
         }
-        
+
+
+        public Tokenizer Tokenizer {
+            get { return _tokenizer; }
+        }
         
         /// <summary>
         /// Gets the AST
@@ -428,7 +432,7 @@ namespace SmartDevelop.Model.Projecting
         }
 
         void UpdateTokenizer() {
-            if(_documentdirty && !_tokenizer.IsBusy) {
+            if(_documentdirty && Project.ASTManager.UpdateAtWill && !_tokenizer.IsBusy) {
                 _documentdirty = false;
                 _tokenizer.TokenizeAsync();
             }

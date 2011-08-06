@@ -10,6 +10,8 @@ using Archimedes.Patterns.Utils;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.Tokenizing;
 using SmartDevelop.Model.Projecting;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace SmartDevelop.AHK.AHKv1.Tokenizing
 {
@@ -88,10 +90,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         int _currentColumn;
         Token _activeToken = Token.Unknown;
         Token _currentToken = Token.Unknown;
-        BackgroundWorker _tokenizerworker;
+        //BackgroundWorker _tokenizerworker;
 
         readonly ProjectItemCodeDocument _codeitem;
         readonly ITextSource _document;
+
+        CancellationTokenSource _cts;
 
         #endregion
 
@@ -102,22 +106,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             _document = document;
             _codeitem = codeitem;
 
-
             KEYWORDS = (from w in codeitem.CodeLanguage.LanguageKeywords
                        select w.Name).ToList();
-
-
-            _tokenizerworker = new BackgroundWorker();
-            _tokenizerworker.DoWork += TokinizeWorker;
-            _tokenizerworker.WorkerSupportsCancellation = true;
-
-            _tokenizerworker.RunWorkerCompleted += (s, e) => {
-                if(!e.Cancelled)
-                    OnFinishedSucessfully();
-                lock(_tokenizerworkerLock) {
-                    _asynctokenizerworkerBusy = false;
-                }
-            };
         }
 
         #endregion
@@ -127,22 +117,39 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         /// <summary>
         /// Starts Tokenizing async
         /// </summary>
-        public override void TokenizeAsync() {
-            lock(_tokenizerworkerLock) {
-                if(_tokenizerworker.IsBusy) {
-                    _tokenizerworker.CancelAsync();
-                    while(true) {
-                        if(_tokenizerworker.IsBusy) {
-                            Thread.Sleep(1);
-                        } else
-                            break;
-                    }
+        public override async Task TokenizeAsync() {
+
+            await TaskEx.Run(() => {
+
+                if(IsBusy) {
+                    _cts.Cancel();
+                    while(IsBusy)
+                        Thread.Sleep(5);
                 }
-                _text = _document.Text;
-                _textlen = _text.Length;
-                _asynctokenizerworkerBusy = true;
-                _tokenizerworker.RunWorkerAsync();
-            }
+
+                Application.Current.Dispatcher.Invoke(new Action(() => {
+                        //
+                        // Access the text/length properties in the std thread!
+                        //
+                        _text = _document.Text;
+                        _textlen = _text.Length;
+                    }));
+
+                IsBusy = true;
+                _cts = new CancellationTokenSource();
+                try {
+                    var tsk = TokinizeWorker(_cts.Token);
+                    tsk.Wait();
+                    OnFinishedSucessfully();
+                } catch(OperationCanceledException e) {
+                    //Console.WriteLine("Processing canceled.");
+                    var dummy = e.Message;
+                } catch(AggregateException e) {
+                    var dummy = e.Message;
+                }
+            });
+
+            IsBusy = false;
         }
 
         /// <summary>
@@ -150,13 +157,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         /// </summary>
         public override void TokenizeSync() {
             lock(_tokenizerworkerLock) {
-                if(!_tokenizerworker.IsBusy) {
+                if(!IsBusy) {
                     _syncTokenizerBusy = true;
-
                     _text = _document.Text;
                     _textlen = _text.Length;
-                    TokinizeWorker(null, new DoWorkEventArgs(null));
-
+                    var cts = new CancellationTokenSource();
+                    TokinizeWorker(cts.Token);
                     _syncTokenizerBusy = false;
                     OnFinishedSucessfully();
                 }
@@ -178,10 +184,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         #region Properties
 
         object _tokenizerworkerLock = new object();
-        bool _syncTokenizerBusy = false;
-        bool _asynctokenizerworkerBusy = false;
-        
 
+        bool _syncTokenizerBusy = false;
+        bool _isbusy = false;
+
+
+        
         /// <summary>
         /// Is tokenizing running now?
         /// </summary>
@@ -191,7 +199,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     return true;
 
                 lock(_tokenizerworkerLock) {
-                    return _asynctokenizerworkerBusy;//_tokenizerworker.IsBusy;
+                    return _isbusy; 
+                }
+            }
+            protected set {
+                lock(_tokenizerworkerLock) {
+                    _isbusy = value;
                 }
             }
         }
@@ -202,270 +215,274 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         #region Tokenizer
 
-        void TokinizeWorker(object sender, DoWorkEventArgs e) {
-            var bgw = sender as BackgroundWorker;
-            _currentToken = Token.Unknown;
-            
-            bool ensureNewToken = false;
-            
-            int i;
-            bool inTradEscapeBefore = false;
-            bool inderef = false;
-            bool inTraditionalContext = false;
-            bool inTraditionalAsignment = false;
-            int openLiteralBracketsInTraditional = 0;
+        async Task TokinizeWorker(CancellationToken cancelToken) {
 
-            //clean things up
-            _activeToken = Token.Unknown;
-            _codesegmentsWorker.Clear();
-            _directivesWorker.Clear();
-            _currentRangeStart = 0;
-            _currentColStart = 0;
-            _currentLine = 1;
-            _currentColumn = 0;
-            _traditionalMode = false;
+            #region await the tokenizer task
 
-            string tempstr = "";
+            await TaskEx.Run(() => {
 
-            char currentChar;
-            for(i = 0; i < _textlen; i++) {
+                _currentToken = Token.Unknown;
 
-            redo:
+                bool ensureNewToken = false;
 
-                #region Handle Cancel Tokenizer
+                int i;
+                bool inTradEscapeBefore = false;
+                bool inderef = false;
+                bool inTraditionalContext = false;
+                bool inTraditionalAsignment = false;
+                int openLiteralBracketsInTraditional = 0;
 
-                if(bgw != null && bgw.CancellationPending) {
-                    e.Cancel = true;
-                    break;
-                }
+                //clean things up
+                _activeToken = Token.Unknown;
+                _codesegmentsWorker.Clear();
+                _directivesWorker.Clear();
+                _currentRangeStart = 0;
+                _currentColStart = 0;
+                _currentLine = 1;
+                _currentColumn = 0;
+                _traditionalMode = false;
 
-                #endregion
+                string tempstr = "";
 
-                #region Force new Tokens if necessary
+                char currentChar;
+                for(i = 0; i < _textlen; i++) {
 
-                // end one sign regions -> braktes/lines
-                // ensure that we differ from the token before in those cases
-                if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken) 
-                    || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter || _activeToken == Token.Deref
-                    || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat || _activeToken == Token.TraditionalAssign
-                    || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) 
-                {
-                    ensureNewToken = false;
-                    if(!_traditionalMode || inderef)
-                        _currentToken = Token.Unknown;
-                    else
-                        _currentToken = Token.TraditionalString;
+                redo:
 
-                    if(_activeToken == Token.TraditionalAssign)
-                        _currentToken = Token.TraditionalString;
-
-                }
-
-                #endregion
-
-                currentChar = _text[i];
-
-                if(currentChar == '\n') {
-                    _currentToken = Token.NewLine;
-                    //_currentLine++;
-                    _currentColumn = 0;
-                    _traditionalMode = false;   // we assume that traditional commands not have multilines
-                    inTraditionalContext = false;
-                    inTraditionalAsignment = false;
-                } else if(!_traditionalMode && IsLieralStringMarkerBegin(i)) {
-
-                    #region Parse literal string
-
-                    EndActiveToken(i);
-                    _activeToken = Token.LiteralString;
+                    // Handle Cancel Tokenizer
+                    cancelToken.ThrowIfCancellationRequested();
 
 
-                    bool previuosWasEscape = true;
-                    while(i < _textlen) {
-                        if(_text[i] == '\n') {
-                            _currentLine++;
-                            break;
-                        } else if(_text[i] == '"') {
-                            if(previuosWasEscape == true)
-                                previuosWasEscape = false;
-                            else if(_text.Next(i) == '"') {
-                                previuosWasEscape = true;
+                    #region Force new Tokens if necessary
+
+                    // end one sign regions -> braktes/lines
+                    // ensure that we differ from the token before in those cases
+                    if((ensureNewToken || TokenHelper.BRAKETS.ContainsValue(_activeToken)
+                        || _activeToken == Token.NewLine) || _activeToken == Token.ParameterDelemiter || _activeToken == Token.Deref
+                        || _activeToken == Token.MemberInvoke || _activeToken == Token.StringConcat || _activeToken == Token.TraditionalAssign
+                        || (_activeToken == Token.WhiteSpace && !IsWhiteSpace(i))) {
+                        ensureNewToken = false;
+                        if(!_traditionalMode || inderef)
+                            _currentToken = Token.Unknown;
+                        else
+                            _currentToken = Token.TraditionalString;
+
+                        if(_activeToken == Token.TraditionalAssign)
+                            _currentToken = Token.TraditionalString;
+
+                    }
+
+                    #endregion
+
+                    currentChar = _text[i];
+
+                    if(currentChar == '\n') {
+                        _currentToken = Token.NewLine;
+                        //_currentLine++;
+                        _currentColumn = 0;
+                        _traditionalMode = false;   // we assume that traditional commands not have multilines
+                        inTraditionalContext = false;
+                        inTraditionalAsignment = false;
+                    } else if(!_traditionalMode && IsLieralStringMarkerBegin(i)) {
+
+                        #region Parse literal string
+
+                        EndActiveToken(i);
+                        _activeToken = Token.LiteralString;
+
+
+                        bool previuosWasEscape = true;
+                        while(i < _textlen) {
+                            if(_text[i] == '\n') {
+                                _currentLine++;
+                                break;
+                            } else if(_text[i] == '"') {
+                                if(previuosWasEscape == true)
+                                    previuosWasEscape = false;
+                                else if(_text.Next(i) == '"') {
+                                    previuosWasEscape = true;
+                                } else {
+                                    break;
+                                }
                             } else {
+                                previuosWasEscape = false;
+                            }
+                            i++;
+                        }
+
+                        ensureNewToken = true;
+                        if((i + 1) < _textlen)
+                            i++;
+                        goto redo;
+                        //EndActiveToken(i);
+
+                        #endregion
+
+                    } else if(!_traditionalMode && IsMultiLineCommentStart(i)) {
+
+                        #region Handle Multiline Comment
+
+                        EndActiveToken(i);
+                        _activeToken = Token.MultiLineComment;
+
+                        // lets find the end of comment section,
+                        // as we dont want to parse the whole comment chunk
+                        // to speed things up
+                        bool endingboundsFound = false;
+                        while(i < _textlen) {
+                            if(_text[i] == '\n')
+                                _currentLine++;
+                            if(IsMultiLineCommentEnd(i)) {
+                                endingboundsFound = true;
                                 break;
                             }
+                            i++;
+                        }
+
+                        if(!endingboundsFound) {
+                            EndActiveToken(i);
+                            return; // we are done ;)
                         } else {
-                            previuosWasEscape = false;
+                            i += 2;
+                            _currentColumn = 0;
+                            EndActiveToken(i);
                         }
-                        i++;
-                    }
 
-                    ensureNewToken = true;
-                    if((i + 1) < _textlen)
-                        i++;
-                    goto redo;
-                    //EndActiveToken(i);
+                        #endregion
 
-                    #endregion
+                    } else if(!IsInAnyComment() && !_traditionalMode && IsMultilineTraditionalStringStart(i)) {
 
-                } else if(!_traditionalMode && IsMultiLineCommentStart(i)) {
+                        #region Handle Multiline strings
+                        // for now extract the wohle thing as one token.
 
-                    #region Handle Multiline Comment
+                        EndActiveToken(i);
+                        _activeToken = Token.TraditionalString;
 
-                    EndActiveToken(i);
-                    _activeToken = Token.MultiLineComment;
 
-                    // lets find the end of comment section,
-                    // as we dont want to parse the whole comment chunk
-                    // to speed things up
-                    bool endingboundsFound = false;
-                    while(i < _textlen) {
-                        if(_text[i] == '\n')
-                            _currentLine++;
-                        if(IsMultiLineCommentEnd(i)) {
-                            endingboundsFound = true;
-                            break;
+                        // lets find the end of multiline string section,
+                        // as we dont want to parse the whole string chunk
+                        // to speed things up
+                        bool endingboundsFound = false;
+                        bool matchDirty = true;
+                        while(i < _textlen) {
+                            if(_text[i] == '\n') {
+                                _currentLine++;
+                                matchDirty = false;
+                            } else if(_text[i] == ')' && !matchDirty) {
+                                endingboundsFound = true;
+                                break;
+                            } else if(!IsWhiteSpace(i)) {
+                                matchDirty = true;
+                            }
+                            i++;
                         }
-                        i++;
-                    }
-                    
-                    if(!endingboundsFound) {
-                        EndActiveToken(i);
-                        return; // we are done ;)
-                    } else {
-                        i += 2;
-                        _currentColumn = 0;
-                        EndActiveToken(i);
-                    }
 
-                    #endregion
-
-                } else if(!IsInAnyComment() && !_traditionalMode && IsMultilineTraditionalStringStart(i)){
-
-                    #region Handle Multiline strings
-                    // for now extract the wohle thing as one token.
-
-                    EndActiveToken(i);
-                    _activeToken = Token.TraditionalString;
-
-
-                    // lets find the end of multiline string section,
-                    // as we dont want to parse the whole string chunk
-                    // to speed things up
-                    bool endingboundsFound = false;
-                    bool matchDirty = true;
-                    while(i < _textlen) {
-                        if(_text[i] == '\n') {
-                            _currentLine++;
-                            matchDirty = false;
-                        }else if(_text[i] == ')' && !matchDirty) {
-                            endingboundsFound = true;
-                            break;
-                        } else if(!IsWhiteSpace(i)) {
-                            matchDirty = true;
-                        }
-                        i++;
-                    }
-
-                    if(!endingboundsFound) {
-                        EndActiveToken(i);
-                        return; // we are done ;)
-                    } else {
-                        i += 2;
-                        _currentColumn = 0;
-                        EndActiveToken(i);
-                    }
-
-                    #endregion
-
-                } else if(!IsInAnyComment()) {
-
-                    if(!_traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
-                        _currentToken = TokenHelper.BRAKETS[currentChar];
-                    } else if(currentChar == SINGLELINE_COMMENT) {
-                        _currentToken = Token.SingleLineComment;
-                    } else if(!_traditionalMode && IsWhiteSpace(i)) {
-                        _currentToken = Token.WhiteSpace;
-                    } else if(!_traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
-                        _currentToken = Token.MemberInvoke;
-                    } else if(!_traditionalMode && currentChar == STRINGCONCAT) {
-                        _currentToken = Token.StringConcat;
-                    //}else if(!traditionalMode && IsVariableAsignStart(i)){
-
-                    } else if(!_traditionalMode && IsTraditionalCommandBegin(i)) {
-                        _currentToken = Token.TraditionalCommandInvoke;
-                        inTraditionalContext = true;
-                    }else if(!_traditionalMode && IsTraditionalAssign(i)){
-                        _currentToken = Token.TraditionalAssign;
-                        inTraditionalContext = true;
-                        inTraditionalAsignment = true;
-                    } else if(!_traditionalMode && OPERATORS.Contains(currentChar)) {
-                        _currentToken = Token.OperatorFlow;
-
-                    } else if(!_traditionalMode && (_activeToken == Token.WhiteSpace || _activeToken == Token.NewLine ) && IsDirective(i, out tempstr)) {
-                        _currentToken = Token.Directive;
-                        inTraditionalContext = true;
-
-                    } else if(!_traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
-                        _currentToken = Token.Unknown;
-                    
-                    #region traditional parsing
-
-                    } else if(_text[i] == PARAMDELEMITER && !inTradEscapeBefore && !inTraditionalAsignment) {
-                        _currentToken = Token.ParameterDelemiter;
-                        if(inTraditionalContext && openLiteralBracketsInTraditional == 0)
-                            _traditionalMode = true;
-                    } else if(_text[i] == VARIABLEDEREF && !inTradEscapeBefore && !inderef) {
-                        _currentToken = Token.Deref;
-                        if(!IsWhiteChar(_text.Next(i))) {
-                            inderef = true;
-                        } else
-                            _traditionalMode = false;
-                    } else if(_text[i] == VARIABLEDEREF && inderef) {
-                        _currentToken = Token.Deref;
-                        inderef = false;
-                    }
-
-                    if(_traditionalMode) {
-                        if(_text[i] == ESCAPECHAR && !inTradEscapeBefore) {
-                            inTradEscapeBefore = true;
+                        if(!endingboundsFound) {
+                            EndActiveToken(i);
+                            return; // we are done ;)
                         } else {
-                            inTradEscapeBefore = false;
+                            i += 2;
+                            _currentColumn = 0;
+                            EndActiveToken(i);
                         }
+
+                        #endregion
+
+                    } else if(!IsInAnyComment()) {
+
+                        if(!_traditionalMode && TokenHelper.BRAKETS.ContainsKey(currentChar)) {
+                            _currentToken = TokenHelper.BRAKETS[currentChar];
+                        } else if(currentChar == SINGLELINE_COMMENT) {
+                            _currentToken = Token.SingleLineComment;
+                        } else if(!_traditionalMode && IsWhiteSpace(i)) {
+                            _currentToken = Token.WhiteSpace;
+                        } else if(!_traditionalMode && currentChar == MEMBERINVOKE && i > 0 && (!IsWhiteSpace(i - 1) || IsNumber(_text[i - 1]))) {
+                            _currentToken = Token.MemberInvoke;
+                        } else if(!_traditionalMode && currentChar == STRINGCONCAT) {
+                            _currentToken = Token.StringConcat;
+                            //}else if(!traditionalMode && IsVariableAsignStart(i)){
+
+                        } else if(!_traditionalMode && IsTraditionalCommandBegin(i)) {
+                            _currentToken = Token.TraditionalCommandInvoke;
+                            inTraditionalContext = true;
+                        } else if(!_traditionalMode && IsTraditionalAssign(i)) {
+                            _currentToken = Token.TraditionalAssign;
+                            inTraditionalContext = true;
+                            inTraditionalAsignment = true;
+                        } else if(!_traditionalMode && OPERATORS.Contains(currentChar)) {
+                            _currentToken = Token.OperatorFlow;
+
+                        } else if(!_traditionalMode && (_activeToken == Token.WhiteSpace || _activeToken == Token.NewLine) && IsDirective(i, out tempstr)) {
+                            _currentToken = Token.Directive;
+                            inTraditionalContext = true;
+
+                        } else if(!_traditionalMode && _activeToken == Token.OperatorFlow && !OPERATORS.Contains(currentChar)) {
+                            _currentToken = Token.Unknown;
+
+                            #region traditional parsing
+
+                        } else if(_text[i] == PARAMDELEMITER && !inTradEscapeBefore && !inTraditionalAsignment) {
+                            _currentToken = Token.ParameterDelemiter;
+                            if(inTraditionalContext && openLiteralBracketsInTraditional == 0)
+                                _traditionalMode = true;
+                        } else if(_text[i] == VARIABLEDEREF && !inTradEscapeBefore && !inderef) {
+                            _currentToken = Token.Deref;
+                            if(!IsWhiteChar(_text.Next(i))) {
+                                inderef = true;
+                            } else
+                                _traditionalMode = false;
+                        } else if(_text[i] == VARIABLEDEREF && inderef) {
+                            _currentToken = Token.Deref;
+                            inderef = false;
+                        }
+
+                        if(_traditionalMode) {
+                            if(_text[i] == ESCAPECHAR && !inTradEscapeBefore) {
+                                inTradEscapeBefore = true;
+                            } else {
+                                inTradEscapeBefore = false;
+                            }
+                        }
+
+                        if(!_traditionalMode && inTraditionalContext && _activeToken != Token.TraditionalString) {
+                            if(_text[i] == '(') {
+                                openLiteralBracketsInTraditional++;
+                            } else if(_text[i] == ')') {
+                                openLiteralBracketsInTraditional--;
+                            }
+                        }
+
+                            #endregion
+
                     }
 
-                    if(!_traditionalMode && inTraditionalContext && _activeToken != Token.TraditionalString){
-                        if(_text[i] == '('){
-                            openLiteralBracketsInTraditional++;
-                        }else if(_text[i] == ')'){
-                            openLiteralBracketsInTraditional--;
-                        }
+                    if(_currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
+                        // we have to end the previous token region and set the new one active
+                        EndActiveToken(i);
+                        _activeToken = _currentToken;
                     }
 
-                    #endregion
-
+                    if(currentChar == '\n')
+                        _currentLine++;
+                    else
+                        _currentColumn++;
                 }
-
-                if(_currentToken != _activeToken || IsSingleCharToken(_activeToken)) {
-                    // we have to end the previous token region and set the new one active
-                    EndActiveToken(i);
-                    _activeToken = _currentToken;
+                EndActiveToken(_textlen);
+                lock(__codesegmentsSaveLock) {
+                    _codesegmentsSave.Clear();
+                    _directivesSave.Clear();
+                    _codesegmentsSave.AddRange(_codesegmentsWorker);
+                    _directivesSave.AddRange(_directivesWorker);
                 }
+                lock(_tokenizerworkerLock) {
+                    _isbusy = false; //_tokenizerworker.IsBusy;
+                }
+            });
 
-                if(currentChar == '\n')
-                    _currentLine++;
-                else
-                    _currentColumn++;
-            }
-            EndActiveToken(_textlen);
-            lock(__codesegmentsSaveLock) {
-                _codesegmentsSave.Clear();
-                _directivesSave.Clear();
-                _codesegmentsSave.AddRange(_codesegmentsWorker);
-                _directivesSave.AddRange(_directivesWorker);
-            }
-            lock(_tokenizerworkerLock) {
-                _asynctokenizerworkerBusy = false; //_tokenizerworker.IsBusy;
-            }
+            #endregion
+
+            // tokenizer has finished here
+
         }
 
         #endregion

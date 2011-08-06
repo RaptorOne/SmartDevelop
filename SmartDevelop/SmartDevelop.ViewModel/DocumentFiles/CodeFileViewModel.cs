@@ -352,7 +352,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _projectitem.AST.CompileTokenFileAsync();
                 //_projectitem.EnsureASTIsUpdated(MAX_TIMEOUT);
 
-                return;
 
                 var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
 
@@ -374,6 +373,13 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                             InvokeDescription = methodRef.CommentInfo
                         };
 
+                        _invokeCompletion.Closed += (s, ee) => {
+                            if(_invokeCompletion != null) {
+                                _invokeCompletion.Dispose();
+                                _invokeCompletion = null;
+                            }
+                            };
+
                         _invokeCompletion.Show();
                     } else
                         return;
@@ -381,25 +387,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 }
             }
 
-            //if(currentChar == '(') {
-
-            //    var vm = new InvokeCompletionViewModel()
-            //    {
-            //        Prefix = "Runnnnii(",
-            //        Sufix = ")",
-            //        InvokeDescription = "This is a description for Runnnnii"
-            //    };
-            //    vm.AllParameters.Add(new InvokeParameter("param1", "I'm the description for Param1"));
-            //    vm.AllParameters.Add(new InvokeParameter(", param2", "I'm the description for Param2"));
-            //    vm.AllParameters[0].IsActiveParameter = true;
-
-            //    _toolTip.PlacementTarget = _texteditor; // required for property inheritance
-            //    _toolTip.Content = vm;
-            //    _toolTip.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
-            //    _toolTip.IsOpen = true;
-
-            //    return;
-            //}
         }
 
 

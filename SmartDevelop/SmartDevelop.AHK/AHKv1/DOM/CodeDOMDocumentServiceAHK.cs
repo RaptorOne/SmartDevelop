@@ -34,15 +34,13 @@ namespace SmartDevelop.Model.DOM
         CodeMemberMethodEx _autoexec;
         CodeTypeDeclarationEx _superBase;
         
-        //BackgroundWorker _fileCompileWorker;
-
         object startcompilerLock = new object();
-
+        CancellationTokenSource _cts;
 
         CodeTypeDeclarationEx _rootLanguageSnapshot;
         object _rootLanguageSnapshotLOCK = new object();
 
-        #endregion
+        CodeDocumentDOMService _dependingOnSave;
 
         /// <summary>
         /// This is the language Root
@@ -50,6 +48,7 @@ namespace SmartDevelop.Model.DOM
         /// DOM Service is found
         /// </summary>
         protected readonly CodeTypeDeclarationEx _root;
+        #endregion
 
         #region Constructor
 
@@ -263,7 +262,6 @@ namespace SmartDevelop.Model.DOM
 
         #region Public Methods
 
-
         /// <summary>
         /// Ensures that the parser is finished.
         /// </summary>
@@ -279,15 +277,13 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
-        CancellationTokenSource _cts;
-
-        public override async void CompileTokenFileAsync() {
+        
+        public override async Task CompileTokenFileAsync() {
 
             await TaskEx.Run(() => {
 
                 if(IsBusy) {
                     _cts.Cancel();
-
                     while(IsBusy)
                         Thread.Sleep(5);
                 }
@@ -304,16 +300,19 @@ namespace SmartDevelop.Model.DOM
                 } catch(AggregateException e) {
                     var dummy = e.Message;
                 }
-                IsBusy = false;
             });
 
+            IsBusy = false;
+        }
+
+        public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
+            lock(_rootLanguageSnapshotLOCK) {
+                return _rootLanguageSnapshot;
+            }
         }
 
 
         #endregion
-
-
-        CodeDocumentDOMService dependingOnSave;
 
         #region Token Compiler Worker
 
@@ -329,7 +328,7 @@ namespace SmartDevelop.Model.DOM
 
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    dependingOnSave = this.DependingOn;
+                    _dependingOnSave = this.DependingOn;
 
                     #region Clean Up
 
@@ -340,20 +339,22 @@ namespace SmartDevelop.Model.DOM
 
                     #region Merge DependingOn Members
 
-                    if(dependingOnSave == null) {
+                    if(_dependingOnSave == null) {
                         // merge super base members
                         _languageRoot.Members.AddRange(_root.Members);
                         firstAfterNull = true;
                     } else {
 
-                        if(firstAfterNull) {
-                            ignoreDependingOnce = true;
-                            dependingOnSave.CompileTokenFileAsync();
-                            firstAfterNull = false;
-                        }
-                        dependingOnSave.WaitUntilUpdated(200);
-
-                        _languageRoot.Members.AddRange(dependingOnSave.GetRootTypeSnapshot().Members);
+                        //if(!_project.IsInUpdate) {
+                        //    if(firstAfterNull) {
+                        //        ignoreDependingOnce = true;
+                        //        _dependingOnSave.CompileTokenFileAsync();
+                        //        firstAfterNull = false;
+                        //    }
+                        //    _dependingOnSave.WaitUntilUpdated(200);
+                        //}
+                        
+                        _languageRoot.Members.AddRange(_dependingOnSave.GetRootTypeSnapshot().Members);
                     }
 
                     #endregion
@@ -691,14 +692,6 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
-
-
-        public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
-            lock(_rootLanguageSnapshotLOCK) {
-                return _rootLanguageSnapshot;
-            }
-        }
-
         CodeCommentStatement ExtractComment(CodeSegment identifier) {
             var comment = identifier.PreviousOmit(whitespacetokenNewLines);
             if(comment != null && comment.Token == Token.MultiLineComment) {
@@ -1023,8 +1016,11 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-
         protected override void OnDependingOnASTUpdated(object sender, EventArgs e) {
+
+            if(!_project.ASTManager.UpdateAtWill)
+                return;
+
             if(!ignoreDependingOnce) {
                 this.CompileTokenFileAsync();
                 base.OnDependingOnASTUpdated(sender, e);
@@ -1032,12 +1028,7 @@ namespace SmartDevelop.Model.DOM
                 ignoreDependingOnce = false;
             }
         }
-
-        protected virtual void OnRunWorkerCompleted() {
-            OnASTUpdated();
-        }
-
-
+        
         bool _isBusy = false;
         object _isBusyLock = new object();
 
@@ -1051,11 +1042,6 @@ namespace SmartDevelop.Model.DOM
                 lock(_isBusyLock) { _isBusy = value; }
             }
         }
-
-
-
-
-
 
     }
 }
