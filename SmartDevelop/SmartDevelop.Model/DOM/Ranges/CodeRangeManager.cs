@@ -50,10 +50,10 @@ namespace SmartDevelop.Model.DOM.Ranges
         /// <returns></returns>
         public IEnumerable<CodeRange> FindEncapsulatingRanges(int offset) {
             lock(_ranges) {
-                return from r in _ranges
+                return (from r in _ranges
                        where r.SegmentRange.Offset < offset && r.SegmentRange.EndOffset > offset
                        orderby r.SegmentRange.Length
-                       select r;
+                       select r).ToList();
             }
         }
 
