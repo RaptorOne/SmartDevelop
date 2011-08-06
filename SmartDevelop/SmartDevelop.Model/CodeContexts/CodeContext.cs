@@ -31,16 +31,18 @@ namespace SmartDevelop.Model.CodeContexts
 
         public virtual IEnumerable<CodeTypeMember> GetVisibleMembers() {
             var members = new List<CodeTypeMember>();
-            if(CodeDOMService != null) {
-                members.AddRange(from m in CodeDOMService.RootType.Members.Cast<CodeTypeMember>()
-                                 let mimp = m as ICodeMemberEx
-                                 where mimp == null || !mimp.IsHidden
-                                 select m);
 
-                if(EnclosingType != null && EnclosingType != CodeDOMService.RootType) {
-                    members.AddRange(EnclosingType.GetInheritedMembers());
-                }
+            var rootSnapshot = CodeDOMService.GetRootTypeSnapshot();
+
+            members.AddRange(from m in rootSnapshot.Members.Cast<CodeTypeMember>()
+                                let mimp = m as ICodeMemberEx
+                                where mimp == null || !mimp.IsHidden
+                                select m);
+
+            if(EnclosingType != null && EnclosingType is CodeTypeDeclarationRoot) {
+                members.AddRange(EnclosingType.GetInheritedMembers());
             }
+
             return members; 
         }
 

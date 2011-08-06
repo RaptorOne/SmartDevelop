@@ -17,6 +17,7 @@ using System.ComponentModel;
 
 using System.Windows;
 using SmartDevelop.AHK.AHKv1.DOM;
+using System.Threading;
 
 
 namespace SmartDevelop.Model.DOM
@@ -32,12 +33,22 @@ namespace SmartDevelop.Model.DOM
         Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
         CodeMemberMethodEx _autoexec;
         CodeTypeDeclarationEx _superBase;
-        BackgroundWorker _fileCompileWorker;
+        
+        //BackgroundWorker _fileCompileWorker;
 
         object startcompilerLock = new object();
 
+
+        CodeTypeDeclarationEx _rootLanguageSnapshot;
+        object _rootLanguageSnapshotLOCK = new object();
+
         #endregion
 
+        /// <summary>
+        /// This is the language Root
+        /// which is staticaly and always gets merged into this RootType if there is no Depending 
+        /// DOM Service is found
+        /// </summary>
         protected readonly CodeTypeDeclarationEx _root;
 
         #region Constructor
@@ -45,14 +56,13 @@ namespace SmartDevelop.Model.DOM
         public CodeDOMDocumentServiceAHK(ProjectItemCodeDocument document)
             : base(document) {
 
-                _fileCompileWorker = new BackgroundWorker();
-                _fileCompileWorker.DoWork += CompileTokenFile;
-                _fileCompileWorker.RunWorkerCompleted += (s, e) => {
-                    OnRunWorkerCompleted();
-                };
-                _fileCompileWorker.WorkerSupportsCancellation = true;
-                _fileCompileWorker.WorkerReportsProgress = false;
-
+                //_fileCompileWorker = new BackgroundWorker();
+                //_fileCompileWorker.DoWork += CompileTokenFile;
+                //_fileCompileWorker.RunWorkerCompleted += (s, e) => {
+                //    OnRunWorkerCompleted();
+                //};
+                //_fileCompileWorker.WorkerSupportsCancellation = true;
+                //_fileCompileWorker.WorkerReportsProgress = false;
 
                 #region Create Language Master Root
 
@@ -246,15 +256,12 @@ namespace SmartDevelop.Model.DOM
 
                 #endregion
 
+                _rootLanguageSnapshot = _root;
         }
 
         #endregion
 
         #region Public Methods
-
-
-        List<ProjectItemCodeDocument> _compileQueue = new List<ProjectItemCodeDocument>();
-        object _itemsToCompileLock = new object();
 
 
         /// <summary>
@@ -272,17 +279,34 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
-        public override void CompileTokenFileAsync() {
-            lock(startcompilerLock) {
-                    if(IsBusy) {
-                        if(!_fileCompileWorker.CancellationPending)
-                            _fileCompileWorker.CancelAsync();
-                        WaitUntilUpdated(200);
-                    }
-                    IsBusy = true;
-                    if(!_fileCompileWorker.IsBusy)
-                        _fileCompileWorker.RunWorkerAsync();
-            }
+        CancellationTokenSource _cts;
+
+        public override async void CompileTokenFileAsync() {
+
+            await TaskEx.Run(() => {
+
+                if(IsBusy) {
+                    _cts.Cancel();
+
+                    while(IsBusy)
+                        Thread.Sleep(5);
+                }
+
+                IsBusy = true;
+                _cts = new CancellationTokenSource();
+                try {
+                    var tsk = CompileTokenFile(_cts.Token);
+                    tsk.Wait();
+                    OnASTUpdated();
+                } catch(OperationCanceledException e) {
+                    //Console.WriteLine("Processing canceled.");
+                    var dummy = e.Message;
+                } catch(AggregateException e) {
+                    var dummy = e.Message;
+                }
+                IsBusy = false;
+            });
+
         }
 
 
@@ -296,240 +320,236 @@ namespace SmartDevelop.Model.DOM
         bool firstAfterNull = true;
         bool ignoreDependingOnce = false;
 
-        protected virtual void CompileTokenFile(object sender, DoWorkEventArgs e) {
-
-            if(e.Cancel)
-                return;
-
-            lock(_languageRootLock) {
-
-                CodeTypeDeclarationEx initialparent = _languageRoot;
-
-                if(e.Cancel)
-                    return;
-
-                dependingOnSave = this.DependingOn;
+        protected async Task CompileTokenFile(CancellationToken cancellationToken) {
+            try {
+                await TaskEx.Run(() => {
+                    _languageRoot = new CodeTypeDeclarationRoot() { Project = _document.Project };
+                    CodeTypeDeclarationEx initialparent = _languageRoot;
 
 
-                #region Clean Up
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                _languageRoot.Members.Clear();
-                _codeRangeManager.Clear();
+                    dependingOnSave = this.DependingOn;
 
-                #endregion
+                    #region Clean Up
 
-                #region Merge DependingOn Members
+                    //_languageRoot.Members.Clear();
+                    _codeRangeManager.Clear();
 
-                if(dependingOnSave == null) {
-                    // merge super base members
-                    _languageRoot.Members.AddRange(_root.Members);
-                    firstAfterNull = true;
-                } else {
-                    if(firstAfterNull) {
-                        ignoreDependingOnce = true;
-                        dependingOnSave.CompileTokenFileAsync();
-                        firstAfterNull = false;
+                    #endregion
+
+                    #region Merge DependingOn Members
+
+                    if(dependingOnSave == null) {
+                        // merge super base members
+                        _languageRoot.Members.AddRange(_root.Members);
+                        firstAfterNull = true;
+                    } else {
+
+                        if(firstAfterNull) {
+                            ignoreDependingOnce = true;
+                            dependingOnSave.CompileTokenFileAsync();
+                            firstAfterNull = false;
+                        }
+                        dependingOnSave.WaitUntilUpdated(200);
+
+                        _languageRoot.Members.AddRange(dependingOnSave.GetRootTypeSnapshot().Members);
                     }
-                    dependingOnSave.WaitUntilUpdated(2000);
-                    _languageRoot.Members.AddRange(dependingOnSave.RootType.Members);
-                }
 
-                #endregion
+                    #endregion
 
-                var codeLineMap = _document.SegmentService.GetCodeSegmentLinesMap();
-                CodeTypeDeclaration parent = initialparent;
-                Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
-                int linecnt = 0;
-                if(codeLineMap.Keys.Any())
-                    linecnt = codeLineMap.Keys.Max();
+                    var codeLineMap = _document.SegmentService.GetCodeSegmentLinesMap();
+                    CodeTypeDeclaration parent = initialparent;
+                    Stack<CodeSegment> paramstack = new Stack<CodeSegment>();
+                    int linecnt = 0;
+                    if(codeLineMap.Keys.Any())
+                        linecnt = codeLineMap.Keys.Max();
 
-                CodeTokenLine line;
+                    CodeTokenLine line;
 
-                Stack<CodeTypeDeclarationEx> parentHirarchy = new Stack<CodeTypeDeclarationEx>();
-                int bcc = 0;
-                parentHirarchy.Push(initialparent);
+                    Stack<CodeTypeDeclarationEx> parentHirarchy = new Stack<CodeTypeDeclarationEx>();
+                    int bcc = 0;
+                    parentHirarchy.Push(initialparent);
 
-                if(e.Cancel)
-                    return;
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                #region Parse
+                    #region Parse
 
-                for(int i = 0; i <= linecnt; i++) {
+                    for(int i = 0; i <= linecnt; i++) {
 
-                    if(e.Cancel)
-                        return;
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                    if(codeLineMap.ContainsKey(i))
-                        line = codeLineMap[i];
-                    else
-                        continue;
+                        if(codeLineMap.ContainsKey(i))
+                            line = codeLineMap[i];
+                        else
+                            continue;
 
-                    // is class definition?:
+                        // is class definition?:
 
-                    #region Parse Class Definition
+                        #region Parse Class Definition
 
-                    var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
-                    if(classkeywordSegment != null && classkeywordSegment.Token == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
-                        var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
-                        if(classNameSegment != null) {
+                        var classkeywordSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
+                        if(classkeywordSegment != null && classkeywordSegment.Token == Token.KeyWord && classkeywordSegment.TokenString.Equals("class", StringComparison.CurrentCultureIgnoreCase)) {
+                            var classNameSegment = classkeywordSegment.FindNextOnSameLine(Token.Identifier);
+                            if(classNameSegment != null) {
 
-                            var next = classNameSegment.NextOmit(whitespacetokenNewLines);
-                            if(next != null) {
-                                CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
-                                CodeTypeReferenceEx basecls = null;
-                                CodeSegment refBaseClass = null;
-                                if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
-                                    refBaseClass = next.NextOmit(whitespacetokenNewLines);
+                                var next = classNameSegment.NextOmit(whitespacetokenNewLines);
+                                if(next != null) {
+                                    CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
+                                    CodeTypeReferenceEx basecls = null;
+                                    CodeSegment refBaseClass = null;
+                                    if(next.Token == Token.KeyWord && next.TokenString.Equals("extends", StringComparison.InvariantCultureIgnoreCase)) {
+                                        refBaseClass = next.NextOmit(whitespacetokenNewLines);
 
-                                    if(refBaseClass != null) {
-                                        if(refBaseClass.Token == Token.Identifier) {
-                                            refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(_document, refBaseClass.TokenString, thisparent);
-                                            next = refBaseClass.NextOmit(whitespacetokenNewLines);
-                                        } else {
-                                            RegisterError(_document, next.Next, "Expected: Class Name Identifier");
-                                            next = next.NextOmit(whitespacetokenNewLines);
-                                        }
-                                    } else {
-                                        if(next.Next != null && next.Next.Token != Token.BlockOpen) {
-                                            RegisterError(_document, next.Next, "Expected: Class Name Identifier");
-                                            next = next.NextOmit(whitespacetokenNewLines);
-                                        }
-                                    }
-                                }
-
-                                if(next.Token == Token.BlockOpen) {
-
-                                    #region Add Class Declaration
-
-                                    CodeSegment classBodyStart = next;
-
-                                    var type = new CodeTypeDeclarationEx(_document, classNameSegment.TokenString)
-                                    {
-                                        IsClass = true,
-                                        LinePragma = CreatePragma(classNameSegment, _document.FilePath),
-                                        CodeDocumentItem = _document
-                                    };
-                                    classNameSegment.CodeDOMObject = type;
-
-
-                                    // check if this type was alread defined in this scope
-                                    if(thisparent.GetInheritedMembers().Contains(type)) {
-                                        RegisterError(_document, classNameSegment, "oh my dear, this class already exisits in the current scope!");
-                                    } else {
-
-                                        #region Check & Resolve Baseclass
-
-                                        if(basecls != null) {
-                                            //check if we have a circual interhance tree
-                                            var baseclassImpl = basecls.ResolveTypeDeclarationCache();
-                                            if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(_document, classNameSegment.TokenString, thisparent))) {
-                                                //circular dependency detected!!
-                                                RegisterError(_document, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
+                                        if(refBaseClass != null) {
+                                            if(refBaseClass.Token == Token.Identifier) {
+                                                refBaseClass.CodeDOMObject = basecls = new CodeTypeReferenceEx(_document, refBaseClass.TokenString, thisparent);
+                                                next = refBaseClass.NextOmit(whitespacetokenNewLines);
                                             } else {
-                                                if(basecls != null)
-                                                    type.BaseTypes.Add(basecls);
-                                                else
-                                                    type.BaseTypes.Add(new CodeTypeReferenceEx(_document, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                                RegisterError(_document, next.Next, "Expected: Class Name Identifier");
+                                                next = next.NextOmit(whitespacetokenNewLines);
+                                            }
+                                        } else {
+                                            if(next.Next != null && next.Next.Token != Token.BlockOpen) {
+                                                RegisterError(_document, next.Next, "Expected: Class Name Identifier");
+                                                next = next.NextOmit(whitespacetokenNewLines);
                                             }
                                         }
+                                    }
+
+                                    if(next.Token == Token.BlockOpen) {
+
+                                        #region Add Class Declaration
+
+                                        CodeSegment classBodyStart = next;
+
+                                        var type = new CodeTypeDeclarationEx(_document, classNameSegment.TokenString)
+                                        {
+                                            IsClass = true,
+                                            LinePragma = CreatePragma(classNameSegment, _document.FilePath),
+                                            CodeDocumentItem = _document
+                                        };
+                                        classNameSegment.CodeDOMObject = type;
+
+
+                                        // check if this type was alread defined in this scope
+                                        if(thisparent.GetInheritedMembers().Contains(type)) {
+                                            RegisterError(_document, classNameSegment, "oh my dear, this class already exisits in the current scope!");
+                                        } else {
+
+                                            #region Check & Resolve Baseclass
+
+                                            if(basecls != null) {
+                                                //check if we have a circual interhance tree
+                                                var baseclassImpl = basecls.ResolveTypeDeclarationCache();
+                                                if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(_document, classNameSegment.TokenString, thisparent))) {
+                                                    //circular dependency detected!!
+                                                    RegisterError(_document, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
+                                                } else {
+                                                    if(basecls != null)
+                                                        type.BaseTypes.Add(basecls);
+                                                    else
+                                                        type.BaseTypes.Add(new CodeTypeReferenceEx(_document, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                                }
+                                            }
+
+                                            #endregion
+
+
+                                            // extract class documentation Comment
+                                            var comment = ExtractComment(classkeywordSegment);
+                                            if(comment != null)
+                                                type.Comments.Add(comment);
+
+
+                                            // Add it to the CodeDOM Tree
+                                            thisparent.Members.Add(type);
+                                            type.Parent = thisparent;
+                                        }
+
+                                        // Create a CodeRange Item
+                                        int startOffset = classBodyStart.Range.Offset;
+                                        var classBodyEnd = classBodyStart.FindClosingBracked(true);
+                                        if(classBodyEnd != null) {
+                                            int length = (classBodyEnd.Range.Offset - startOffset);
+                                            _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
+                                        } else {
+                                            RegisterError(_document, classBodyStart, "Expected: " + Token.BlockClosed);
+                                        }
+
+                                        parentHirarchy.Push(type);
+                                        bcc++;
+
+                                        i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
+                                        continue;
 
                                         #endregion
 
-
-                                        // extract class documentation Comment
-                                        var comment = ExtractComment(classkeywordSegment);
-                                        if(comment != null)
-                                            type.Comments.Add(comment);
-
-
-                                        // Add it to the CodeDOM Tree
-                                        thisparent.Members.Add(type);
-                                        type.Parent = thisparent;
-                                    }
-
-                                    // Create a CodeRange Item
-                                    int startOffset = classBodyStart.Range.Offset;
-                                    var classBodyEnd = classBodyStart.FindClosingBracked(true);
-                                    if(classBodyEnd != null) {
-                                        int length = (classBodyEnd.Range.Offset - startOffset);
-                                        _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
                                     } else {
-                                        RegisterError(_document, classBodyStart, "Expected: " + Token.BlockClosed);
+                                        RegisterError(_document, next, "Expected: " + Token.BlockOpen);
+                                        i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
                                     }
-
-                                    parentHirarchy.Push(type);
-                                    bcc++;
-
-                                    i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
-                                    continue;
-
-                                    #endregion
-
-                                } else {
-                                    RegisterError(_document, next, "Expected: " + Token.BlockOpen);
-                                    i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
                                 }
                             }
                         }
-                    }
 
-                    #endregion
+                        #endregion
 
-                    // is class property / field
+                        // is class property / field
 
-                    #region Parse Class Properties / Fields
+                        #region Parse Class Properties / Fields
 
-                    var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
-                    if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
-                        var property = decl.NextOmit(whitespacetokens);
+                        var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
+                        if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
+                            var property = decl.NextOmit(whitespacetokens);
 
-                        if(parentHirarchy.Count > 1) {
-                            // we must be in a class to have method properties
-                            if(property != null && property.Token == Token.Identifier) {
-                                // this is a class field declaration
+                            if(parentHirarchy.Count > 1) {
+                                // we must be in a class to have method properties
+                                if(property != null && property.Token == Token.Identifier) {
+                                    // this is a class field declaration
 
-                                var propertyType = new CodeTypeReference(typeof(object));
-                                var memberprop = new CodeMemberPropertyEx(_document)
-                                {
-                                    Name = property.TokenString,
-                                    Attributes = MemberAttributes.Public,
-                                    Type = propertyType,
-                                    LinePragma = CreatePragma(property, _document.FilePath)
-                                };
-                                property.CodeDOMObject = memberprop;
-                                decl.CodeDOMObject = propertyType;
-                                parentHirarchy.Peek().Members.Add(memberprop);
+                                    var propertyType = new CodeTypeReference(typeof(object));
+                                    var memberprop = new CodeMemberPropertyEx(_document)
+                                    {
+                                        Name = property.TokenString,
+                                        Attributes = MemberAttributes.Public,
+                                        Type = propertyType,
+                                        LinePragma = CreatePragma(property, _document.FilePath)
+                                    };
+                                    property.CodeDOMObject = memberprop;
+                                    decl.CodeDOMObject = propertyType;
+                                    parentHirarchy.Peek().Members.Add(memberprop);
+                                } else {
+                                    RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
+                                }
                             } else {
-                                RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
+                                var err = "unexpected class field declaration -> not in class body";
+                                if(property != null)
+                                    RegisterError(_document, property, err);
+                                RegisterError(_document, decl, err);
                             }
-                        } else {
-                            var err = "unexpected class field declaration -> not in class body";
-                            if(property != null)
-                                RegisterError(_document, property, err);
-                            RegisterError(_document, decl, err);
+
+
+
                         }
 
+                        #endregion
 
 
-                    }
+                        // is method definition?:
 
-                    #endregion
+                        #region Analyze for Method Definition
 
-
-                    // is method definition?:
-
-                    #region Analyze for Method Definition
-
-                    var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
-                    if(methodSegment != null && methodSegment.Token == Token.Identifier) {
-                        var methodSignatureStart = methodSegment.Next;
-                        if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
-                            var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
-                            if(methodSignatureEnd != null) {
-                                var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLinesComments);
-                                if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
-                                    // jup we have a method definition here.
-                                    // Method body starts at startMethodBody
+                        var methodSegment = line.CodeSegments[0].ThisOrNextOmit(whitespacetokenNewLines);
+                        if(methodSegment != null && methodSegment.Token == Token.Identifier) {
+                            var methodSignatureStart = methodSegment.Next;
+                            if(methodSignatureStart != null && methodSignatureStart.Token == Token.LiteralBracketOpen) {
+                                var methodSignatureEnd = methodSignatureStart.FindClosingBracked(false);
+                                if(methodSignatureEnd != null) {
+                                    var startMethodBody = methodSignatureEnd.NextOmit(whitespacetokenNewLinesComments);
+                                    if(startMethodBody != null && startMethodBody.Token == Token.BlockOpen) {
+                                        // jup we have a method definition here.
+                                        // Method body starts at startMethodBody
 
 
                                         CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
@@ -598,7 +618,7 @@ namespace SmartDevelop.Model.DOM
 
                                             // get method statements
                                             method.Statements.AddRange(
-                                                CollectAllCodeStatements(e, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
+                                                CollectAllCodeStatements(cancellationToken, thisparent, codeLineMap, startMethodBody.LineNumber + 1, endMethodBody.LineNumber));
 
 
                                             // add it to the code DOM Tree
@@ -619,51 +639,64 @@ namespace SmartDevelop.Model.DOM
                                             continue;
                                         } else {
                                             RegisterError(_document, startMethodBody, "Missing: " + Token.BlockClosed);
-                                            
+
 
                                         }
+                                    }
                                 }
                             }
                         }
+
+                        #endregion
+
+                        #region Parse Remaining Tokens
+
+                        if(codeLineMap.ContainsKey(i)) {
+                            var lineBlock = codeLineMap[i];
+                            CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
+
+                            foreach(var segment in lineBlock.CodeSegments) {
+
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                if(segment.Token == Token.BlockOpen) {
+                                    bcc++;
+                                } else if(segment.Token == Token.BlockClosed) {
+                                    bcc--;
+                                    if(parentHirarchy.Count - 2 == bcc) {
+                                        if(parentHirarchy.Any())
+                                            parentHirarchy.Pop();
+                                    }
+                                }
+                            }
+                            _autoexec.Statements.AddRange(
+                                            CollectAllCodeStatements(cancellationToken, thisparent, codeLineMap, i, i));
+
+                        } else
+                            continue;
+
+                        #endregion
                     }
 
                     #endregion
 
-                    #region Parse Remaining Tokens
+                    AnalyzeAST(cancellationToken);
 
-                    if(codeLineMap.ContainsKey(i)) {
-                        var lineBlock = codeLineMap[i];
-                        CodeTypeDeclarationEx thisparent = parentHirarchy.Any() ? parentHirarchy.Peek() : _languageRoot;
-
-                        foreach(var segment in lineBlock.CodeSegments) {
-
-                            if(e.Cancel)
-                                return;
-
-                            if(segment.Token == Token.BlockOpen) {
-                                bcc++;
-                            } else if(segment.Token == Token.BlockClosed) {
-                                bcc--;
-                                if(parentHirarchy.Count - 2 == bcc) {
-                                    if(parentHirarchy.Any())
-                                        parentHirarchy.Pop();
-                                }
-                            }
-                        }
-                        _autoexec.Statements.AddRange(
-                                        CollectAllCodeStatements(e, thisparent, codeLineMap, i, i));
-
-                    } else
-                        continue;
-
-                    #endregion
-                }
-
-                #endregion
-
-                AnalyzeAST(e);
+                    lock(_rootLanguageSnapshotLOCK) {
+                        _rootLanguageSnapshot = _languageRoot;
+                    }
+                });
+            } catch(OperationCanceledException) {
+                throw;
             }
-            IsBusy = false;
+        }
+
+
+
+        public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
+            lock(_rootLanguageSnapshotLOCK) {
+                return _rootLanguageSnapshot;
+            }
         }
 
         CodeCommentStatement ExtractComment(CodeSegment identifier) {
@@ -698,16 +731,14 @@ namespace SmartDevelop.Model.DOM
         #region Analyze AST
 
 
-        void AnalyzeAST(DoWorkEventArgs e) {
+        void AnalyzeAST(CancellationToken cancellationToken) {
 
             var segmentService = _document.SegmentService;
             var segments = segmentService.GetSegments();
 
             foreach(var segment in segments) {
 
-                if(e.Cancel)
-                    return;
-
+                cancellationToken.ThrowIfCancellationRequested();
 
                 #region Resolve CodeTypeReferencees
 
@@ -784,14 +815,13 @@ namespace SmartDevelop.Model.DOM
         /// <param name="startLine"></param>
         /// <param name="endLine"></param>
         /// <returns></returns>
-        CodeStatementCollection CollectAllCodeStatements(DoWorkEventArgs e, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
+        CodeStatementCollection CollectAllCodeStatements(CancellationToken cancelToken, CodeTypeDeclarationEx enclosingType, Dictionary<int, CodeTokenLine> segments, int startLine, int endLine) {
             CodeTokenLine line;
             var codeStatements = new CodeStatementCollection();
 
             for(int i = startLine; i <= endLine; i++) {
 
-                if(e.Cancel)
-                    break;
+                cancelToken.ThrowIfCancellationRequested();
 
                 if(segments.ContainsKey(i))
                     line = segments[i];
@@ -1014,10 +1044,7 @@ namespace SmartDevelop.Model.DOM
         public override bool IsBusy {
             get {  
                 lock(_isBusyLock)  {
-                    //if(_isBusy && !_fileCompileWorker.IsBusy) {
-                    //    _isBusy = ;
-                    //}
-                    return _fileCompileWorker.IsBusy;
+                    return _isBusy;
                 }
             }
             protected set {
@@ -1025,9 +1052,7 @@ namespace SmartDevelop.Model.DOM
             }
         }
 
-        public override CodeTypeDeclarationEx GetRootTypeSnapshot() {
-            throw new NotImplementedException();
-        }
+
 
 
 

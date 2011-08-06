@@ -9,7 +9,7 @@ using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeMemberMethodEx : CodeMemberMethod, ICodeMemberEx, IEquatable<CodeMemberMethodEx>
+    public class CodeMemberMethodEx : CodeMemberMethod, ICodeMemberEx, ICloneable, IEquatable<CodeMemberMethodEx>
     {
         #region Fields
 
@@ -30,8 +30,6 @@ namespace SmartDevelop.Model.DOM.Types
             : base() { IsBuildInType = buildIn; }
 
         #endregion
-
-
 
         #region Methods
 
@@ -123,5 +121,23 @@ namespace SmartDevelop.Model.DOM.Types
             return "\nMethod Declaration: " + this.Name + "()";
         }
 
+
+        public object Clone() {
+            var mehtod = new CodeMemberMethodEx(this.IsBuildInType)
+            {
+                CodeDocumentItem = this.CodeDocumentItem,
+                Name = this.Name,
+                Project = this.Project,
+                IsHidden = this.IsHidden,
+                ReturnType = (this.ReturnType as CodeTypeReferenceEx).Clone() as CodeTypeReferenceEx,
+                LinePragma = CloneHelper.Clone(this.LinePragma),
+            };
+
+            foreach(var p in this.Parameters){
+                mehtod.Parameters.Add(((CodeParameterDeclarationExpressionEx)p).Clone() as CodeParameterDeclarationExpressionEx);
+            }
+
+            return mehtod;
+        }
     }
 }

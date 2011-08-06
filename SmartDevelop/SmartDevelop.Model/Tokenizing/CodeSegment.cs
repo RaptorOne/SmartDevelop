@@ -119,10 +119,28 @@ namespace SmartDevelop.Model.Tokenizing
                 return null;
         }
 
+
+
+
+        public CodeSegment FindPrevious(Token tokeoFind) {
+            return FindPrevious(tokeoFind, null);
+        }
+        public CodeSegment FindPrevious(Token tokeoFind, List<Token> endTokens){
+            if(this.Previous != null) {
+                if(Previous.Token == tokeoFind)
+                    return Previous;
+                else if(endTokens != null && endTokens.Contains(Next.Token))
+                    return null;
+                else
+                    return Next.FindPrevious(tokeoFind, endTokens);
+
+            } else
+                return null;
+        }
+
         public CodeSegment FindNext(Token tokeoFind) {
             return FindNext(tokeoFind, null);
         }
-
         public CodeSegment FindNext(Token tokeoFind, List<Token> endTokens) {
             if(this.Next != null) {
                 if(Next.Token == tokeoFind)
@@ -130,7 +148,7 @@ namespace SmartDevelop.Model.Tokenizing
                 else if(endTokens != null && endTokens.Contains(Next.Token))
                     return null;
                 else
-                    return Next.FindNextOnSameLine(tokeoFind);
+                    return Next.FindNext(tokeoFind);
             } else
                 return null;
         }
@@ -141,7 +159,7 @@ namespace SmartDevelop.Model.Tokenizing
             else if(endTokens != null && endTokens.Contains(this.Token))
                 return null;
             else
-                return this.FindNextOnSameLine(tokeoFind);
+                return this.FindNext(tokeoFind, endTokens);
         }
 
 

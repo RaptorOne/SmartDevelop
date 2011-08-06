@@ -7,10 +7,11 @@ using SmartDevelop.Model.CodeContexts;
 using SmartDevelop.Model.CodeLanguages;
 using Archimedes.Patterns.Utils;
 using SmartDevelop.Model.Projecting;
+using Archimedes.Patterns;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeTypeReferenceEx : CodeTypeReference, IEquatable<CodeTypeReferenceEx>
+    public class CodeTypeReferenceEx : CodeTypeReference, ICloneable, IEquatable<CodeTypeReferenceEx>
     {
         #region Fields
 
@@ -136,6 +137,16 @@ namespace SmartDevelop.Model.DOM.Types
 
         public override string ToString() {
             return string.Format("{0}\n{1}", this.TypeName, this.CommentInfo);
+        }
+
+        public object Clone() {
+            var clone = new CodeTypeReferenceEx(this.CodeDocumentItem, this.TypeName, this.EnclosingType)
+            {
+                Project = this.Project,
+                BaseType = this.BaseType,
+                ResolvedTypeDeclaration = this.ResolvedTypeDeclaration.Clone() as CodeTypeDeclarationEx,
+            };
+            return clone;
         }
     }
 }

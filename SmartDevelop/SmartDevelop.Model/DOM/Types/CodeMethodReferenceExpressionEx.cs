@@ -93,7 +93,7 @@ namespace SmartDevelop.Model.DOM.Types
 
             if(_methodDeclaration == null) {
                 var doc = CodeDocumentItem;
-                if(doc != null && doc.AST.RootTypeUnSave != EnclosingType) {
+                if(doc != null && !(EnclosingType is CodeTypeDeclarationRoot)) {
 
                     var members = from member in doc.AST.RootTypeUnSave.Members.Cast<CodeTypeMember>()
                                   let methodMember = member as CodeMemberMethodEx

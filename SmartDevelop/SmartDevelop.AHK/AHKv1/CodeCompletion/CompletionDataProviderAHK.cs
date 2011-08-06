@@ -20,6 +20,8 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
     public class CompletionDataProviderAHK : EditorDocumentExtension
     {
+        const int MAX_TIMEOUT = 2000;
+
         #region Fields
 
         TextEditor _texteditor;
@@ -111,7 +113,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
                     //ensure we have a updated tokenizer
                     _projectitem.EnsureTokenizerHasWorked();
-                    _projectitem.AST.WaitUntilUpdated(2000);
+                    _projectitem.AST.WaitUntilUpdated(MAX_TIMEOUT);
 
 
                     // do type lookup & list avaiable members
@@ -160,7 +162,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                     } else {
                         // get root type context
                         ctx = new CodeContext(_projectitem.AST);
-                        ctx.EnclosingType = _projectitem.AST.RootType;
+                        ctx.EnclosingType = _projectitem.AST.GetRootTypeSnapshot();
                     }
 
                     foreach(var m in ctx.GetVisibleMembers()) {

@@ -20,6 +20,7 @@ using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.CodeContexts;
 using SmartDevelop.ViewModel.InvokeCompletion;
+using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -28,6 +29,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
     /// </summary>
     public class CodeFileViewModel : WorkspaceViewModel, IEditor, ICacheable
     {
+        const int MAX_TIMEOUT = 100;
+
         #region Fields
 
         readonly ProjectItemCodeDocument _projectitem;
@@ -148,6 +151,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         public TextEditor Editor {
             get {
                 return _texteditor;
+            }
+        }
+
+        public ProjectItemCodeDocument CodeDocument {
+            get {
+                return _projectitem;
             }
         }
 
@@ -295,6 +304,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #endregion
 
+        #region Get Help Command
+
         ICommand _getHelpCommand;
         public ICommand GetHelpCommand {
             get {
@@ -306,7 +317,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     } else {
                         // get root type context
                         ctx = new CodeContext(_projectitem.AST);
-                        ctx.EnclosingType = _projectitem.AST.RootType;
+                        ctx.EnclosingType = _projectitem.AST.GetRootTypeSnapshot();
                     }
                     _projectitem.CodeLanguage.GetHelpFor(_projectitem, ctx);
 
@@ -318,13 +329,57 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
         #endregion
 
+        #endregion
+
         #region Event Handlers
+
+        InvokeCompletionViewModel _invokeCompletion;
+
+        List<char> invokeCompletionTriggers = new List<char> { '(', ',' };
+        
 
         void OnTextEntered(object sender, TextCompositionEventArgs e) {
 
-            char currentChar;
+            if(_invokeCompletion != null) {
+                return;
+            }
 
-            currentChar = e.Text[0];
+            char typedChar;
+            typedChar = e.Text[0];
+            if(invokeCompletionTriggers.Contains(typedChar)) {
+
+                _projectitem.EnsureTokenizerHasWorked();
+                _projectitem.AST.CompileTokenFileAsync();
+                //_projectitem.EnsureASTIsUpdated(MAX_TIMEOUT);
+
+                return;
+
+                var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
+
+                if(ctx.Segment != null) {
+                    if(ctx.Segment.Token == Token.TraditionalString || ctx.Segment.Token == Token.LiteralString)
+                        return;
+
+                    var methodRef = FindMethodInvoke(ctx.Segment);
+
+                    if(methodRef != null && methodRef.ResolvedMethodMember != null) {
+                        var methodDecl = methodRef.ResolvedMethodMember;
+                        var parameters = methodDecl.Parameters;
+
+
+                        _invokeCompletion = new InvokeCompletionViewModel(this)
+                        {
+                            Prefix = methodDecl.Name,
+                            Sufix = ")",
+                            InvokeDescription = methodRef.CommentInfo
+                        };
+
+                        _invokeCompletion.Show();
+                    } else
+                        return;
+
+                }
+            }
 
             //if(currentChar == '(') {
 
@@ -346,6 +401,40 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             //    return;
             //}
         }
+
+
+        List<Token> _endingTokens = new List<Token>() { Token.BlockClosed, Token.BlockOpen };
+
+
+        CodeMethodReferenceExpressionEx FindMethodInvoke(CodeSegment segment) {
+            int literalBracketCnt = 1;
+            int indexerBrackedCnt = 0;
+            CodeMethodReferenceExpressionEx methodRef = null;
+            CodeSegment current = segment;
+
+            while(current != null) {
+
+                if(_endingTokens.Contains(current.Token))
+                    break;
+                else if(current.Token == Token.LiteralBracketClosed)
+                    literalBracketCnt++;
+                else if(current.Token == Token.IndexerBracketClosed)
+                    literalBracketCnt++;
+                else if(current.Token == Token.IndexerBracketOpen)
+                    literalBracketCnt--;
+                else if(current.Token == Token.LiteralBracketOpen) {
+                        literalBracketCnt--;
+                } else if(current.Token == Token.Identifier && current.CodeDOMObject is CodeMethodReferenceExpressionEx) {
+                    if(literalBracketCnt == 0 && indexerBrackedCnt == 0) {
+                        methodRef = current.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                        break;
+                    }
+                }
+                current = current.Previous;
+            }
+            return methodRef;
+        }
+
 
         protected override void OnHasFocusChanged() {
             if(_projectitem.Project != null && _projectitem.Project.Solution != null) {

@@ -21,56 +21,14 @@ namespace SmartDevelop.Model.DOM.Types
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Gets the parent of this type if it is nested otherwise returns null
-        /// </summary>
-        public CodeTypeDeclarationEx Parent {
-            get;
-            set;
-        }
-
-        public bool IsHidden {
-            get;
-            set;
-        }
-
-        public bool IsBuildInType {
-            get;
-            set;
-        }
-
-        SmartCodeProject _project;
-        Projecting.ProjectItemCodeDocument _codeDocumentItem;
-
-        public ProjectItemCodeDocument CodeDocumentItem {
-            get { return _codeDocumentItem; }
-            set { _codeDocumentItem = value; }
-        }
-
-        public SmartCodeProject Project {
-            get {
-                return (CodeDocumentItem != null) ? CodeDocumentItem.Project : _project;
-            }
-            set {
-                _project = value;
-            }
-        }
-
-        CodeLanguage Language {
-            get {
-                return Project!=null ? Project.Language : null;
-            }
-        }
-
-        #endregion
-
         #region Public Methods
 
+        /// <summary>
+        /// Yields an empty list
+        /// </summary>
+        /// <returns></returns>
         public override IEnumerable<CodeTypeMember> GetInheritedMembers() {
-            List<CodeTypeMember> members = new List<CodeTypeMember>();
-            return members;
+            return new List<CodeTypeMember>();;
         }
 
 
@@ -85,8 +43,7 @@ namespace SmartDevelop.Model.DOM.Types
 
 
         public IEnumerable<CodeTypeReferenceEx> GetBaseTypeHirarchy() {
-            List<CodeTypeReferenceEx> types = new List<CodeTypeReferenceEx>();
-            return types;
+            return new List<CodeTypeReferenceEx>();
         }
 
         #endregion

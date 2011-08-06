@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\Lib\AsyncCtpLibrary\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -61,10 +64,13 @@
     <Compile Include="DOM\Ranges\CodeRange.cs" />
     <Compile Include="DOM\Ranges\CodeRangeManager.cs" />
     <Compile Include="DOM\ShuntingYardExpressionParser.cs" />
+    <Compile Include="DOM\Types\CloneHelper.cs" />
     <Compile Include="DOM\Types\CodeMemberMethodEx.cs" />
     <Compile Include="DOM\Types\CodeMemberPropertyEx.cs" />
     <Compile Include="DOM\Types\CodeMethodReferenceExpressionEx.cs" />
+    <Compile Include="DOM\Types\CodeParameterDeclarationExpressionEx.cs" />
     <Compile Include="DOM\Types\CodeTypeDeclarationEx.cs" />
+    <Compile Include="DOM\Types\CodeTypeDeclarationRoot.cs" />
     <Compile Include="DOM\Types\CodeTypeReferenceEx.cs" />
     <Compile Include="DOM\Types\CodePropertyReferenceExpressionEx.cs" />
     <Compile Include="DOM\Types\CodeTypeDeclarationDynamic.cs" />

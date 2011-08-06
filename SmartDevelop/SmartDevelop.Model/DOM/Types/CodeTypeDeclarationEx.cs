@@ -1,22 +1,31 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.CodeDom;
+using Archimedes.Patterns;
 using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokenizing;
 
 namespace SmartDevelop.Model.DOM.Types
 {
-    public class CodeTypeDeclarationEx : CodeTypeDeclaration, ICodeMemberEx, IEquatable<CodeTypeDeclarationEx>
+    public class CodeTypeDeclarationEx : CodeTypeDeclaration, ICodeMemberEx, ICloneable, IEquatable<CodeTypeDeclarationEx>
     {
+        SmartCodeProject _project;
+        Projecting.ProjectItemCodeDocument _codeDocumentItem;
+
 
         #region Constructors
 
-        public CodeTypeDeclarationEx() : base() { }
-        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name) : base(name) { CodeDocumentItem = codeitem; }
-        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name, bool buildin) : base(name) { IsBuildInType = buildin; CodeDocumentItem = codeitem; }
+        public CodeTypeDeclarationEx() 
+            : base() { }
+
+        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name)
+            : base(name) { CodeDocumentItem = codeitem; }
+
+        public CodeTypeDeclarationEx(ProjectItemCodeDocument codeitem, string name, bool buildin) 
+            : base(name) { IsBuildInType = buildin; CodeDocumentItem = codeitem; }
 
         #endregion
 
@@ -40,8 +49,7 @@ namespace SmartDevelop.Model.DOM.Types
             set;
         }
 
-        SmartCodeProject _project;
-        Projecting.ProjectItemCodeDocument _codeDocumentItem;
+
 
         public ProjectItemCodeDocument CodeDocumentItem {
             get { return _codeDocumentItem; }
@@ -57,7 +65,7 @@ namespace SmartDevelop.Model.DOM.Types
             }
         }
 
-        CodeLanguage Language {
+        protected CodeLanguage Language {
             get {
                 return Project!=null ? Project.Language : null;
             }
@@ -139,6 +147,49 @@ namespace SmartDevelop.Model.DOM.Types
             return string.Format("\nTypeDeclaration: {0}", this.Name);
         }
 
+        #region ICloneable
+
+        /// <summary>
+        /// Clones this TypeDeclaration. Members won't be cloned
+        /// </summary>
+        /// <returns></returns>
+        public virtual object Clone() {
+
+            var clone = new CodeTypeDeclarationEx(this.CodeDocumentItem, this.Name, this.IsBuildInType)
+            {
+                Project = this.Project,
+                IsClass = this.IsClass,
+                IsEnum = this.IsEnum,
+                IsHidden = this.IsHidden,
+                IsInterface = this.IsInterface,
+                IsStruct = this.IsStruct,
+                IsPartial = this.IsPartial,
+                Parent = (this.Parent != null) ? this.Parent.Clone() as CodeTypeDeclarationEx : null,
+                LinePragma = CloneHelper.Clone(this.LinePragma)
+            };
+
+            foreach(CodeCommentStatement comment in this.Comments) {
+                clone.Comments.Add(CloneHelper.Clone(comment));
+            }
+
+            foreach(CodeTypeReferenceEx typeRef in this.BaseTypes) {
+                clone.BaseTypes.Add(typeRef.Clone() as CodeTypeReferenceEx);
+            }
+            
+            foreach(CodeTypeMember member in this.Members){
+                //if(member is ICloneable)
+                //    clone.Members.Add(((ICloneable)member).Clone() as CodeTypeMember);
+                //else
+                //    throw new NotSupportedException("type doesn't implement ICloneable!");
+
+                clone.Members.Add(member);
+            }
+
+            return clone;
+        }
+
+        #endregion
+
         #region IEquatable
 
         public virtual bool Equals(CodeTypeDeclarationEx other) {
@@ -156,8 +207,6 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         #endregion
-
-
 
     }
 }

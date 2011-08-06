@@ -11,6 +11,7 @@ using SmartDevelop.Model.CodeContexts;
 using ICSharpCode.AvalonEdit.Document;
 using SmartDevelop.Model.DOM.Ranges;
 using SmartDevelop.Model.Tokenizing;
+using Archimedes.Patterns.Threading;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -24,14 +25,13 @@ namespace SmartDevelop.Model.DOM
         protected readonly ProjectItemCodeDocument _document;
         protected readonly SmartCodeProject _project;
 
-        protected readonly CodeTypeDeclarationEx _languageRoot;
-        protected object _languageRootLock = new object();
+        protected CodeTypeDeclarationEx _languageRoot;
+        //protected object _languageRootLock = new object();
 
         protected static List<Token> whitespacetokenNewLinesComments = new List<Token> { Token.WhiteSpace, Token.NewLine, Token.MultiLineComment, Token.SingleLineComment };
         protected static List<Token> whitespacetokenNewLines = new List<Token> { Token.WhiteSpace, Token.NewLine };
         protected static List<Token> whitespacetokens = new List<Token> { Token.WhiteSpace };
         
-        //protected Dictionary<ProjectItemCodeDocument, CodeRangeManager> _codeRanges = new Dictionary<ProjectItemCodeDocument, CodeRangeManager>();
         protected CodeRangeManager _codeRangeManager = new CodeRangeManager();
 
         #endregion
@@ -50,7 +50,6 @@ namespace SmartDevelop.Model.DOM
         #region Constructor
 
         public CodeDocumentDOMService(ProjectItemCodeDocument document) {
-            _languageRoot = new CodeTypeDeclarationEx(null, "Global") { Project = document.Project };
             _document = document;
             _project = document.Project;
         }
@@ -102,19 +101,11 @@ namespace SmartDevelop.Model.DOM
         }
 
 
-
         /// <summary>
-        /// Accessing the RootType will lock it for all other threads
-        /// </summary>
-        public CodeTypeDeclarationEx RootType {
-            get { lock(_languageRootLock) { return _languageRoot; } }
-        }
-
-        /// <summary>
-        /// Unsave access the RootType
+        /// Unsave access the working RootType
         /// </summary>
         public CodeTypeDeclarationEx RootTypeUnSave {
-            get {  return _languageRoot; }
+            get { return _languageRoot; }
         }
 
         /// <summary>
@@ -152,20 +143,16 @@ namespace SmartDevelop.Model.DOM
                 if(range.RangedCodeObject is CodeTypeDeclarationEx) {
                     context.EnclosingType = range.RangedCodeObject as CodeTypeDeclarationEx;
                 }
-            }
+            } else
+                context.EnclosingType = this.GetRootTypeSnapshot();
 
             if(includeCurrentSegment)
                 context.Segment = _document.SegmentService.QueryCodeSegmentAt(offset);
-
-            if(context.EnclosingType == null)
-                context.EnclosingType = this.RootType;
 
             return context;
         }
 
         #endregion
-
-        #region File Compiler
 
         /// <summary>
         /// Compiles the codeitem to parse it async
@@ -176,7 +163,8 @@ namespace SmartDevelop.Model.DOM
 
         public abstract bool IsBusy { get; protected set; }
 
-        #endregion
+        public abstract bool WaitUntilUpdated(int timeout);
+
 
         #region Event Handlers
 
@@ -187,7 +175,7 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-        public abstract bool WaitUntilUpdated(int timeout);
+        
     }
  
 }
