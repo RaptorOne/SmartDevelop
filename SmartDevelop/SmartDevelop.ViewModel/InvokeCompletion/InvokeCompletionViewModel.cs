@@ -13,6 +13,7 @@ using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
 using System.Windows.Controls.Primitives;
 using ICSharpCode.AvalonEdit.Rendering;
+using System.Windows;
 
 namespace SmartDevelop.ViewModel.InvokeCompletion
 {
@@ -37,21 +38,34 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             _documentVM = documentVM;
 
             _toolTip = new ToolTip();
-            _toolTip.Placement = PlacementMode.RelativePoint;
-            _toolTip.PlacementTarget = _documentVM.Editor;
+            _toolTip.Placement = PlacementMode.Custom;
+            _toolTip.PlacementTarget = _documentVM.Editor.TextArea.TextView;
             _toolTip.Content = this;
+
+            _toolTip.CustomPopupPlacementCallback = PopupPlacement;
 
             _documentVM.Editor.TextArea.KeyDown += (s, e) => {
                 if(e.Key == Key.Escape)
                     this.CloseCommand.Execute(null);
             };
 
-            _documentVM.Editor.TextArea.TextEntered += OnTextEntered;
+            //_documentVM.Editor.TextArea.TextEntered += OnTextEntered;
             _documentVM.Editor.TextArea.Caret.PositionChanged += OnCaretPositionChanged;
 
             AllParameters = new ObservableCollection<InvokeParameter>();
             SetMethod(methodSegment);
         }
+
+
+        CustomPopupPlacement[] PopupPlacement(Size popupSize, Size targetSize, Point offset) {
+            CustomPopupPlacement[] places = 
+            {
+                new CustomPopupPlacement(popuplacement, PopupPrimaryAxis.Horizontal)
+            };
+            return places ;
+        }
+
+        Point popuplacement;
 
         void SetMethod(CodeSegment methodSegment) {
 
@@ -65,9 +79,9 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             _documentVM.Editor.TextArea.TextView.EnsureVisualLines();
             var geometrys = BackgroundGeometryBuilder.GetRectsForSegment(_documentVM.Editor.TextArea.TextView, methodSegment.Range);
             if(geometrys.Any()){
-                var pos = geometrys.First().BottomLeft;
-                _toolTip.VerticalOffset = pos.Y;
-                _toolTip.HorizontalOffset = pos.X;
+                popuplacement = geometrys.First().BottomLeft;
+                //_toolTip.VerticalOffset = pos.Y;
+                //_toolTip.HorizontalOffset = pos.X;
             }
 
             AllParameters.Clear();
@@ -213,16 +227,11 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             return null; //methodRef;
         }
 
+        //void OnTextEntered(object sender, TextCompositionEventArgs e) {
+        //    char current = e.Text[0];
 
 
-
-
-
-        void OnTextEntered(object sender, TextCompositionEventArgs e) {
-            char current = e.Text[0];
-
-
-        }
+        //}
 
         void OnCaretPositionChanged(object sender, EventArgs e) {
 
@@ -258,7 +267,7 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         }
 
         protected override void OnDispose() {
-            _documentVM.Editor.TextArea.TextEntered -= OnTextEntered;
+            //_documentVM.Editor.TextArea.TextEntered -= OnTextEntered;
             _documentVM.Editor.TextArea.Caret.PositionChanged -= OnCaretPositionChanged;
             base.OnDispose();
         }

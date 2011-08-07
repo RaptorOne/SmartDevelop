@@ -40,6 +40,8 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
         static List<char> triggerCodeCompletion = new List<char> { '.' };
 
+        static List<char> endCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';' };
+
         static List<char> allowedspecailChars = new List<char> { '#', '_' };
         
 
@@ -83,6 +85,12 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 
             try {
                 currentChar = e.Text[0];
+
+                if(_completionWindow != null && endCodeCompletion.Contains(currentChar))
+                    _completionWindow.Close();
+
+                if(_completionWindow != null)
+                    return;
 
                 if(_texteditor.CaretOffset > 1 && !triggerCodeCompletion.Contains(currentChar)) {
                     beforeChar = _texteditor.Document.GetCharAt(_texteditor.CaretOffset - 2);
