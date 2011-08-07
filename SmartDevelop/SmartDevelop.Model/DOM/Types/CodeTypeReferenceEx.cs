@@ -144,7 +144,26 @@ namespace SmartDevelop.Model.DOM.Types
         #endregion
 
         public override string ToString() {
-            return string.Format("{0}\n{1}", this.TypeName, this.CommentInfo);
+            return string.Format("{0} {1}\n{2}", TypeTypeName, this.TypeName, this.CommentInfo);
+        }
+
+        string TypeTypeName {
+            get {
+                string name = "";
+
+                if(ResolvedTypeDeclaration != null) {
+                    if(ResolvedTypeDeclaration.IsClass) {
+                        return "class";
+                    } else if(ResolvedTypeDeclaration.IsEnum) {
+                        return "enum";
+                    } else if(ResolvedTypeDeclaration.IsInterface) {
+                        return "interface";
+                    } else if(ResolvedTypeDeclaration.IsStruct) {
+                        return "struct";
+                    } 
+                }
+                return name;
+            }
         }
 
         public object Clone() {

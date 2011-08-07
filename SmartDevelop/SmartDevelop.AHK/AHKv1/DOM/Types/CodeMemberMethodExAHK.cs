@@ -35,5 +35,12 @@ namespace SmartDevelop.AHK.AHKv1.DOM.Types
             set;
         }
 
+        public override string ToString() {
+            if(IsTraditionalCommand && !IsDefaultMethodInvoke)
+                return string.Format("Command {0}\n{1}", this.Name, Helper.GetDocumentCommentString(Comments));
+            else
+                return string.Format("{0}()\n{1}", this.Name, Helper.GetDocumentCommentString(Comments));
+        }
+
     }
 }

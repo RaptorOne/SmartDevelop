@@ -28,6 +28,10 @@ namespace SmartDevelop.Model.DOM.Types
             set;
         }
 
+        public bool IsOptional {
+            get;
+            set;
+        }
 
         public object Clone() {
             var clone = new CodeParameterDeclarationExpressionEx(this.Name)

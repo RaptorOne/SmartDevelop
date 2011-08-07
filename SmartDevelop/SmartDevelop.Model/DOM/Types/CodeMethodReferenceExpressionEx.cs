@@ -108,10 +108,10 @@ namespace SmartDevelop.Model.DOM.Types
         }
 
         public override string ToString() {
-            return this.MethodName + "()\n" + CommentInfo;
+            if(ResolvedMethodMember != null) {
+                return ResolvedMethodMember.ToString();
+            } else
+                return string.Format("{0}()\n{1}", this.MethodName, CommentInfo);
         }
-
-
-
     }
 }

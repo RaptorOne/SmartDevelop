@@ -450,7 +450,8 @@ namespace SmartDevelop.AHK.AHKv1
 
             #endregion
 
-            
+            #region Common 2
+
             method = new CodeMemberMethodExAHK(true)
             {
                 Name = "FileExist",
@@ -489,6 +490,147 @@ namespace SmartDevelop.AHK.AHKv1
             method.Comments.Add(new CodeCommentStatement("Calls a function inside a DLL, such as a standard Windows API function.", true));
             method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
+
+            #endregion
+
+            #region COM
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjCreate",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(string)), "CLSID"));
+
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(IntPtr)), "IID") { IsOptional = true }); 
+
+            method.Comments.Add(new CodeCommentStatement("Creates a COM object.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+            #region COM Object Active
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjActive",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(string)), "CLSID"));
+
+            method.Comments.Add(new CodeCommentStatement("Retrieves a running object that has been registered with OLE.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjParameter",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(object)), "VarType"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(object)), "Value"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+            new CodeTypeReferenceEx(typeof(object)), "Flags") { IsOptional = true }); 
+            method.Comments.Add(new CodeCommentStatement("Creates an object representing a typed value to be passed as a parameter or return value.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjMissing",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Comments.Add(new CodeCommentStatement("Creates an object which may be used in place of an optional parameter's default value when calling a method of a COM object.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjEnwrap",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(int)), "DispPtr"));
+
+            method.Comments.Add(new CodeCommentStatement("Wraps a raw IDispatch pointer in a usable object.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjUnwrap",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(int)), "DispPtr"));
+
+            method.Comments.Add(new CodeCommentStatement("UnWraps a COM Object intp a raw IDispatch pointer.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
+            members.Add(method);
+
+            #endregion
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjGet",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(string)), "Name"));
+
+            method.Comments.Add(new CodeCommentStatement("Returns a reference to an object provided by a COM component.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjConnect",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(object)), "ComObject"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(string)), "Prefix") { IsOptional = true });
+
+            method.Comments.Add(new CodeCommentStatement("Connects the object's event sources to functions with a given prefix.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+            method = new CodeMemberMethodExAHK(true)
+            {
+                Name = "ComObjError",
+                IsDefaultMethodInvoke = true,
+                IsTraditionalCommand = false
+            };
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(bool)), "Enable"));
+
+            method.Comments.Add(new CodeCommentStatement("Enables or disables notification of COM errors.", true));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
+            members.Add(method);
+
+
+            #endregion
 
             #region Object Methods
 

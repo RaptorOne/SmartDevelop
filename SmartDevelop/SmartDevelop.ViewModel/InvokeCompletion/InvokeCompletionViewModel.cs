@@ -33,7 +33,7 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         #endregion
         CodeMethodReferenceExpressionEx _methodRef;
 
-        public InvokeCompletionViewModel(CodeFileViewModel documentVM, CodeSegment methodSegment) {
+        public InvokeCompletionViewModel(CodeFileViewModel documentVM, CodeSegment methodSegment, int startParam) {
             _document = documentVM.CodeDocument;
             _documentVM = documentVM;
 
@@ -54,6 +54,7 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
 
             AllParameters = new ObservableCollection<InvokeParameter>();
             SetMethod(methodSegment);
+            SetCurrentParam(startParam);
         }
 
 
@@ -88,8 +89,13 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             int i = 0;
             foreach(CodeParameterDeclarationExpressionEx p in methodDecl.Parameters) {
 
-                var pVM = new InvokeParameter(((p.Direction == FieldDirection.Ref) ? "byref " : "") + 
-                    p.Name + ((++i != methodDecl.Parameters.Count) ? ", " : ""), "-")
+                string typeprefix = "";
+                if(p.Type != null) {
+                    typeprefix = p.Type.BaseType + " ";
+                }
+
+                var pVM = new InvokeParameter(((p.Direction == FieldDirection.Ref) ? "byref " : "") +
+                    typeprefix + p.Name + ((++i != methodDecl.Parameters.Count) ? ", " : ""), "-")
                 {
                     ParameterDescripton = p.ParameterDocumentationComment
                 };
