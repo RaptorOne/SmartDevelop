@@ -9,10 +9,29 @@ namespace SmartDevelop.Model.DOM.Types
     public class CodeParameterDeclarationExpressionEx : CodeParameterDeclarationExpression, ICloneable
     {
 
+        public CodeParameterDeclarationExpressionEx(string name) 
+            : base(typeof(object), name) {
+        }
+
+        public CodeParameterDeclarationExpressionEx(CodeTypeReferenceEx typeRef, string name)
+            : base(typeRef, name) {
+        }
+
+        public CodeParameterDeclarationExpressionEx(Type type, string name)
+            : base(type, name) {
+
+        }
+
+
+        public string ParameterDocumentationComment {
+            get;
+            set;
+        }
+
+
         public object Clone() {
-            var clone = new CodeParameterDeclarationExpressionEx()
+            var clone = new CodeParameterDeclarationExpressionEx(this.Name)
             {
-                Name = this.Name,
                 Direction = this.Direction,
                 Type = this.Type
             };

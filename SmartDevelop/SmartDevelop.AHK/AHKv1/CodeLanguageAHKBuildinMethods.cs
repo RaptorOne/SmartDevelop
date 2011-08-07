@@ -37,7 +37,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric sine of Number. Number must be expressed in radians.", true));
             members.Add(method);
 
@@ -47,7 +47,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric cosine of Number. Number must be expressed in radians.", true));
             members.Add(method);
 
@@ -57,7 +57,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric tangent of Number. Number must be expressed in radians.", true));
             members.Add(method);
 
@@ -67,7 +67,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric arcsine of Number in radians.", true));
             members.Add(method);
 
@@ -77,7 +77,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric arccosine of Number in radians.", true));
             members.Add(method);
 
@@ -87,7 +87,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the trigonometric arctangent of Number in radians.", true));
             members.Add(method);
             
@@ -101,7 +101,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the absolute value of Number. The return value is the same type as Number (integer or floating point).", true));
             members.Add(method);
 
@@ -111,7 +111,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns Number rounded up to the nearest integer (without any .00 suffix).", true));
             members.Add(method);
 
@@ -121,7 +121,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "N"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "N"));
             method.Comments.Add(new CodeCommentStatement("Returns e (which is approximately 2.71828182845905) raised to the Nth power.", true));
             members.Add(method);
 
@@ -131,7 +131,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns Number rounded down to the nearest integer (without any .00 suffix).", true));
             members.Add(method);
 
@@ -141,7 +141,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the logarithm (base 10) of Number.", true));
             members.Add(method);
 
@@ -151,7 +151,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the natural logarithm (base e) of Number.", true));
             members.Add(method);
 
@@ -161,7 +161,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Modulo.", true));
             members.Add(method);
 
@@ -171,8 +171,8 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "N"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "N"));
             method.Comments.Add(new CodeCommentStatement("Returns the rounded number.", true));
             members.Add(method);
 
@@ -182,7 +182,7 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(decimal)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(decimal)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the square root of Number. The result is formatted as floating point. If Number is negative, the function yields a blank result (empty string).", true));
             members.Add(method);
 
@@ -197,12 +197,12 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Number"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "VarOrAddress"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Offset"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Type"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(object)), "VarOrAddress"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Offset"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Type"));
             method.Comments.Add(new CodeCommentStatement("Stores Number in binary format at the specified address+offset and returns the address to the right of the item just written.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -211,11 +211,11 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "VarOrAddress"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Offset"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Type"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(object)), "VarOrAddress"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Offset"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Type"));
             method.Comments.Add(new CodeCommentStatement("Returns the binary number stored at the specified address+offset.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -224,10 +224,10 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "MsgNumber"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "FunctionName"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "MsgNumber"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "FunctionName"));
             method.Comments.Add(new CodeCommentStatement("Monitors a message/event. See OnMessage() for details.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -236,11 +236,11 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Address"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Lenght"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Encoding"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Address"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Lenght"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Encoding"));
             method.Comments.Add(new CodeCommentStatement("Copies a string from a memory address, optionally converting it between code pages.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -249,12 +249,12 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Address"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Lenght"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Encoding"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "String"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Address"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Lenght"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Encoding"));
             method.Comments.Add(new CodeCommentStatement("Copies a string to a memory address, optionally converting it between code pages.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -263,11 +263,11 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "UnquotedVarName "));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "RequestedCapacity"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "FillByte"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "UnquotedVarName "));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "RequestedCapacity"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "FillByte"));
             method.Comments.Add(new CodeCommentStatement("Enlarges a variable's holding capacity or frees its memory.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
 
@@ -277,14 +277,14 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(
-                new CodeTypeReference(typeof(string)), "FunctionName"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(
-                new CodeTypeReference(typeof(int)), "Options"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(
-                new CodeTypeReference(typeof(int)), "ParamCount"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(
-                new CodeTypeReference(typeof(int)), "EventInfo"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(string)), "FunctionName"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(int)), "Options"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(int)), "ParamCount"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(
+                new CodeTypeReferenceEx(typeof(int)), "EventInfo"));
             members.Add(method);
 
             #endregion
@@ -297,9 +297,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "String"));
             method.Comments.Add(new CodeCommentStatement("Returns the ASCII code (a number between 1 and 255) for the first character in String. If String is empty, 0 is returned.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -308,9 +308,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Number"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Number"));
             method.Comments.Add(new CodeCommentStatement("Returns the single character corresponding to the ASCII code indicated by Number.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
 
             #endregion
@@ -323,9 +323,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "KeyName "));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "KeyName "));
             method.Comments.Add(new CodeCommentStatement("this function returns true (1) if the key is down and false (0) if it is up. ", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             #endregion
@@ -339,8 +339,8 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String "));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "OmitChars"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "String "));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "OmitChars"));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -349,13 +349,13 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Needle"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "CaseSensitive"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Occurrence"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Needle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(bool)), "CaseSensitive"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "StartingPos"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Occurrence"));
             method.Comments.Add(new CodeCommentStatement("Searches a string", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -364,12 +364,12 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "NeedleRegEx"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "UnquotedOutputVar"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "NeedleRegEx"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(bool)), "UnquotedOutputVar"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "StartingPos"));
             method.Comments.Add(new CodeCommentStatement("Regual Expression Match", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -378,13 +378,13 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Haystack"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "NeedleRegEx"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(bool)), "Replacement"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "OutputVarCount"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Limit"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Haystack"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "NeedleRegEx"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(bool)), "Replacement"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "OutputVarCount"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Limit"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "StartingPos"));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             method.Comments.Add(new CodeCommentStatement("Regual Expression Match", true));
             members.Add(method);
 
@@ -396,11 +396,11 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "StartingPos"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(int)), "Length"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "String"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "StartingPos"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(int)), "Length"));
             method.Comments.Add(new CodeCommentStatement("Searches a string", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
 
@@ -410,9 +410,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "String"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "String"));
             method.Comments.Add(new CodeCommentStatement("Returns the Lenght of the string", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
 
             #endregion
@@ -425,12 +425,12 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinTitle"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinText"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeTitle"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "WinTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "WinText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "ExcludeTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "ExcludeText"));
             method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), Func() returns 0. Otherwise, it returns a reference to the function.", true));
-            method.ReturnType = new CodeTypeReference(typeof(object));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -439,12 +439,12 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinTitle"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "WinText"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeTitle"));
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "ExcludeText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "WinTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "WinText"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "ExcludeTitle"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "ExcludeText"));
             method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), Func() returns 0. Otherwise, it returns a reference to the function.", true));
-            method.ReturnType = new CodeTypeReference(typeof(object));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
             members.Add(method);
 
 
@@ -457,9 +457,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "FilePath"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "FilePath"));
             method.Comments.Add(new CodeCommentStatement("Checks if the given filepath exists", true));
-            method.ReturnType = new CodeTypeReference(typeof(string));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(string));
             members.Add(method);
 
 
@@ -469,9 +469,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "FunctionName"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "FunctionName"));
             method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), Func() returns 0. Otherwise, it returns a reference to the function.", true));
-            method.ReturnType = new CodeTypeReference(typeof(object));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(object));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -480,14 +480,14 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "DllFileAndFunction"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "DllFileAndFunction"));
 
             for(int i = 1; i < 10; i++) {
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "Type" + i));
-                method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "Arg" + i));
+                method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "Type" + i));
+                method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(object)), "Arg" + i));
             }
             method.Comments.Add(new CodeCommentStatement("Calls a function inside a DLL, such as a standard Windows API function.", true));
-            method.ReturnType = new CodeTypeReference(typeof(int));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(int));
             members.Add(method);
 
             #region Object Methods
@@ -498,9 +498,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "FunctionName"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "FunctionName"));
             method.Comments.Add(new CodeCommentStatement("If FunctionName does not exist explicitly in the script (by means such as #Include or a non-dynamic call to a library function), IsFunc() returns 0.", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -509,10 +509,10 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(string)), "LabelName"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(string)), "LabelName"));
             method.Comments.Add(
                 new CodeCommentStatement("Returns a non-zero number if LabelName exists in the script as a subroutine, hotkey, or hotstring (do not include the trailing colon(s) in LabelName).", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             method = new CodeMemberMethodExAHK(true)
@@ -521,9 +521,9 @@ namespace SmartDevelop.AHK.AHKv1
                 IsDefaultMethodInvoke = true,
                 IsTraditionalCommand = false
             };
-            method.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(typeof(object)), "obj"));
+            method.Parameters.Add(new CodeParameterDeclarationExpressionEx(new CodeTypeReferenceEx(typeof(object)), "obj"));
             method.Comments.Add(new CodeCommentStatement("Determites if the given Value is an Object", true));
-            method.ReturnType = new CodeTypeReference(typeof(bool));
+            method.ReturnType = new CodeTypeReferenceEx(typeof(bool));
             members.Add(method);
 
             #endregion

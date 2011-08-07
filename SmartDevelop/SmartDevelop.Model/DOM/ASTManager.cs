@@ -94,6 +94,7 @@ namespace SmartDevelop.Model.DOM
 
         /// <summary>
         /// Updates the full AST Dependency Tree
+        /// Which means each document gets tokenized & Includeflow reanalyzed and reparsed
         /// </summary>
         /// <returns></returns>
         public async Task UpdateFullAST() {
@@ -143,8 +144,6 @@ namespace SmartDevelop.Model.DOM
         protected virtual void UpdateDocumentIncludeFlow(ProjectItemCodeDocument document) {
 
             // sub classes can override and add include parsing here
-
-            
         }
 
         /// <summary>

@@ -88,14 +88,19 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 };
 
 
-            //_texteditor.ShowLineNumbers
-            
+            _projectitem.TokenizerUpdated += (s, e) => {
+                _workbenchservice.STADispatcher.Invoke(new Action(() => {
+                    _texteditor.TextArea.TextView.Redraw();
+                }));
+
+            };
 
             _projectitem.AST.Updated += (s, e) => {
                 _workbenchservice.STADispatcher.Invoke(new Action(() => {
                         _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
                     }));
                 };
+
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
             _texteditor.FontSize = 15;
@@ -359,19 +364,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     if(ctx.Segment.Token == Token.TraditionalString || ctx.Segment.Token == Token.LiteralString)
                         return;
 
-                    var methodRef = FindMethodInvoke(ctx.Segment);
+                    int paramNumber;
+                    var methodRef = InvokeCompletionViewModel.FindEnclosingMethodInvoke(ctx.Segment, out paramNumber);
 
                     if(methodRef != null && methodRef.ResolvedMethodMember != null) {
-                        var methodDecl = methodRef.ResolvedMethodMember;
-                        var parameters = methodDecl.Parameters;
-
-
-                        _invokeCompletion = new InvokeCompletionViewModel(this)
-                        {
-                            Prefix = methodDecl.Name,
-                            Sufix = ")",
-                            InvokeDescription = methodRef.CommentInfo
-                        };
+                        
+                        _invokeCompletion = new InvokeCompletionViewModel(this, methodRef);
 
                         _invokeCompletion.Closed += (s, ee) => {
                             if(_invokeCompletion != null) {
@@ -390,37 +388,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         }
 
 
-        List<Token> _endingTokens = new List<Token>() { Token.BlockClosed, Token.BlockOpen };
 
-
-        CodeMethodReferenceExpressionEx FindMethodInvoke(CodeSegment segment) {
-            int literalBracketCnt = 1;
-            int indexerBrackedCnt = 0;
-            CodeMethodReferenceExpressionEx methodRef = null;
-            CodeSegment current = segment;
-
-            while(current != null) {
-
-                if(_endingTokens.Contains(current.Token))
-                    break;
-                else if(current.Token == Token.LiteralBracketClosed)
-                    literalBracketCnt++;
-                else if(current.Token == Token.IndexerBracketClosed)
-                    literalBracketCnt++;
-                else if(current.Token == Token.IndexerBracketOpen)
-                    literalBracketCnt--;
-                else if(current.Token == Token.LiteralBracketOpen) {
-                        literalBracketCnt--;
-                } else if(current.Token == Token.Identifier && current.CodeDOMObject is CodeMethodReferenceExpressionEx) {
-                    if(literalBracketCnt == 0 && indexerBrackedCnt == 0) {
-                        methodRef = current.CodeDOMObject as CodeMethodReferenceExpressionEx;
-                        break;
-                    }
-                }
-                current = current.Previous;
-            }
-            return methodRef;
-        }
 
 
         protected override void OnHasFocusChanged() {

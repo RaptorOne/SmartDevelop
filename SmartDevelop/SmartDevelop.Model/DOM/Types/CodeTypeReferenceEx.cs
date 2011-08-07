@@ -25,6 +25,14 @@ namespace SmartDevelop.Model.DOM.Types
 
         #region Constructor
 
+
+        public CodeTypeReferenceEx(Type type)
+            : base(type) {
+                _name = type.Name;
+        }
+
+
+
         public CodeTypeReferenceEx(ProjectItemCodeDocument item, string name, CodeTypeDeclarationEx enclosingType)
             : base(name) {
 

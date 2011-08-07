@@ -27,7 +27,11 @@ namespace SmartDevelop.Model.DOM
     ///  CodeDOM Service Impl. for AHK
     /// </summary>
     public class CodeDOMDocumentServiceAHK : CodeDocumentDOMService
-    {    
+    {
+
+        const string BY_REF = "byref";
+
+
         #region Fields
 
         Archimedes.CodeDOM.CodeDOMTraveler _codeDOMTraveler = new Archimedes.CodeDOM.CodeDOMTraveler();
@@ -591,7 +595,7 @@ namespace SmartDevelop.Model.DOM
                                             paramstack.Clear();
                                             CodeSegment previous = methodSignatureStart;
 
-                                            // get method properties:
+                                            // get method params:
                                             while(true) {
                                                 var current = previous.Next;
                                                 if(current.Token == Token.Identifier) {
@@ -600,10 +604,28 @@ namespace SmartDevelop.Model.DOM
                                                     // end of param reached:
                                                     if(paramstack.Count == 1) {
                                                         // thread one param as the untyped argument, type of Object
-                                                        method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object), paramstack.Pop().TokenString));
-                                                    } else if(paramstack.Count > 1) {
+                                                        method.Parameters.Add(new CodeParameterDeclarationExpressionEx(typeof(object), paramstack.Pop().TokenString)
+                                                            {
+                                                                Direction = FieldDirection.In
+                                                            });
+                                                    } else if(paramstack.Count == 2) {
+
+                                                        CodeParameterDeclarationExpressionEx param;
+
+                                                        var first = paramstack.Pop();
+
+                                                        //handle byref ->
+                                                        if(first.Token == Token.KeyWord && first.TokenString.Equals(BY_REF, StringComparison.InvariantCultureIgnoreCase)) {
+                                                            param = new CodeParameterDeclarationExpressionEx(typeof(object), paramstack.Pop().TokenString);
+                                                            param.Direction = FieldDirection.Ref;
+                                                        } else {
+                                                            param = new CodeParameterDeclarationExpressionEx(
+                                                                new CodeTypeReferenceEx(_document, first.TokenString, thisparent),
+                                                                paramstack.Pop().TokenString);
+                                                        }
+
                                                         // thread two param as the type and argument
-                                                        method.Parameters.Add(new CodeParameterDeclarationExpression(paramstack.Pop().TokenString, paramstack.Pop().TokenString));
+                                                        method.Parameters.Add(param);
                                                     }
                                                     if(current.Token == Token.LiteralBracketClosed)
                                                         break;

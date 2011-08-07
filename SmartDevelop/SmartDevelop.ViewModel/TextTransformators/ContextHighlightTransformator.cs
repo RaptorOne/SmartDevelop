@@ -27,6 +27,9 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
         public ContextHighlightTransformator(ProjectItemCodeDocument codeProject) {
             _codeProject = codeProject;
+
+
+
         }
 
         #region Colorizer

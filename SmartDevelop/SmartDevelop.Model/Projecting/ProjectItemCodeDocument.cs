@@ -125,7 +125,6 @@ namespace SmartDevelop.Model.Projecting
 
             _tokenizer.FinishedSucessfully += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
-                //// notify that we have a new token base to parse
                 OnTokenizerUpdated(this, new EventArgs<ProjectItemCodeDocument>(this));
                 //OnRequestTextInvalidation();
             };

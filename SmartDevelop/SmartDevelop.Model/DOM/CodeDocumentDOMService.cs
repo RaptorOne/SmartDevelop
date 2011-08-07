@@ -132,8 +132,8 @@ namespace SmartDevelop.Model.DOM
             var context = new CodeContext(this);
 
             var ranges = from r in _codeRangeManager.FindEncapsulatingRanges(offset)
-                            where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
-                            select r;
+                         where r.RangedCodeObject is CodeTypeDeclarationEx || r.RangedCodeObject is CodeMemberMethodEx
+                         select r;
 
             if(ranges.Any()) {
                 var range = ranges.First();
