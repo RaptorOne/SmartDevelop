@@ -21,6 +21,7 @@ using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.Model.CodeContexts;
 using SmartDevelop.ViewModel.InvokeCompletion;
 using SmartDevelop.Model.Tokenizing;
+using System.Threading.Tasks;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -95,11 +96,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             };
 
-            _projectitem.AST.Updated += (s, e) => {
-                _workbenchservice.STADispatcher.Invoke(new Action(() => {
-                        _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
-                    }));
-                };
+            //_projectitem.AST.Updated += (s, e) => {
+            //    _workbenchservice.STADispatcher.Invoke(new Action(() => {
+            //            _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
+            //        }));
+            //    };
 
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
@@ -352,13 +353,17 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             char typedChar;
             typedChar = e.Text[0];
             if(invokeCompletionTriggers.Contains(typedChar)) {
+                TaskEx.Run(()=>HandleMethodInvokeIntellisense());
+            }
+        }
 
-                _projectitem.EnsureTokenizerHasWorked();
-                _projectitem.AST.CompileTokenFileAsync();
-                //_projectitem.EnsureASTIsUpdated(MAX_TIMEOUT);
+        async void HandleMethodInvokeIntellisense() {
 
+            _projectitem.EnsureTokenizerHasWorked();
+            await _projectitem.AST.CompileTokenFileAsync();
 
-                var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
+            SyncInvoke(() => {
+                var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset, true);
 
                 if(ctx.Segment != null) {
                     if(ctx.Segment.Token == Token.TraditionalString || ctx.Segment.Token == Token.LiteralString)
@@ -379,16 +384,16 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                                 _invokeCompletion.Dispose();
                                 _invokeCompletion = null;
                             }
-                            };
+                        };
 
                         _invokeCompletion.Show();
                     } else
                         return;
                 }
-            }
+            });
+
 
         }
-
 
 
 

@@ -39,6 +39,8 @@ namespace SmartDevelop.Model.Tokenizing
         /// <returns></returns>
         public abstract TokenizerSnapshot GetSegmentsSnapshot();
 
+        public abstract void WaitTillCompleted();
+
         #endregion
 
         /// <summary>

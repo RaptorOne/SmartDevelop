@@ -15,6 +15,8 @@ using SmartDevelop.Model.Tokenizing;
 using SmartDevelop.Model.CodeContexts;
 using System.Windows.Controls;
 using SmartDevelop.ViewModel.InvokeCompletion;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace SmartDevelop.AHK.AHKv1.CodeCompletion
 {
@@ -102,6 +104,12 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 return;
             }
 
+            TaskEx.Run(() => HandleCompletionEvent(currentChar, segment, e));
+        }
+
+
+        async void HandleCompletionEvent(char currentChar, CodeSegment segment, TextCompositionEventArgs e) {
+
             if(e.Text.Length == 1 && !omitCodeCompletion.Contains(currentChar)) {
                 // this is just for first debugging purposes
                 // as this code belongs to a completion service which handles and caches those completion items
@@ -109,35 +117,38 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                 // Open code completion after the user has pressed dot:
                 if(e.Text == ".") {
 
-                    IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
-
                     //ensure we have a updated tokenizer
                     _projectitem.EnsureTokenizerHasWorked();
-                    _projectitem.AST.WaitUntilUpdated(MAX_TIMEOUT);
+                    await _projectitem.AST.CompileTokenFileAsync();
 
 
-                    // do type lookup & list avaiable members
-                    var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
 
-                    if(ctx != null && ctx.Segment != null) {
-                        if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
-                            foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
-                                data.Add(CompletionItem.Build(m));
-                            }
-                        } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
-                            foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
+                        IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
+                        // do type lookup & list avaiable members
+                        var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset - 1, true);
 
-                                var td = basetype.ResolveTypeDeclarationCache();
-                                if(td != null) {
-                                    foreach(var m in td.GetInheritedMembers())
-                                        data.Add(CompletionItem.Build(m));
+                        if(ctx != null && ctx.Segment != null) {
+                            if(ctx.Segment.CodeDOMObject is CodeThisReferenceExpression) {
+                                foreach(var m in ctx.EnclosingType.GetInheritedMembers()) {
+                                    data.Add(CompletionItem.Build(m));
+                                }
+                            } else if(ctx.Segment.CodeDOMObject is CodeBaseReferenceExpression) {
+                                foreach(CodeTypeReferenceEx basetype in ctx.EnclosingType.BaseTypes) {
+
+                                    var td = basetype.ResolveTypeDeclarationCache();
+                                    if(td != null) {
+                                        foreach(var m in td.GetInheritedMembers())
+                                            data.Add(CompletionItem.Build(m));
+                                    }
                                 }
                             }
                         }
-                    }
-                    if(data.Any())
-                        _completionWindow.Show();
-
+                        if(data.Any()) {
+                            _completionWindow.StartOffset++;
+                            _completionWindow.Show();
+                        }
+                    }));
                 } else if(_completionWindow == null && e.Text != "\n" &&
                     ((AsciiHelper.IsAsciiLiteralLetter(currentChar) || allowedspecailChars.Contains(currentChar))
                     && !AsciiHelper.IsAsciiNum(currentChar))) { // && !whitespaces.Contains(carretChar)
@@ -150,50 +161,59 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
                             return;
                     }
 
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
 
-                    IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
-                    foreach(var item in GetStaticCompletionItems()) {
-                        data.Add(item);
-                    }
+                        IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
+                        foreach(var item in GetStaticCompletionItems()) {
+                            data.Add(item);
+                        }
 
-                    CodeContext ctx;
-                    if(_texteditor.Document.TextLength > _texteditor.CaretOffset) {
-                        ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset, true);
-                    } else {
-                        // get root type context
-                        ctx = new CodeContext(_projectitem.AST);
-                        ctx.EnclosingType = _projectitem.AST.GetRootTypeSnapshot();
-                    }
+                        CodeContext ctx;
+                        if(_texteditor.Document.TextLength > _texteditor.CaretOffset) {
+                            ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset, true);
+                        } else {
+                            // get root type context
+                            ctx = new CodeContext(_projectitem.AST);
+                            ctx.EnclosingType = _projectitem.AST.GetRootTypeSnapshot();
+                        }
 
-                    foreach(var m in ctx.GetVisibleMembers()) {
-                        data.Add(CompletionItem.Build(m));
-                    }
+                        foreach(var m in ctx.GetVisibleMembers()) {
+                            data.Add(CompletionItem.Build(m));
+                        }
+                        //_completionWindow.StartOffset++;
+                        _completionWindow.Show();
 
-                    _completionWindow.Show(); 
+                    }));
                 }
             } else if(whitespaces.Contains(currentChar)) {
 
                 if(segment != null) {
                     var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
-                    if(s != null && s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase) || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
-                        var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        if(s != null && s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase)
+                            || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
 
-                        IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
-                        bool any = false;
-                        foreach(var m in ctx.GetVisibleMembers()) {
-                            if(m is CodeTypeDeclaration) {
-                                data.Add(CompletionItem.Build(m));
-                                any = true;
+                            var ctx = _projectitem.AST.GetCodeContext(_texteditor.CaretOffset);
+                            IList<ICompletionData> data = CreateNewCompletionWindow().CompletionList.CompletionData;
+                            bool any = false;
+                            foreach(var m in ctx.GetVisibleMembers()) {
+                                if(m is CodeTypeDeclaration) {
+                                    data.Add(CompletionItem.Build(m));
+                                    any = true;
+                                }
+                            }
+                            if(any) {
+                                _completionWindow.StartOffset++;
+                                _completionWindow.Show();
                             }
                         }
-                        if(any) {
-                            _completionWindow.StartOffset++;
-                            _completionWindow.Show();
-                        }
-                    }
+                    }));
+
                 }
             }
+
         }
+
 #endregion
 
         #region Helper Methods

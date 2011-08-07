@@ -112,12 +112,53 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         #endregion
 
+
+        Task _tokenizerTask;
+        object _tokenizerTaskLOCK = new object();
+
+        protected Task TokenizerTask {
+            get {
+                lock(_tokenizerTaskLOCK) {
+                    return _tokenizerTask;
+                }
+            }
+        }
+
+
+        bool _waitinginQueue;
+        object _waitinginQueueLock = new object();
+        bool WaitinginQueue {
+            get {
+                lock(_waitinginQueueLock) {
+                return _waitinginQueue;
+                }
+            }
+            set { lock(_waitinginQueueLock) { _waitinginQueue = value; } }
+        }
+
         #region Public Methods
+
+
+        public override void WaitTillCompleted() {
+            var task = TokenizerTask;
+            if(task == null)
+                return;
+            else
+                task.Wait();
+        }
+
+
 
         /// <summary>
         /// Starts Tokenizing async
         /// </summary>
         public override async Task TokenizeAsync() {
+
+            lock(_waitinginQueueLock) {
+                if(_waitinginQueue)
+                    return;
+                _waitinginQueue = true;
+            }
 
             await TaskEx.Run(() => {
 
@@ -126,7 +167,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     while(IsBusy)
                         Thread.Sleep(5);
                 }
-
+                _cts = new CancellationTokenSource();
+                IsBusy = true;
+                
                 Application.Current.Dispatcher.Invoke(new Action(() => {
                         //
                         // Access the text/length properties in the std thread!
@@ -135,11 +178,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         _textlen = _text.Length;
                     }));
 
-                IsBusy = true;
-                _cts = new CancellationTokenSource();
                 try {
-                    var tsk = TokinizeWorker(_cts.Token);
-                    tsk.Wait();
+                    lock(_tokenizerTaskLOCK) {
+                        WaitinginQueue = false;
+                        _tokenizerTask = TokinizeWorkerAsync(_cts.Token);
+                    }
+                    _tokenizerTask.Wait();
                     OnFinishedSucessfully();
                 } catch(OperationCanceledException e) {
                     //Console.WriteLine("Processing canceled.");
@@ -148,6 +192,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     var dummy = e.Message;
                 }
             });
+
 
             IsBusy = false;
         }
@@ -162,7 +207,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     _text = _document.Text;
                     _textlen = _text.Length;
                     var cts = new CancellationTokenSource();
-                    TokinizeWorker(cts.Token);
+                    TokinizeWorkerAsync(cts.Token);
                     _syncTokenizerBusy = false;
                     OnFinishedSucessfully();
                 }
@@ -215,7 +260,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         #region Tokenizer
 
-        async Task TokinizeWorker(CancellationToken cancelToken) {
+        async Task TokinizeWorkerAsync(CancellationToken cancelToken) {
 
             #region await the tokenizer task
 
@@ -805,5 +850,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         }
 
         #endregion
+
+
     }
 }

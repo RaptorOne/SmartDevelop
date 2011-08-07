@@ -166,17 +166,19 @@ namespace SmartDevelop.Model.Projecting
 
         /// <summary>
         /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
-        /// Warning: Calling this Method may result in a notable delay
+        /// This Method will block the calling Thread.
+        /// 
+        /// Warning: Calling this Method may result in a notable delay.
+        /// Warning: Calling this Method on the Standard Thread will likely cause a deadlock, as internaly Std Dispatcher Invokes will occur.
         /// </summary>
         public void EnsureTokenizerHasWorked() {
-            while(_tokenizer.IsBusy) {
-                Thread.Sleep(1);
-            }
-            UpdateTokenizer();
-            while(true) {
-                if(!_tokenizer.IsBusy)
-                    break;
-                Thread.Sleep(10);
+
+            _tokenizer.WaitTillCompleted();
+
+            if(_documentdirty && Project.ASTManager.UpdateAtWill && !_tokenizer.IsBusy) {
+                _documentdirty = false;
+                var tsk = _tokenizer.TokenizeAsync();
+                tsk.Wait();
             }
         }
 

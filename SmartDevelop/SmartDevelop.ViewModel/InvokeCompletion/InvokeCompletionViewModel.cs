@@ -238,6 +238,11 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             }
 
             var currentMethodRef = currentSegment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+
+            if(_methodRef.ResolvedMethodMember == null) {
+                this.CloseCommand.Execute(null);
+            }
+
             if(!_methodRef.MethodName.Equals(currentMethodRef.MethodName, StringComparison.InvariantCultureIgnoreCase)) {
                 SetMethod(currentSegment);
                 SetCurrentParam(paramNumber);
