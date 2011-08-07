@@ -85,8 +85,6 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
 
             var param = AllParameters[paramNumber - 1];
             ActiveParameter = param;
-
-            //InvokeDescription = paramNumber.ToString();
         }
 
 

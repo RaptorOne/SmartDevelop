@@ -92,7 +92,7 @@ namespace SmartDevelop.AHK.AHKv1
                     new CodeKeyWord("if"), new CodeKeyWord("else"),
                     new CodeKeyWord("class"), new CodeKeyWord("var"), new CodeKeyWord("new"), new CodeKeyWord("this"),new CodeKeyWord("base"), new CodeKeyWord("extends"),
                     new CodeKeyWord("return"), new CodeKeyWord("break"), new CodeKeyWord("continue"),
-                    new CodeKeyWord("global"), new CodeKeyWord("static"), new CodeKeyWord("local"),
+                    new CodeKeyWord("global"), new CodeKeyWord("static"), new CodeKeyWord("local"), new CodeKeyWord("byref"),
                      new CodeKeyWord("GoTo"), new CodeKeyWord("GoSub"),
                     new CodeKeyWord("loop"), new CodeKeyWord("for"), new CodeKeyWord("while"), new CodeKeyWord("in")
                 });

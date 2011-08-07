@@ -42,7 +42,8 @@
       <Word>local</Word>
       <Word>global</Word>
       <Word>static</Word>
-
+      <Word>byref</Word>
+      
       <Word>true</Word>
       <Word>false</Word>
 

@@ -598,7 +598,7 @@ namespace SmartDevelop.Model.DOM
                                             // get method params:
                                             while(true) {
                                                 var current = previous.Next;
-                                                if(current.Token == Token.Identifier) {
+                                                if(current.Token == Token.Identifier || current.Token == Token.KeyWord) {
                                                     paramstack.Push(current);
                                                 } else if(current.Token == Token.ParameterDelemiter || current.Token == Token.LiteralBracketClosed) {
                                                     // end of param reached:
@@ -612,11 +612,12 @@ namespace SmartDevelop.Model.DOM
 
                                                         CodeParameterDeclarationExpressionEx param;
 
+                                                        var second = paramstack.Pop();
                                                         var first = paramstack.Pop();
 
                                                         //handle byref ->
                                                         if(first.Token == Token.KeyWord && first.TokenString.Equals(BY_REF, StringComparison.InvariantCultureIgnoreCase)) {
-                                                            param = new CodeParameterDeclarationExpressionEx(typeof(object), paramstack.Pop().TokenString);
+                                                            param = new CodeParameterDeclarationExpressionEx(typeof(object), second.TokenString);
                                                             param.Direction = FieldDirection.Ref;
                                                         } else {
                                                             param = new CodeParameterDeclarationExpressionEx(
@@ -629,6 +630,8 @@ namespace SmartDevelop.Model.DOM
                                                     }
                                                     if(current.Token == Token.LiteralBracketClosed)
                                                         break;
+                                                } else if(current.Token == Token.NewLine){
+                                                    break;
                                                 }
                                                 previous = current;
                                             }
