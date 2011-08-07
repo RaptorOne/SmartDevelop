@@ -96,11 +96,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             };
 
-            //_projectitem.AST.Updated += (s, e) => {
-            //    _workbenchservice.STADispatcher.Invoke(new Action(() => {
-            //            _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
-            //        }));
-            //    };
+            _projectitem.AST.Updated += (s, e) => {
+                _workbenchservice.STADispatcher.Invoke(new Action(() => {
+                    _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
+                }));
+            };
 
 
             _texteditor.FontFamily = new System.Windows.Media.FontFamily("Consolas");

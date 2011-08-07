@@ -39,7 +39,7 @@ namespace SmartDevelop.Model.CodeContexts
                                 where mimp == null || !mimp.IsHidden
                                 select m);
 
-            if(EnclosingType != null && EnclosingType is CodeTypeDeclarationRoot) {
+            if(EnclosingType != null && !(EnclosingType is CodeTypeDeclarationRoot)) {
                 members.AddRange(EnclosingType.GetInheritedMembers());
             }
 
