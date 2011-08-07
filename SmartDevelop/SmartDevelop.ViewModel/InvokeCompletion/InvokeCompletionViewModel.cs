@@ -11,6 +11,8 @@ using System.Windows.Input;
 using SmartDevelop.Model.Tokenizing;
 using SmartDevelop.Model.DOM.Types;
 using System.CodeDom;
+using System.Windows.Controls.Primitives;
+using ICSharpCode.AvalonEdit.Rendering;
 
 namespace SmartDevelop.ViewModel.InvokeCompletion
 {
@@ -30,11 +32,13 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         #endregion
         CodeMethodReferenceExpressionEx _methodRef;
 
-        public InvokeCompletionViewModel(CodeFileViewModel documentVM, CodeMethodReferenceExpressionEx methodRef) {
+        public InvokeCompletionViewModel(CodeFileViewModel documentVM, CodeSegment methodSegment) {
             _document = documentVM.CodeDocument;
             _documentVM = documentVM;
 
             _toolTip = new ToolTip();
+            _toolTip.Placement = PlacementMode.RelativePoint;
+            _toolTip.PlacementTarget = _documentVM.Editor;
             _toolTip.Content = this;
 
             _documentVM.Editor.TextArea.KeyDown += (s, e) => {
@@ -46,19 +50,25 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             _documentVM.Editor.TextArea.Caret.PositionChanged += OnCaretPositionChanged;
 
             AllParameters = new ObservableCollection<InvokeParameter>();
-            SetMethod(methodRef);
+            SetMethod(methodSegment);
         }
 
-        void SetMethod(CodeMethodReferenceExpressionEx methodref) {
-            _methodRef = methodref;
+        void SetMethod(CodeSegment methodSegment) {
 
-            var methodDecl = methodref.ResolvedMethodMember;
-
+            _methodRef = methodSegment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+            var methodDecl = _methodRef.ResolvedMethodMember;
 
             Prefix = methodDecl.Name + "(";
             Sufix = ")";
-            InvokeDescription = methodref.CommentInfo;
+            InvokeDescription = _methodRef.CommentInfo;
 
+            _documentVM.Editor.TextArea.TextView.EnsureVisualLines();
+            var geometrys = BackgroundGeometryBuilder.GetRectsForSegment(_documentVM.Editor.TextArea.TextView, methodSegment.Range);
+            if(geometrys.Any()){
+                var pos = geometrys.First().BottomLeft;
+                _toolTip.VerticalOffset = pos.Y;
+                _toolTip.HorizontalOffset = pos.X;
+            }
 
             AllParameters.Clear();
             int i = 0;
@@ -164,13 +174,13 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         /// Searches the enclosing Methode-Invoke Expression
         /// </summary>
         /// <param name="segment">segment to analyze</param>
-        /// <returns>Returns the enclosing Method Reference Expression</returns>
-        public static CodeMethodReferenceExpressionEx FindEnclosingMethodInvoke(CodeSegment segment, out int paramNumber) {
+        /// <returns>Returns the enclosing Method Reference Expression Segment</returns>
+        public static CodeSegment FindEnclosingMethodInvoke(CodeSegment segment, out int paramNumber) {
             int literalBracketCnt = 1;
             int indexerBrackedCnt = 0;
             paramNumber = 1;
 
-            CodeMethodReferenceExpressionEx methodRef = null;
+            //CodeMethodReferenceExpressionEx methodRef = null;
             CodeSegment current = segment;
 
             while(current != null) {
@@ -193,13 +203,14 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
 
                 } else if(current.Token == Token.Identifier && current.CodeDOMObject is CodeMethodReferenceExpressionEx) {
                     if(literalBracketCnt == 0 && indexerBrackedCnt == 0) {
-                        methodRef = current.CodeDOMObject as CodeMethodReferenceExpressionEx;
-                        break;
+                        //methodRef = current.CodeDOMObject as CodeMethodReferenceExpressionEx;
+                        return current;
+                        //break;
                     }
                 }
                 current = current.Previous;
             }
-            return methodRef;
+            return null; //methodRef;
         }
 
 
@@ -219,12 +230,16 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
             if(segment == null)
                 this.CloseCommand.Execute(null);
             int paramNumber;
-            var currentMethodRef = FindEnclosingMethodInvoke(segment, out paramNumber);
+            var currentSegment = FindEnclosingMethodInvoke(segment, out paramNumber);
 
-            if(currentMethodRef == null) {
+            if(currentSegment == null) {
                 this.CloseCommand.Execute(null);
-            } else if(!_methodRef.MethodName.Equals(currentMethodRef.MethodName, StringComparison.InvariantCultureIgnoreCase)) {
-                SetMethod(currentMethodRef);
+                return;
+            }
+
+            var currentMethodRef = currentSegment.CodeDOMObject as CodeMethodReferenceExpressionEx;
+            if(!_methodRef.MethodName.Equals(currentMethodRef.MethodName, StringComparison.InvariantCultureIgnoreCase)) {
+                SetMethod(currentSegment);
                 SetCurrentParam(paramNumber);
             } else {
                 SetCurrentParam(paramNumber);

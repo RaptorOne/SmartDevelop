@@ -365,11 +365,14 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         return;
 
                     int paramNumber;
-                    var methodRef = InvokeCompletionViewModel.FindEnclosingMethodInvoke(ctx.Segment, out paramNumber);
+                    var methodSegment = InvokeCompletionViewModel.FindEnclosingMethodInvoke(ctx.Segment, out paramNumber);
+                    if(methodSegment == null)
+                        return;
 
+                    var methodRef = methodSegment.CodeDOMObject as CodeMethodReferenceExpressionEx;
                     if(methodRef != null && methodRef.ResolvedMethodMember != null) {
-                        
-                        _invokeCompletion = new InvokeCompletionViewModel(this, methodRef);
+
+                        _invokeCompletion = new InvokeCompletionViewModel(this, methodSegment);
 
                         _invokeCompletion.Closed += (s, ee) => {
                             if(_invokeCompletion != null) {
@@ -381,7 +384,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                         _invokeCompletion.Show();
                     } else
                         return;
-
                 }
             }
 

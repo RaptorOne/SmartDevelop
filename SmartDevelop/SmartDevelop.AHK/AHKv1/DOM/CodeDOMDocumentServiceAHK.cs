@@ -868,9 +868,7 @@ namespace SmartDevelop.Model.DOM
             if(tokenSegment.Token == Token.Identifier && tokenSegment.Next != null
                     && tokenSegment.Next.Token == Token.LiteralBracketOpen) {
 
-
-
-                        bool ismethodDeclaration = false;
+                bool ismethodDeclaration = false;
                 var closingliteral = tokenSegment.Next.FindClosingBracked(true);
                 if(closingliteral != null) {
                     //ensure that it is not a defect method declaration
@@ -882,8 +880,6 @@ namespace SmartDevelop.Model.DOM
                 } else {
                     RegisterError(_document, tokenSegment.Next, "Missing: )");
                 }
-                
-
 
                 #region Parse for Method Invokes
 
@@ -968,7 +964,7 @@ namespace SmartDevelop.Model.DOM
             } else if(tokenSegment.Token == Token.Identifier  && tokenSegment.Previous != null
                     && tokenSegment.Previous.Token == Token.MemberInvoke) {
 
-                #region Parse MemberInvoke
+                #region Parse MemberInvoke (Dot) Class.Member
 
                 var context = tokenSegment.Previous.Previous;
                 if(context == null) {
