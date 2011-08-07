@@ -40,7 +40,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
         static List<char> omitCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '\t', };
         static List<char> triggerCodeCompletion = new List<char> { '.' };
 
-        static List<char> endCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ' };
+        static List<char> endCodeCompletion = new List<char> { '(', ')', '[', ']', '{', '}', ';', ' ', '.' };
 
         static List<char> allowedspecailChars = new List<char> { '#', '_' };
         
