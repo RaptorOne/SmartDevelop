@@ -18,6 +18,8 @@ using System.ComponentModel;
 using System.Windows;
 using SmartDevelop.AHK.AHKv1.DOM;
 using System.Threading;
+using Archimedes.Patterns.Utils;
+using System.Diagnostics;
 
 
 namespace SmartDevelop.Model.DOM
@@ -59,13 +61,6 @@ namespace SmartDevelop.Model.DOM
         public CodeDOMDocumentServiceAHK(ProjectItemCodeDocument document)
             : base(document) {
 
-                //_fileCompileWorker = new BackgroundWorker();
-                //_fileCompileWorker.DoWork += CompileTokenFile;
-                //_fileCompileWorker.RunWorkerCompleted += (s, e) => {
-                //    OnRunWorkerCompleted();
-                //};
-                //_fileCompileWorker.WorkerSupportsCancellation = true;
-                //_fileCompileWorker.WorkerReportsProgress = false;
 
                 #region Create Language Master Root
 
@@ -422,7 +417,7 @@ namespace SmartDevelop.Model.DOM
                                         }
                                     }
 
-                                    if(next.Token == Token.BlockOpen) {
+                                  if(next.Token == Token.BlockOpen) {
 
                                         #region Add Class Declaration
 
@@ -509,23 +504,26 @@ namespace SmartDevelop.Model.DOM
                             var property = decl.NextOmit(whitespacetokens);
 
                             if(parentHirarchy.Count > 1) {
-                                // we must be in a class to have method properties
-                                if(property != null && property.Token == Token.Identifier) {
-                                    // this is a class field declaration
 
-                                    var propertyType = new CodeTypeReference(typeof(object));
-                                    var memberprop = new CodeMemberPropertyEx(_document)
-                                    {
-                                        Name = property.TokenString,
-                                        Attributes = MemberAttributes.Public,
-                                        Type = propertyType,
-                                        LinePragma = CreatePragma(property, _document.FilePath)
-                                    };
-                                    property.CodeDOMObject = memberprop;
-                                    decl.CodeDOMObject = propertyType;
-                                    parentHirarchy.Peek().Members.Add(memberprop);
-                                } else {
-                                    RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
+                                if(property != null) {
+                                    // we must be in a class to have method properties
+                                    if(property.Token == Token.Identifier) {
+                                        // this is a class field declaration
+
+                                        var propertyType = new CodeTypeReference(typeof(object));
+                                        var memberprop = new CodeMemberPropertyEx(_document)
+                                        {
+                                            Name = property.TokenString,
+                                            Attributes = MemberAttributes.Public,
+                                            Type = propertyType,
+                                            LinePragma = CreatePragma(property, _document.FilePath)
+                                        };
+                                        property.CodeDOMObject = memberprop;
+                                        decl.CodeDOMObject = propertyType;
+                                        parentHirarchy.Peek().Members.Add(memberprop);
+                                    } else {
+                                        RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
+                                    }
                                 }
                             } else {
                                 var err = "unexpected class field declaration -> not in class body";
@@ -533,9 +531,6 @@ namespace SmartDevelop.Model.DOM
                                     RegisterError(_document, property, err);
                                 RegisterError(_document, decl, err);
                             }
-
-
-
                         }
 
                         #endregion
@@ -812,7 +807,10 @@ namespace SmartDevelop.Model.DOM
 
         #region Helper Methods
 
+        [DebuggerStepThrough]
         void RegisterError(Projecting.ProjectItemCodeDocument codeitem, CodeSegment segment, string errorDescription) {
+            ThrowUtil.ThrowIfNull(codeitem);
+            ThrowUtil.ThrowIfNull(segment);
             var errorService = codeitem.Project.Solution.ErrorService;
             segment.ErrorContext = new CodeError() { Description = errorDescription };
             errorService.Add(new Errors.ErrorItem(segment, codeitem));

@@ -45,6 +45,7 @@ namespace SmartDevelop.AHK.AHKv1.Folding
             List<NewFolding> newFoldings = new List<NewFolding>();
             Stack<int> startOffsets = new Stack<int>();
             int lastNewLineOffset = 0;
+            int len = document.TextLength;
 
             foreach(var segment in _tokenservice.GetSegments()) {
                 if(segment.Token == Token.BlockOpen || segment.Token == Token.BlockClosed) {
@@ -55,7 +56,11 @@ namespace SmartDevelop.AHK.AHKv1.Folding
                         int startOffset = startOffsets.Pop();
                         // don't fold if opening and closing brace are on the same line
                         if(startOffset < lastNewLineOffset) {
-                            newFoldings.Add(new NewFolding(startOffset, segment.Range.Offset + 1));
+
+                            int endoffset = segment.Range.Offset + 1;
+                            if(startOffset < len && endoffset < len) {
+                                newFoldings.Add(new NewFolding(startOffset, endoffset));
+                            }
                         }
                     }
                 } else if(segment.Token == Token.NewLine) {

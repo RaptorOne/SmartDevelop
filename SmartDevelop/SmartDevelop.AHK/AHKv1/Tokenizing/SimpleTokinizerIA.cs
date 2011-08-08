@@ -319,7 +319,10 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                     #endregion
 
-                    currentChar = _text[i];
+                    if(i < _textlen)
+                        currentChar = _text[i];
+                    else
+                        break;
 
                     if(currentChar == '\n') {
                         _currentToken = Token.NewLine;

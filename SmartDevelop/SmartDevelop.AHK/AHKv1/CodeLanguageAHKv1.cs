@@ -31,6 +31,7 @@ using SmartDevelop.Model.Highlighning;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokening;
 using SmartDevelop.Model.Tokenizing;
+using SmartDevelop.AHK.AHKv1.Folding;
 
 namespace SmartDevelop.AHK.AHKv1
 {
@@ -211,7 +212,7 @@ namespace SmartDevelop.AHK.AHKv1
         }
 
         public override AbstractFoldingStrategy CreateFoldingStrategy( DocumentCodeSegmentService segmentService) {
-            return null; /* new FoldingStrategyAHKv1(segmentService); */
+            return new FoldingStrategyAHKv1(segmentService);
         }
 
 

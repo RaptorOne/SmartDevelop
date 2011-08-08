@@ -22,6 +22,7 @@ using SmartDevelop.Model.CodeContexts;
 using SmartDevelop.ViewModel.InvokeCompletion;
 using SmartDevelop.Model.Tokenizing;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SmartDevelop.ViewModel.DocumentFiles
 {
@@ -144,7 +145,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 _texteditor.TextArea.TextView.Redraw();
             };
 
-            DispatcherTimer foldingUpdateTimer = new DispatcherTimer();
+            DispatcherTimer foldingUpdateTimer = new DispatcherTimer( DispatcherPriority.Input, Application.Current.Dispatcher);
             foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
             foldingUpdateTimer.Tick += foldingUpdateTimer_Tick;
             foldingUpdateTimer.Start();
@@ -479,7 +480,6 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 if(segment.HasError) {
                     msg = segment.ErrorContext.Description;
                 } else {
-                    //msg = string.Format("[{0}] {1} @ L{2} C{3}, {4}", segment.Token, segment.TokenString, segment.LineNumber, segment.ColumnStart, segment.CodeDOMObject);
                     msg = segment.CodeDOMObject.ToString();
                 }
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
@@ -499,14 +499,12 @@ namespace SmartDevelop.ViewModel.DocumentFiles
         #region FoldingTimer
 
         void foldingUpdateTimer_Tick(object sender, EventArgs e) {
-            try {
-                if(_foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
-                    _foldingDirty = false;
-                    _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
-                }
-            } catch {
-                _foldingDirty = true;
+
+            if(_foldingDirty && !_texteditor.Document.IsInUpdate && _foldingStrategy != null) {
+                _foldingDirty = false;
+                _foldingStrategy.UpdateFoldings(_foldingManager, _texteditor.Document);
             }
+
         }
 
         #endregion
