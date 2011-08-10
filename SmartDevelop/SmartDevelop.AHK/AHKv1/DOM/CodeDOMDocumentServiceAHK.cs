@@ -32,6 +32,7 @@ namespace SmartDevelop.Model.DOM
     {
 
         const string BY_REF = "byref";
+        const string MODIFIER_STATIC = "static";
 
 
         #region Fields
@@ -495,45 +496,16 @@ namespace SmartDevelop.Model.DOM
 
                         #endregion
 
-                        // is class property / field
+                        // adjust some asumptions the tokenizer has made
 
-                        #region Parse Class Properties / Fields
-
-                        var decl = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
-                        if(decl != null && decl.Token == Token.KeyWord && decl.TokenString == "var") {
-                            var property = decl.NextOmit(whitespacetokens);
-
-                            if(parentHirarchy.Count > 1) {
-
-                                if(property != null) {
-                                    // we must be in a class to have method properties
-                                    if(property.Token == Token.Identifier) {
-                                        // this is a class field declaration
-
-                                        var propertyType = new CodeTypeReference(typeof(object));
-                                        var memberprop = new CodeMemberPropertyEx(_document)
-                                        {
-                                            Name = property.TokenString,
-                                            Attributes = MemberAttributes.Public,
-                                            Type = propertyType,
-                                            LinePragma = CreatePragma(property, _document.FilePath)
-                                        };
-                                        property.CodeDOMObject = memberprop;
-                                        decl.CodeDOMObject = propertyType;
-                                        parentHirarchy.Peek().Members.Add(memberprop);
-                                    } else {
-                                        RegisterError(_document, property, "unexpected Token -> Expected Identifier!");
-                                    }
+                        if(parentHirarchy.Count > 1) {
+                            // if we are in a class body, we can't have a traditional command invoke
+                            foreach(var s in line.CodeSegments)
+                                if(s.Token == Token.TraditionalCommandInvoke) {
+                                    s.Token = Token.Identifier;
+                                    break;
                                 }
-                            } else {
-                                var err = "unexpected class field declaration -> not in class body";
-                                if(property != null)
-                                    RegisterError(_document, property, err);
-                                RegisterError(_document, decl, err);
-                            }
                         }
-
-                        #endregion
 
 
                         // is method definition?:
@@ -669,6 +641,109 @@ namespace SmartDevelop.Model.DOM
                         }
 
                         #endregion
+
+
+                        // is class property / field
+
+                        #region Parse Class Properties / Fields
+
+                        if(parentHirarchy.Count > 1) {
+                            // we must be in a class to have method properties
+                            // extract keywords & Identifiers untill we reach
+                            // any otherToken - omit whitespaces 
+
+                            List<CodeSegment> declarationStack = new List<CodeSegment>();
+
+                            CodeSegment current = line.CodeSegments[0].ThisOrNextOmit(whitespacetokens);
+
+                            while(current != null) {
+                                if(current.Token == Token.WhiteSpace) {
+                                    //ignore white spaces
+                                } else if(current.Token == Token.Identifier || current.Token == Token.KeyWord) {
+                                    declarationStack.Add(current);
+                                } else {
+                                    break;
+                                }
+                                current = current.Next;
+                            }
+
+                            switch(declarationStack.Count) {
+
+
+                                case 0:
+                                    break;
+                                case 1:
+                                    // instance field definition
+                                    if(declarationStack[0].Token == Token.Identifier) {
+
+                                        // this is an untyped instance class field declaration
+
+                                        var propertyType = new CodeTypeReference(typeof(object));
+                                        var memberprop = new CodeMemberPropertyEx(_document)
+                                        {
+                                            Name = declarationStack[0].TokenString,
+                                            Attributes = MemberAttributes.Public,
+                                            Type = propertyType,
+                                            LinePragma = CreatePragma(declarationStack[0], _document.FilePath)
+                                        };
+                                        declarationStack[0].CodeDOMObject = memberprop;
+                                        parentHirarchy.Peek().Members.Add(memberprop);
+
+                                    } else {
+                                        RegisterError(_document, declarationStack[0], string.Format("Unexpected Token: {0}", declarationStack[0].Token));
+                                    }
+
+                                    break;
+
+                                case 2:
+                                    // we have two members in the decalration stack
+                                    // expected token flows
+                                    // keyword - identifier:  static Field, int Field
+                                    // identifier - identifier: Car myTypedCarField
+
+                                    // for the time beeing, AHK just supports static Field
+
+                                    if(declarationStack[0].Token == Token.KeyWord
+                                        && declarationStack[0].TokenString.Equals(MODIFIER_STATIC, StringComparison.InvariantCultureIgnoreCase)) {
+
+                                        if(declarationStack[1].Token == Token.Identifier) {
+
+                                            // this is an untyped static class field declaration
+
+                                            var propertyType = new CodeTypeReference(typeof(object));
+                                            var memberprop = new CodeMemberPropertyEx(_document)
+                                            {
+                                                Name = declarationStack[1].TokenString,
+                                                Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                                                Type = propertyType,
+                                                LinePragma = CreatePragma(declarationStack[1], _document.FilePath)
+                                            };
+                                            declarationStack[1].CodeDOMObject = memberprop;
+                                            parentHirarchy.Peek().Members.Add(memberprop);
+                                            
+
+                                        } else {
+                                            RegisterError(_document, declarationStack[0], string.Format("Expected: {0}", Token.Identifier));
+
+                                        }
+
+                                    } else {
+                                        RegisterError(_document, declarationStack[0], string.Format("Unexpected Token: {0}", declarationStack[0].Token));
+                                    }
+                                    break;
+
+                                default:
+                                    for(int ci = 0; ci < declarationStack.Count; ci++) {
+                                        RegisterError(_document, declarationStack[ci], string.Format("To much declaration Members", declarationStack[0].Token));
+                                    }
+                                    break;
+
+                            }
+
+                        }
+
+                        #endregion
+
 
                         #region Parse Remaining Tokens
 

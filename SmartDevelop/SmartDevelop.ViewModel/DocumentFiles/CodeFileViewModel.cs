@@ -115,7 +115,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
 
             _texteditor.SyntaxHighlighting = projectitem.CodeLanguage.GetHighlighter();
 
-            _foldingStrategy = projectitem.CodeLanguage.CreateFoldingStrategy(projectitem.SegmentService);
+            //_foldingStrategy = projectitem.CodeLanguage.CreateFoldingStrategy(projectitem.SegmentService);
             if(_foldingStrategy != null) {
                 if(_foldingManager == null)
                     _foldingManager = FoldingManager.Install(_texteditor.TextArea);

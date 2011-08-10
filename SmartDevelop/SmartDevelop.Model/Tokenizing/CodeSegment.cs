@@ -17,7 +17,7 @@ namespace SmartDevelop.Model.Tokenizing
 
         readonly ProjectItemCodeDocument _codeDocument;
         readonly SimpleSegment _codesegment;
-        readonly Token _type;
+        Token _type;
         readonly string _tokenstring;
         readonly int _line;
         readonly int _column;
@@ -265,6 +265,7 @@ namespace SmartDevelop.Model.Tokenizing
         /// </summary>
         public Token Token {
             get { return _type; }
+            set { _type = value; }
         }
 
         /// <summary>

@@ -7,8 +7,9 @@ namespace SmartDevelop.Model.Tokenizing
 {
     public static class TokenHelper
     {
-        public static List<Token> WhiteSpaces = new List<Token> { Token.WhiteSpace };
-        public static List<Token> WhiteSpacesNewLine = new List<Token> { Token.WhiteSpace, Token.NewLine };
+        public static readonly List<Token> WhiteSpaces = new List<Token> { Token.WhiteSpace };
+        public static readonly List<Token> WhiteSpacesNewLine = new List<Token> { Token.WhiteSpace, Token.NewLine };
+
 
         #region Bracket Helper Methods
 
@@ -52,6 +53,57 @@ namespace SmartDevelop.Model.Tokenizing
         public static bool IsBracketToken(Token token) {
             return (openCloseMap.ContainsKey(token) || openCloseMap.ContainsValue(token));
         }
+        #endregion
+
+        #region Operators
+
+        public static readonly List<Token> OPERATORS = new List<Token>() {
+            Token.Operator_Add,
+            Token.Operator_Subtract,
+            Token.Operator_Multiply,
+            Token.Operator_Divide,
+            Token.Operator_AssignModulus, 
+            Token.Operator_BitwiseOr, 
+            Token.Operator_BitwiseXOr, 
+            Token.Operator_BitwiseAnd,
+            Token.Operator_Power,
+
+            Token.Operator_ShiftLeft,
+            Token.Operator_ShiftRight,
+
+
+            Token.Operator_BooleanAnd,
+            Token.Operator_BooleanOr,
+            Token.Operator_BooleanNot,
+
+            Token.Operator_GreaterThan,
+            Token.Operator_GreaterThanOrEqual,
+
+            Token.Operator_LessThan,
+            Token.Operator_LessThanOrEqual,
+
+                
+            Token.Operator_IdentityEquality,
+            Token.Operator_IdentityInequality,
+
+
+            Token.Operator_TernaryIf,
+            Token.Operator_TernaryElse,
+
+            Token.Operator_Assign,
+            Token.Operator_AssignAdd,
+            Token.Operator_AssignSubtract,
+            Token.Operator_AssignMultiply,
+            Token.Operator_AssignDivide,
+            Token.Operator_AssignModulus,
+            Token.Operator_AssignAppend,
+            Token.Operator_AssignBitOr,
+            Token.Operator_AssignBitAnd,
+            Token.Operator_AssignBitXOr,
+            Token.Operator_AssignShiftRight,
+            Token.Operator_AssignShiftLeft,
+        };
+
         #endregion
     }
 }

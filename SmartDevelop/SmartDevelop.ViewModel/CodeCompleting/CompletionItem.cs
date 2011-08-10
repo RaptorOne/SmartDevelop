@@ -30,7 +30,11 @@ namespace SmartDevelop.ViewModel.CodeCompleting
                 return new CompletionItemClass(classdecl.Name, string.Format("class {0}\n{1}", classdecl.Name, GetDocumentCommentString(classdecl.Comments)));
             }else if(m is CodeMemberProperty) {
                 var prop = ((CodeMemberProperty)m);
-                return new CompletionItemProperty(prop.Name, string.Format("Property {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+                if((prop.Attributes & MemberAttributes.Static) == MemberAttributes.Static)
+                    return new CompletionItemPropertyStatic(prop.Name, string.Format("Property {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+                else
+                    return new CompletionItemProperty(prop.Name, string.Format("Property {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
+                
             }else if(m is CodeMemberField) {
                 var prop = ((CodeMemberField)m);
                 return new CompletionItemField(prop.Name, string.Format("Field {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
