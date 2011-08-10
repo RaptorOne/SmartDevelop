@@ -53,7 +53,6 @@
     <Compile Include="AHKv1\CodeLanguageAHKBuildinMethods.cs" />
     <Compile Include="AHKv1\CodeLanguageAHKv1.cs" />
     <Compile Include="AHKv1\DOM\ASTManagerAHK.cs" />
-    <Compile Include="AHKv1\DOM\CodeDOMServiceIA.cs" />
     <Compile Include="AHKv1\DOM\CodeDOMDocumentServiceAHK.cs" />
     <Compile Include="AHKv1\DOM\CompilerArgument.cs" />
     <Compile Include="AHKv1\DOM\IncludeTreeBuilder.cs" />

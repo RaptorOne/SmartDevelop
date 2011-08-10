@@ -62,6 +62,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char TRADITIONAL_ASIGNMENT = '=';
         const char DIRECTIVE_START = '#';
 
+        const char NEWLINE = '\r';
 
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '^' , '-', '|' , '?' };
@@ -130,7 +131,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         bool WaitinginQueue {
             get {
                 lock(_waitinginQueueLock) {
-                return _waitinginQueue;
+                    return _waitinginQueue;
                 }
             }
             set { lock(_waitinginQueueLock) { _waitinginQueue = value; } }
@@ -324,7 +325,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     else
                         break;
 
-                    if(currentChar == '\n') {
+                    if(currentChar == NEWLINE) {
                         _currentToken = Token.NewLine;
                         //_currentLine++;
                         _currentColumn = 0;
@@ -341,7 +342,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                         bool previuosWasEscape = true;
                         while(i < _textlen) {
-                            if(_text[i] == '\n') {
+                            if(_text[i] == NEWLINE) {
                                 _currentLine++;
                                 break;
                             } else if(_text[i] == '"') {
@@ -378,7 +379,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         // to speed things up
                         bool endingboundsFound = false;
                         while(i < _textlen) {
-                            if(_text[i] == '\n')
+                            if(_text[i] == NEWLINE)
                                 _currentLine++;
                             if(IsMultiLineCommentEnd(i)) {
                                 endingboundsFound = true;
@@ -413,7 +414,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         bool endingboundsFound = false;
                         bool matchDirty = true;
                         while(i < _textlen) {
-                            if(_text[i] == '\n') {
+                            if(_text[i] == NEWLINE) {
                                 _currentLine++;
                                 matchDirty = false;
                             } else if(_text[i] == ')' && !matchDirty) {
@@ -510,7 +511,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         _activeToken = _currentToken;
                     }
 
-                    if(currentChar == '\n')
+                    if(currentChar == NEWLINE)
                         _currentLine++;
                     else
                         _currentColumn++;
@@ -659,7 +660,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                 bool gotIdentifier = false;
                 while(true) {
                     c = _text.Previous(index);
-                    if(c == '\0' || c == '\n') {
+                    if(c == '\0' || c == NEWLINE) {
                         break;
                     }else if(IsWhiteChar(c)){
                         // igonre
@@ -743,7 +744,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
                 while(true) {
                     if(--index > 0) {
-                        if(_text[index] == '\n')
+                        if(_text[index] == NEWLINE)
                             return true;
                         else if(!IsWhiteSpace(index)) {
                             break;
@@ -821,10 +822,13 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
 
         bool IsCleanPrefixSpace(int index) {
             bool cleanPrefixSpace = true;
+            char c;
             for(int pPtr = index - 1; pPtr >= 0; pPtr--) {
-                if(_text[pPtr] == '\n')
+
+                c = _text[pPtr];
+                if(c == NEWLINE)
                     break;
-                if(!IsWhiteChar(pPtr)) {
+                if(!IsWhiteChar(c)) {
                     cleanPrefixSpace = false;
                     break;
                 }
@@ -836,16 +840,12 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
             char c;
             while(true) {
                 c = _text.Next(index++);
-                if(c == '\n' || c == '\0')
+                if(c == NEWLINE || c == '\0')
                     break;
                 else if(c != ' ' && c != '\t')
                     break;
             }
             return c;
-        }
-
-        bool IsWhiteChar(int index) {
-            return _text[index] == ' ' || _text[index] == '\t';
         }
 
         public static bool IsWhiteChar(char c) {

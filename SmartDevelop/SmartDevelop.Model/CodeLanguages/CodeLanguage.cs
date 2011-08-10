@@ -120,12 +120,6 @@ namespace SmartDevelop.Model.CodeLanguages
         /// <returns></returns>
         public abstract Tokenizer CreateTokenizer(ProjectItemCodeDocument codeitem, ITextSource source);
 
-        /// <summary>
-        /// Creates a new DomService for this Language
-        /// </summary>
-        /// <param name="codeProject"></param>
-        /// <returns></returns>
-        public abstract CodeDOMService CreateDOMService(SmartCodeProject codeProject);
 
         /// <summary>
         /// Creates a new DOMService for the given Document

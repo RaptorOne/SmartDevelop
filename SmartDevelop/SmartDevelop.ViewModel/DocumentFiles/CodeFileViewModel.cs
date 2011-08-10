@@ -472,7 +472,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             if(pos != null) {
 
                 var segment = _projectitem.SegmentService.QueryCodeSegmentAt(_projectitem.Document.GetOffset(pos.Value.Line, pos.Value.Column + 1));
-                if(segment == null || segment.CodeDOMObject == null)
+                if(segment == null) //segment.CodeDOMObject == null
                     return;
 
                 string msg;
@@ -480,7 +480,7 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 if(segment.HasError) {
                     msg = segment.ErrorContext.Description;
                 } else {
-                    msg = segment.CodeDOMObject.ToString();
+                    msg = string.Format("{0} '{1}', {2}", segment.Token, segment.TokenString, segment.CodeDOMObject);
                 }
                 _toolTip.PlacementTarget = _texteditor; // required for property inheritance
                 _toolTip.Content = msg;

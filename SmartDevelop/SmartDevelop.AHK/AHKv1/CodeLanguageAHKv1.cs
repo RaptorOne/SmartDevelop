@@ -207,10 +207,6 @@ namespace SmartDevelop.AHK.AHKv1
             return new SimpleTokinizerIA(codeitem, source);
         }
 
-        public override Model.DOM.CodeDOMService CreateDOMService(Model.Projecting.SmartCodeProject codeProject) {
-            return new CodeDOMServiceIA(codeProject);
-        }
-
         public override AbstractFoldingStrategy CreateFoldingStrategy( DocumentCodeSegmentService segmentService) {
             return new FoldingStrategyAHKv1(segmentService);
         }
