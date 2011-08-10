@@ -542,9 +542,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         CodeSegment _previous = null;
 
         void EndActiveToken(int index) {
-            int l = index - _currentRangeStart;
-            if(l > 0) {
-                var str = _text.Substring(_currentRangeStart, l).Trim(trimchars);
+            int tokenRangeLenght = index - _currentRangeStart;
+            if(tokenRangeLenght > 0) {
+                var str = _text.Substring(_currentRangeStart, tokenRangeLenght).Trim(trimchars);
                 if(!(_activeToken == Token.Unknown && str.Length == 0)) {
 
                     Token? tokenToStore = null;
@@ -573,8 +573,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         tokenToStore = OPERATOR_TOKEN.FindOperatorToken(str);
                     }
 
-                    if(l > 1 && _currentToken == Token.NewLine)
-                        l--;
+                    //if(tokenRangeLenght > 1 && _currentToken == Token.NewLine)
+                    //    tokenRangeLenght--;
                     int linenumber = _currentLine;
                     if(_activeToken == Token.NewLine)
                         --linenumber;
@@ -584,7 +584,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         _traditionalMode = true;
 
                     var currentsegment = new CodeSegment(_codeitem, tokenToStore.HasValue ? tokenToStore.Value : _activeToken,
-                        str, new SimpleSegment(_currentRangeStart, l), linenumber, _currentColStart, _previous);
+                        str, new SimpleSegment(_currentRangeStart, tokenRangeLenght), linenumber, _currentColStart, _previous);
                     if(_previous != null)
                         _previous.Next = currentsegment;
                     _previous = currentsegment;

@@ -33,7 +33,7 @@ namespace SmartDevelop.Model.DOM
 
         const string BY_REF = "byref";
         const string MODIFIER_STATIC = "static";
-
+        const char NEWLINE = '\r';
 
         #region Fields
 
@@ -728,7 +728,7 @@ namespace SmartDevelop.Model.DOM
                                         }
 
                                     } else {
-                                        RegisterError(_document, declarationStack[0], string.Format("Unexpected Token: {0}", declarationStack[0].Token));
+                                        RegisterError(_document, declarationStack[0], string.Format("Unexpected '{0}' in Class Body", declarationStack[0].TokenString));
                                     }
                                     break;
 
@@ -801,7 +801,7 @@ namespace SmartDevelop.Model.DOM
 
         string GetDocumentationComment(string data) {
             StringBuilder sb = new StringBuilder();
-            foreach(var line in data.Split('\n')) {
+            foreach(var line in data.Split('\n','\r')) {
                 var cline = line.Trim();
                 cline = cline.TrimStart(' ', '\t', ';', '/');
                 cline = cline.TrimStart('*');
