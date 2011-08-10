@@ -109,12 +109,15 @@ namespace SmartDevelop.ViewModel.InvokeCompletion
         /// </summary>
         void SetCurrentParam(int paramNumber) {
 
-            if(AllParameters.Count < paramNumber) {
-                paramNumber = AllParameters.Count;
-            }
+            if(AllParameters.Any()) {
+                if(AllParameters.Count < paramNumber) {
+                    paramNumber = AllParameters.Count;
+                }
 
-            var param = AllParameters[paramNumber - 1];
-            ActiveParameter = param;
+                var param = AllParameters[paramNumber - 1];
+                ActiveParameter = param;
+            } else
+                ActiveParameter = null;
         }
 
 

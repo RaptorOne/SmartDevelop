@@ -375,16 +375,18 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         _activeToken = Token.MultiLineComment;
 
                         // lets find the end of comment section,
-                        // as we dont want to parse the whole comment chunk
+                        // as we don't want to parse the whole comment chunk
                         // to speed things up
                         bool endingboundsFound = false;
                         while(i < _textlen) {
-                            if(_text[i] == NEWLINE)
+                            if(_text[i] == NEWLINE) {
                                 _currentLine++;
-                            if(IsMultiLineCommentEnd(i)) {
+                                _currentColumn = 0;
+                            } if(IsMultiLineCommentEnd(i)) {
                                 endingboundsFound = true;
                                 break;
-                            }
+                            } else
+                                _currentColumn++;
                             i++;
                         }
 
@@ -393,8 +395,9 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                             return; // we are done ;)
                         } else {
                             i += 2;
-                            _currentColumn = 0;
+                            //_currentColumn = 0;
                             EndActiveToken(i);
+                            goto redo;
                         }
 
                         #endregion
@@ -564,12 +567,6 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                     }
 
                     if(_activeToken == Token.OperatorFlow) {
-                        // toDo:
-                        // handle AHK specail cases like:
-                        // := AND = Asign
-                        // == AND = Equality
-                        // to do so, look back this line for
-
                         tokenToStore = OPERATOR_TOKEN.FindOperatorToken(str);
                     }
 

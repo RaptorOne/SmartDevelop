@@ -418,77 +418,79 @@ namespace SmartDevelop.Model.DOM
                                         }
                                     }
 
-                                  if(next.Token == Token.BlockOpen) {
+                                    if(next != null) {
+                                        if(next.Token == Token.BlockOpen) {
 
-                                        #region Add Class Declaration
+                                            #region Add Class Declaration
 
-                                        CodeSegment classBodyStart = next;
+                                            CodeSegment classBodyStart = next;
 
-                                        var type = new CodeTypeDeclarationEx(_document, classNameSegment.TokenString)
-                                        {
-                                            IsClass = true,
-                                            LinePragma = CreatePragma(classNameSegment, _document.FilePath),
-                                            CodeDocumentItem = _document
-                                        };
-                                        classNameSegment.CodeDOMObject = type;
+                                            var type = new CodeTypeDeclarationEx(_document, classNameSegment.TokenString)
+                                            {
+                                                IsClass = true,
+                                                LinePragma = CreatePragma(classNameSegment, _document.FilePath),
+                                                CodeDocumentItem = _document
+                                            };
+                                            classNameSegment.CodeDOMObject = type;
 
 
-                                        // check if this type was alread defined in this scope
-                                        if(thisparent.GetInheritedMembers().Contains(type)) {
-                                            RegisterError(_document, classNameSegment, "oh my dear, this class already exisits in the current scope!");
-                                        } else {
+                                            // check if this type was alread defined in this scope
+                                            if(thisparent.GetInheritedMembers().Contains(type)) {
+                                                RegisterError(_document, classNameSegment, "oh my dear, this class already exisits in the current scope!");
+                                            } else {
 
-                                            #region Check & Resolve Baseclass
+                                                #region Check & Resolve Baseclass
 
-                                            if(basecls != null) {
-                                                //check if we have a circual interhance tree
-                                                var baseclassImpl = basecls.ResolveTypeDeclarationCache();
-                                                if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(_document, classNameSegment.TokenString, thisparent))) {
-                                                    //circular dependency detected!!
-                                                    RegisterError(_document, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
-                                                } else {
-                                                    if(basecls != null)
-                                                        type.BaseTypes.Add(basecls);
-                                                    else
-                                                        type.BaseTypes.Add(new CodeTypeReferenceEx(_document, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                                if(basecls != null) {
+                                                    //check if we have a circual interhance tree
+                                                    var baseclassImpl = basecls.ResolveTypeDeclarationCache();
+                                                    if(baseclassImpl != null && baseclassImpl.IsSubclassOf(new CodeTypeReferenceEx(_document, classNameSegment.TokenString, thisparent))) {
+                                                        //circular dependency detected!!
+                                                        RegisterError(_document, refBaseClass, "Woops you just produced a circular dependency in your inheritance tree!");
+                                                    } else {
+                                                        if(basecls != null)
+                                                            type.BaseTypes.Add(basecls);
+                                                        else
+                                                            type.BaseTypes.Add(new CodeTypeReferenceEx(_document, "Object", thisparent) { ResolvedTypeDeclaration = _superBase });
+                                                    }
                                                 }
+
+                                                #endregion
+
+
+                                                // extract class documentation Comment
+                                                var comment = ExtractComment(classkeywordSegment);
+                                                if(comment != null)
+                                                    type.Comments.Add(comment);
+
+
+                                                // Add it to the CodeDOM Tree
+                                                thisparent.Members.Add(type);
+                                                type.Parent = thisparent;
                                             }
+
+                                            // Create a CodeRange Item
+                                            int startOffset = classBodyStart.Range.Offset;
+                                            var classBodyEnd = classBodyStart.FindClosingBracked(true);
+                                            if(classBodyEnd != null) {
+                                                int length = (classBodyEnd.Range.Offset - startOffset);
+                                                _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
+                                            } else {
+                                                RegisterError(_document, classBodyStart, "Expected: " + Token.BlockClosed);
+                                            }
+
+                                            parentHirarchy.Push(type);
+                                            bcc++;
+
+                                            i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
+                                            continue;
 
                                             #endregion
 
-
-                                            // extract class documentation Comment
-                                            var comment = ExtractComment(classkeywordSegment);
-                                            if(comment != null)
-                                                type.Comments.Add(comment);
-
-
-                                            // Add it to the CodeDOM Tree
-                                            thisparent.Members.Add(type);
-                                            type.Parent = thisparent;
-                                        }
-
-                                        // Create a CodeRange Item
-                                        int startOffset = classBodyStart.Range.Offset;
-                                        var classBodyEnd = classBodyStart.FindClosingBracked(true);
-                                        if(classBodyEnd != null) {
-                                            int length = (classBodyEnd.Range.Offset - startOffset);
-                                            _codeRangeManager.Add(new CodeRange(new SimpleSegment(startOffset, length), type));
                                         } else {
-                                            RegisterError(_document, classBodyStart, "Expected: " + Token.BlockClosed);
+                                            RegisterError(_document, next, "Expected: " + Token.BlockOpen);
+                                            i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
                                         }
-
-                                        parentHirarchy.Push(type);
-                                        bcc++;
-
-                                        i = classBodyStart.LineNumber; // jumt to:  class Foo { * <---|
-                                        continue;
-
-                                        #endregion
-
-                                    } else {
-                                        RegisterError(_document, next, "Expected: " + Token.BlockOpen);
-                                        i = (next.Next != null) ? next.Next.LineNumber : next.LineNumber;
                                     }
                                 }
                             }
