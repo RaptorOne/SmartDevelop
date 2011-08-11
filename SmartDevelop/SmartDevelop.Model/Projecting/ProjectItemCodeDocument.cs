@@ -38,7 +38,7 @@ namespace SmartDevelop.Model.Projecting
         DocumentCodeSegmentService _codeSegmentService;
         CodeDocumentDOMService _ast;
 
-        bool _documentdirty = false;
+        volatile bool _documentdirty = false;
         bool _hasUnsavedChanges = false;
         string _name;
 
@@ -285,6 +285,10 @@ namespace SmartDevelop.Model.Projecting
 
         #region Public Properties
 
+
+        public bool IsDocumentDirty {
+            get { return _documentdirty; }
+        }
 
         /// <summary>
         /// Used for non sulution/project files

@@ -69,7 +69,8 @@ namespace SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates
 */
 class AeroPlane
 {
-    var JetSets ; :-P
+    JetSets ; :-P
+    static Humus
     
     Fly(){
         ; run it! :D
@@ -93,7 +94,7 @@ class AeroPlane
 */
 class Car
 {
-    var Wheels
+    Wheels := []
     
     Run(){
         ; run it! :D
@@ -164,7 +165,7 @@ IncludeTestMethod(){
     */
     class Bar
     {
-	    var TestProperty
+	    TestProperty := """"
 	
 	    SimpleMethod(){
 		    return ""The property is:"" this.TestProperty
@@ -195,8 +196,8 @@ IncludeTestMethod(){
     */
     class Foo extends Bar
     {
-        var TestProperty ;property override
-        var SubClassProperty := ""fal""
+        TestProperty := 33 ;property override
+        SubClassProperty := ""fal""
 
 	    Helper(){
 		    if(this.SubClassProperty == ""fal""){

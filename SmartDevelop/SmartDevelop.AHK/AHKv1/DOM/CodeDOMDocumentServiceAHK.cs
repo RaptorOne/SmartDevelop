@@ -33,7 +33,7 @@ namespace SmartDevelop.Model.DOM
 
         const string BY_REF = "byref";
         const string MODIFIER_STATIC = "static";
-        const char NEWLINE = '\r';
+        const char NEWLINE = '\n';
 
         #region Fields
 

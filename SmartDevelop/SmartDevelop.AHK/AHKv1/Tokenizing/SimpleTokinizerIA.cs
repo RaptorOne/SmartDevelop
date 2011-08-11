@@ -62,7 +62,7 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
         const char TRADITIONAL_ASIGNMENT = '=';
         const char DIRECTIVE_START = '#';
 
-        const char NEWLINE = '\r';
+        const char NEWLINE = '\n';
 
         static List<char> ALLOWED_SPECAILCHARS = new List<char> { '_' , '$' };
         static List<char> OPERATORS = new List<char> { '=', '>', '<', '!', '&', '*', '/', ':', '+', '^' , '-', '|' , '?' };
@@ -570,8 +570,8 @@ namespace SmartDevelop.AHK.AHKv1.Tokenizing
                         tokenToStore = OPERATOR_TOKEN.FindOperatorToken(str);
                     }
 
-                    //if(tokenRangeLenght > 1 && _currentToken == Token.NewLine)
-                    //    tokenRangeLenght--;
+                    if(tokenRangeLenght > 1 && _currentToken == Token.NewLine)
+                        tokenRangeLenght--;
                     int linenumber = _currentLine;
                     if(_activeToken == Token.NewLine)
                         --linenumber;
