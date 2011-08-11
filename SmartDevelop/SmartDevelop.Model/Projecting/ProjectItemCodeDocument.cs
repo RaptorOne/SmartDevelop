@@ -39,6 +39,9 @@ namespace SmartDevelop.Model.Projecting
         CodeDocumentDOMService _ast;
 
         volatile bool _documentdirty = false;
+        volatile bool _documentTokenizerDirty = false;
+        volatile bool _documentASTDirty = false;
+
         bool _hasUnsavedChanges = false;
         string _name;
 
@@ -125,11 +128,19 @@ namespace SmartDevelop.Model.Projecting
 
             _tokenizer.FinishedSucessfully += (s, e) => {
                 _codeSegmentService.Reset(_tokenizer.GetSegmentsSnapshot());
+
+                if(!_documentdirty)
+                    _documentTokenizerDirty = false;
+                
                 OnTokenizerUpdated(this, new EventArgs<ProjectItemCodeDocument>(this));
-                //OnRequestTextInvalidation();
             };
 
             _ast = languageId.CreateDOMService(this);
+
+            _ast.Updated += (s, e) => {
+                if(!_documentdirty && !_documentTokenizerDirty)
+                    _documentASTDirty = false;
+            };
 
 
             DispatcherTimer tokenUpdateTimer = new DispatcherTimer();
@@ -285,9 +296,12 @@ namespace SmartDevelop.Model.Projecting
 
         #region Public Properties
 
+        public bool IsTokenizerDirty {
+            get { return _documentTokenizerDirty; }
+        }
 
-        public bool IsDocumentDirty {
-            get { return _documentdirty; }
+        public bool IsASTDirty {
+            get { return _documentASTDirty; }
         }
 
         /// <summary>
@@ -410,6 +424,15 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+        /// <summary>
+        /// Marks the document as dirty sets appriorate flags
+        /// </summary>
+        void Dirty() {
+            _documentdirty = true;
+            _documentTokenizerDirty = true;
+            _documentASTDirty = true;
+        }
+
         #region Event Handlers
 
 
@@ -428,9 +451,12 @@ namespace SmartDevelop.Model.Projecting
         }
 
         void OnCodedocumentChanged(object sender, EventArgs e){
-            _documentdirty = true;
+            Dirty();
             HasUnsavedChanges = true;
         }
+
+
+
 
         void CheckUpdateTokenRepresentation(object sender, EventArgs e) {
             UpdateTokenizer();

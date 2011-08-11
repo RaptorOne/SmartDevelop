@@ -15,43 +15,48 @@ namespace SmartDevelop.AHK.AHKv1.Projecting.ProjectTemplates
             : base("Demo AHK Project", lang) { }
 
         public override SmartCodeProject Create(string displayname, string name, string location) {
-            var demoProject = new SmartCodeProjectAHK(name,location, this.Language) { DisplayName = displayname };
+
+            var demoProject = new SmartCodeProjectAHK(name, location, this.Language)
+            {
+                DisplayName = displayname
+            };
+            demoProject.BeginProjectUpdate();
+            {
+                // Create stdlib folder alias
+                var stdlibdir = Path.GetDirectoryName(((CodeLanguageAHKv1)_language).Settings.InterpreterPath);
+                demoProject.StdLib = new ProjectItemFolderSTdLib("StdLib", stdlibdir, demoProject);
+                demoProject.Add(demoProject.StdLib);
+
+                // Create local lib folder alias
+                demoProject.Add(new ProjectItemFolder("Lib", demoProject));
 
 
-            // Create stdlib folder alias
-            var stdlibdir = Path.GetDirectoryName(((CodeLanguageAHKv1)_language).Settings.InterpreterPath);
-            demoProject.StdLib = new ProjectItemFolderSTdLib("StdLib", stdlibdir, demoProject);
-            demoProject.Add(demoProject.StdLib);
+                // create a Test Folder and add a demo file
 
-            // Create local lib folder alias
-            demoProject.Add(new ProjectItemFolder("Lib", demoProject));
-
-
-            // create a Test Folder and add a demo file
-
-            var dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "DemoFile.ahk" };
-            demoProject.Add(dp);
-            dp.Document.Text = InitialDemoCode();
-            dp.QuickSave();
-            dp.IsStartUpDocument = true;
-            dp.ShowInWorkSpace(); // present our demo file to the user
+                var dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "DemoFile.ahk" };
+                demoProject.Add(dp);
+                dp.Document.Text = InitialDemoCode();
+                dp.QuickSave();
+                dp.IsStartUpDocument = true;
+                dp.ShowInWorkSpace(); // present our demo file to the user
 
 
-            dp = new ProjectItemCodeDocument(_language, demoProject.LocalLib) { Name = "DemoIncludeMe.ahk" };
-            demoProject.LocalLib.Add(dp);
-            dp.Document.Text = InitialDemoIncludeLibCode();
-            dp.QuickSave();
+                dp = new ProjectItemCodeDocument(_language, demoProject.LocalLib) { Name = "DemoIncludeMe.ahk" };
+                demoProject.LocalLib.Add(dp);
+                dp.Document.Text = InitialDemoIncludeLibCode();
+                dp.QuickSave();
 
 
-            dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "Car.ahk" };
-            demoProject.Add(dp);
-            dp.Document.Text = CarFileCode();
-            dp.QuickSave();
+                dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "Car.ahk" };
+                demoProject.Add(dp);
+                dp.Document.Text = CarFileCode();
+                dp.QuickSave();
 
-            dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "AeroPlane.ahk" };
-            demoProject.Add(dp);
-            dp.Document.Text = AeroPlaneFileCode();
-            dp.QuickSave();
+                dp = new ProjectItemCodeDocument(_language, demoProject) { Name = "AeroPlane.ahk" };
+                demoProject.Add(dp);
+                dp.Document.Text = AeroPlaneFileCode();
+                dp.QuickSave();
+            } demoProject.EndProjectUpdate();
 
             return demoProject;
         }

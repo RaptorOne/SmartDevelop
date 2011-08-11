@@ -33,7 +33,7 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
         protected override void ColorizeLine(ICSharpCode.AvalonEdit.Document.DocumentLine line) {
 
-            if(_codeProject.IsDocumentDirty)
+            if(_codeProject.IsTokenizerDirty)
                 return;
             
             var codeline = _codeProject.SegmentService.QueryCodeTokenLine(line.LineNumber);
