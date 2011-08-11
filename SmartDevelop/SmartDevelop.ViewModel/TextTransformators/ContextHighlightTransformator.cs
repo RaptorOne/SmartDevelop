@@ -27,24 +27,21 @@ namespace SmartDevelop.ViewModel.TextTransformators
 
         public ContextHighlightTransformator(ProjectItemCodeDocument codeProject) {
             _codeProject = codeProject;
-
-
-
         }
 
         #region Colorizer
 
         protected override void ColorizeLine(ICSharpCode.AvalonEdit.Document.DocumentLine line) {
 
+            if(_codeProject.IsDocumentDirty)
+                return;
+            
             var codeline = _codeProject.SegmentService.QueryCodeTokenLine(line.LineNumber);
 
             if(codeline.IsEmpty)
                 return;
-
             int lineStartOffset = line.Offset;
-            string text = CurrentContext.Document.GetText(line);
-
-
+            
             foreach(var segment in codeline.CodeSegments) {
 
 
