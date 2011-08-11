@@ -80,6 +80,7 @@
     <Compile Include="Errors\ErrorService.cs" />
     <Compile Include="Errors\IErrorService.cs" />
     <Compile Include="Highlighning\HighlightingBrushStaticColor.cs" />
+    <Compile Include="IDESettings.cs" />
     <Compile Include="Projecting\IEditor.cs" />
     <Compile Include="Projecting\NewProjectItem.cs" />
     <Compile Include="Projecting\ProjectItem.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DocumentCodeSegmentService.cs" />
     <Compile Include="IDE.cs" />
+    <Compile Include="RecentList.cs" />
     <Compile Include="Tokenizing\CodeError.cs" />
     <Compile Include="Tokenizing\CodeSegment.cs" />
     <Compile Include="Tokenizing\CodeSegmentRange.cs" />

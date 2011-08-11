@@ -143,7 +143,7 @@ namespace SmartDevelop
 
             var languageTemplate = language.GetProjectTemplates().Last();
 
-            SmartCodeProjectAHK demoProject = languageTemplate.Create("Demo Project", "demoproject",tempProjectPath) as SmartCodeProjectAHK;
+            SmartCodeProjectAHK demoProject = languageTemplate.Create("Demo Project", "demoproject", tempProjectPath) as SmartCodeProjectAHK;
             solution.Add(demoProject);
             language.SerializeToFile(demoProject, null);
         }

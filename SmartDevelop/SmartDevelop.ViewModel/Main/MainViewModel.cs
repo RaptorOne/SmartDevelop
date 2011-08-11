@@ -53,6 +53,10 @@ namespace SmartDevelop.ViewModel.Main
                 this.SetSolution(e.Value);
                 };
 
+            _ide.RequestHandleFileOpen += (s, e) => {
+                OpenFile(e.Value);
+            };
+
             Globals.MainVM = this;
         }
 
@@ -224,77 +228,83 @@ namespace SmartDevelop.ViewModel.Main
                                 return;
                             }
                         }
-
-                        if(_languageService.IsProjectFile(fileToOpen)) {
-
-                            if(IDE.Instance.CurrentSolution != null) {
-
-                                if(_workbenchService.MessageBox("To open a Project the current project must be closed. Do you wan't to continue?"
-                                    , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
-                                    return;
-                                }
-
-                                if(!IDE.Instance.CurrentSolution.Close()) {
-                                    return;
-                                }
-                                IDE.Instance.CurrentSolution = null;
-                            }
-
-                            var loadedProject = _languageService.LoadProjectFromFile(fileToOpen);
-
-                            IDE.Instance.CurrentSolution = new SmartSolution() { Name = "Solution" };
-                            IDE.Instance.CurrentSolution.Add(loadedProject);
-
-                        } else {
-                            if(IDE.Instance.CurrentSolution != null) {
-                                var currentProject = IDE.Instance.CurrentSolution.ActiveProject;
-                                if(currentProject.Language.Extensions.Contains(Path.GetExtension(fileToOpen))) {
-                                    if(currentProject != null) {
-                                        var file = ProjectItemCodeDocument.FromFile(fileToOpen, currentProject);
-                                        if(file != null)
-                                            currentProject.Add(file);
-                                        file.ShowInWorkSpace();
-                                    }
-                                } else {
-                                    _workbenchService.MessageBox(
-                                        string.Format("No Plugin knows how to handle {0} Extensions in the current Project!", Path.GetExtension(fileToOpen)),
-                                        "File Open Error", MessageBoxType.Error, MessageBoxWPFButton.OK);
-                                }
-                            } else {
-
-                                var lang = _languageService.GetByExtension(Path.GetExtension(fileToOpen));
-
-                                if(lang == null) {
-                                    _workbenchService.MessageBox("No Plugin knows how to handle your selected file.", "Unknown Filetype.", MessageBoxType.Error);
-                                    return;
-                                }
-
-                                if(_workbenchService.MessageBox(
-                                    string.Format("No active Project was found which can handle the file of type {0}. Do you wan't to create a new one and add this item to it?", lang.Name), "Open an Item"
-                                    , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes) {
-
-                                    var name = Path.GetFileNameWithoutExtension(fileToOpen);
-                                    var project = lang.Create(name, name, Path.GetDirectoryName(fileToOpen));
-
-                                    var doc = new ProjectItemCodeDocument(Path.GetFileName(fileToOpen), lang, project);
-                                    project.Add(doc);
-                                    doc.IsStartUpDocument = true;
-                                    doc.ReloadDocument();
-
-                                    IDE.Instance.CurrentSolution = new SmartSolution() { Name = "Solution" };
-                                    IDE.Instance.CurrentSolution.Add(project);
-
-                                    doc.ShowInWorkSpace();
-                                    project.SaveProject();
-                                }
-
-                            }
-                        }
+                        OpenFile(fileToOpen);
 
                     });
                 }
                 return _openFileCommand;
             }
+        }
+
+
+        protected void OpenFile(string fileToOpen) {
+
+            if(_languageService.IsProjectFile(fileToOpen)) {
+
+                if(_ide.CurrentSolution != null) {
+
+                    if(_workbenchService.MessageBox("To open a Project the current project must be closed. Do you wan't to continue?"
+                        , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                        return;
+                    }
+
+                    if(!_ide.CurrentSolution.Close()) {
+                        return;
+                    }
+                    _ide.CurrentSolution = null;
+                }
+
+                var loadedProject = _languageService.LoadProjectFromFile(fileToOpen);
+
+                _ide.CurrentSolution = new SmartSolution() { Name = "Solution" };
+                _ide.CurrentSolution.Add(loadedProject);
+
+            } else {
+                if(_ide.CurrentSolution != null) {
+                    var currentProject = IDE.Instance.CurrentSolution.ActiveProject;
+                    if(currentProject.Language.Extensions.Contains(Path.GetExtension(fileToOpen))) {
+                        if(currentProject != null) {
+                            var file = ProjectItemCodeDocument.FromFile(fileToOpen, currentProject);
+                            if(file != null)
+                                currentProject.Add(file);
+                            file.ShowInWorkSpace();
+                        }
+                    } else {
+                        _workbenchService.MessageBox(
+                            string.Format("No Plugin knows how to handle {0} Extensions in the current Project!", Path.GetExtension(fileToOpen)),
+                            "File Open Error", MessageBoxType.Error, MessageBoxWPFButton.OK);
+                    }
+                } else {
+
+                    var lang = _languageService.GetByExtension(Path.GetExtension(fileToOpen));
+
+                    if(lang == null) {
+                        _workbenchService.MessageBox("No Plugin knows how to handle your selected file.", "Unknown Filetype.", MessageBoxType.Error);
+                        return;
+                    }
+
+                    if(_workbenchService.MessageBox(
+                        string.Format("No active Project was found which can handle the file of type {0}. Do you wan't to create a new one and add this item to it?", lang.Name), "Open an Item"
+                        , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes) {
+
+                        var name = Path.GetFileNameWithoutExtension(fileToOpen);
+                        var project = lang.Create(name, name, Path.GetDirectoryName(fileToOpen));
+
+                        var doc = new ProjectItemCodeDocument(Path.GetFileName(fileToOpen), lang, project);
+                        project.Add(doc);
+                        doc.IsStartUpDocument = true;
+                        doc.ReloadDocument();
+
+                        _ide.CurrentSolution = new SmartSolution() { Name = "Solution" };
+                        _ide.CurrentSolution.Add(project);
+
+                        doc.ShowInWorkSpace();
+                        project.SaveProject();
+                    }
+
+                }
+            }
+
         }
 
         #endregion

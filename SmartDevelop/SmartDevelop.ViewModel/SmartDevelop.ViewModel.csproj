@@ -73,6 +73,7 @@
     <Compile Include="InvokeCompletion\InvokeCompletionViewModel.cs" />
     <Compile Include="InvokeCompletion\InvokeParameter.cs" />
     <Compile Include="Main\MainViewModel.cs" />
+    <Compile Include="Main\RecentItemViewModel.cs" />
     <Compile Include="Main\StartUpPageViewModel.cs" />
     <Compile Include="Projecting\AddItemViewModel.cs" />
     <Compile Include="Projecting\CreateNewProjectVM.cs" />

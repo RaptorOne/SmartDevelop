@@ -4,27 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
+             xmlns:mainVM="clr-namespace:SmartDevelop.ViewModel.Main;assembly=SmartDevelop.ViewModel"
+            
              mc:Ignorable="d" 
              d:DesignHeight="399" d:DesignWidth="686">
     <UserControl.Resources>
-
-        <Style x:Key="LinkButon2" TargetType="Button">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <TextBlock TextDecorations="Underline">
-                            <ContentPresenter />
-                        </TextBlock>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Foreground" Value="LightBlue" />
-            <Style.Triggers>
-                <Trigger  Property="IsMouseOver" Value="true">
-                    <Setter Property="Foreground"  Value="DarkRed" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
 
         <Style x:Key="LinkButon" TargetType="Button">
             <Setter Property="Template">
@@ -47,6 +31,11 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+
+        <DataTemplate DataType="{x:Type mainVM:RecentItemViewModel}">
+            <Button Style="{StaticResource LinkButon}" Content="{Binding Name}" Command="{Binding OpenCommand}" />
+        </DataTemplate>
        
     </UserControl.Resources>
     

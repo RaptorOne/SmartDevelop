@@ -96,7 +96,10 @@ namespace SmartDevelop.ViewModel.Projecting
                 if(_createSelectedProjectCommand == null) {
                     _createSelectedProjectCommand = new RelayCommand(x => {
                         // create the project
-                        CreatedProject = SelectedItem.Template.Create(this.Name, EscapeName(this.Name, Path.GetInvalidFileNameChars()), Path.Combine(this.Location, EscapeName(this.Name, Path.GetInvalidPathChars())));
+                        CreatedProject = SelectedItem.Template.Create(
+                            this.Name,
+                            EscapeName(this.Name, Path.GetInvalidFileNameChars()),
+                            Path.Combine(this.Location, EscapeName(this.Name, Path.GetInvalidPathChars())));
                         CreatedProject.SaveProject();
                         this.CloseCommand.Execute(null);
                     }, x => {
