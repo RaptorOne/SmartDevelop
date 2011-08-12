@@ -21,7 +21,7 @@ namespace SmartDevelop.ViewModel.CodeCompleting
 
         #endregion
 
-        public static CompletionItem Build(object m) {
+        public static CompletionItem Build(CodeObject m) {
             if(m is CodeMemberMethodEx) {
                 var method = m as CodeMemberMethodEx;
                 return new CompletionItemMethod(method.Name, string.Format("Method {0}({1})\n{2}", method.Name, method.GetParamInfo(), GetDocumentCommentString(method.Comments)));
@@ -38,7 +38,10 @@ namespace SmartDevelop.ViewModel.CodeCompleting
             }else if(m is CodeMemberField) {
                 var prop = ((CodeMemberField)m);
                 return new CompletionItemField(prop.Name, string.Format("Field {0}\n{1}", prop.Name, GetDocumentCommentString(prop.Comments)));
-            }else
+            } else if(m is CodeParameterDeclarationExpression) {
+                var argument = m as CodeParameterDeclarationExpression;
+                return new CompletionItemField(argument.Name, string.Format("Argument {0}", argument.Name));
+            } else
                 throw new NotSupportedException("Cant handle obj type: " + m.GetType().ToString());
 
             //return /* new CompletionItem(m.ToString(), ""); */

@@ -11,6 +11,9 @@ using Archimedes.Patterns.Utils;
 
 namespace SmartDevelop.Model.CodeContexts
 {
+    /// <summary>
+    /// Represents a Code Context
+    /// </summary>
     public class CodeContext
     {
 
@@ -29,10 +32,17 @@ namespace SmartDevelop.Model.CodeContexts
         public CodeSegment Segment { get; set; }
 
 
-        public virtual IEnumerable<CodeTypeMember> GetVisibleMembers() {
-            var members = new List<CodeTypeMember>();
+        public virtual IEnumerable<CodeObject> GetVisibleMembers() {
+            var members = new List<CodeObject>();
 
             var rootSnapshot = CodeDOMService.GetRootTypeSnapshot();
+
+            if(EnclosingMethod != null) {
+                // add all local Method variables here
+                foreach(CodeParameterDeclarationExpression param in EnclosingMethod.Parameters) {
+                    members.Add(param);
+                }
+            }
 
             members.AddRange(from m in rootSnapshot.Members.Cast<CodeTypeMember>()
                                 let mimp = m as ICodeMemberEx
