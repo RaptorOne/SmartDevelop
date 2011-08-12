@@ -14,7 +14,8 @@ namespace SmartDevelop.Model.Errors
     public enum ErrorSource
     {
         ASTParser = 0,
-        External = 1
+        External = 1,
+        DirectiveParser = 2
     }
 
 
@@ -35,7 +36,7 @@ namespace SmartDevelop.Model.Errors
         /// </summary>
         /// <param name="errorSegment"></param>
         /// <param name="codeItem"></param>
-        public ErrorItem(CodeSegment errorSegment, ProjectItemCodeDocument codeItem) {
+        public ErrorItem(CodeSegment errorSegment, ProjectItemCodeDocument codeItem, ErrorSource source = ErrorSource.ASTParser) {
 
             ThrowUtil.ThrowIfNull(errorSegment);
             ThrowUtil.ThrowIfNull(codeItem);
@@ -46,6 +47,7 @@ namespace SmartDevelop.Model.Errors
             _range = errorSegment.Range;
             ColumnStart = errorSegment.ColumnStart;
             StartLine = errorSegment.LineNumber;
+            Source = source;
         }
 
         /// <summary>
@@ -53,13 +55,14 @@ namespace SmartDevelop.Model.Errors
         /// </summary>
         /// <param name="err"></param>
         /// <param name="codeItem"></param>
-        public ErrorItem(CodeError err, ProjectItemCodeDocument codeItem) {
+        public ErrorItem(CodeError err, ProjectItemCodeDocument codeItem, ErrorSource source = ErrorSource.ASTParser) {
 
             ThrowUtil.ThrowIfNull(err);
             ThrowUtil.ThrowIfNull(codeItem);
 
             _codeProjectItem = codeItem;
             _error = err;
+            Source = source;
         }
 
 
@@ -68,12 +71,13 @@ namespace SmartDevelop.Model.Errors
         /// </summary>
         /// <param name="err"></param>
         /// <param name="codeItem"></param>
-        public ErrorItem(int line, ProjectItemCodeDocument codeItem, string errorDescription) {
+        public ErrorItem(int line, ProjectItemCodeDocument codeItem, string errorDescription, ErrorSource source = ErrorSource.ASTParser) {
             ThrowUtil.ThrowIfNull(codeItem);
 
             _codeProjectItem = codeItem;
             StartLine = line;
             _error = new CodeError() { Description = errorDescription };
+            Source = source;
         }
 
 
@@ -109,7 +113,7 @@ namespace SmartDevelop.Model.Errors
             set;
         }
 
-        public ErrorSource ErrorSource {
+        public ErrorSource Source {
             get { return _errorSource; }
             set { _errorSource = value; }
         }

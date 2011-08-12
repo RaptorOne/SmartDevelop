@@ -39,9 +39,16 @@ namespace SmartDevelop.Model.Errors
             }
         }
 
+        public void ClearAllErrorsFrom(ProjectItemCodeDocument codeDocument, ErrorSource source) {
+            foreach(var error in GetErrorsFromDocument(codeDocument)) {
+                if(error.Source == source)
+                    this.Remove(error);
+            }
+        }
+
         public void ClearAllErrorsFrom(ErrorSource source) {
             foreach(var error in GetAllErrors()) {
-                if(error.ErrorSource == source)
+                if(error.Source == source)
                     this.Remove(error);
             }
         }
@@ -74,6 +81,9 @@ namespace SmartDevelop.Model.Errors
         }
 
         #endregion
+
+
+
 
 
 

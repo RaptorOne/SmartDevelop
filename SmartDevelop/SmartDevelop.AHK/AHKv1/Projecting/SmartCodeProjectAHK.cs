@@ -139,7 +139,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
                 if(targetItem != null) {
                     var error = new ErrorItem(linenum, targetItem, description.Trim())
                     {
-                        ErrorSource = ErrorSource.External
+                        Source = ErrorSource.External
                     };
                     return error;
                 }

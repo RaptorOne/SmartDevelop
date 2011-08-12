@@ -44,15 +44,10 @@ namespace SmartDevelop.AHK.AHKv1.DOM
             // for each include in this document
             foreach(var doc in _codeDocuments[document]) {
 
-                #region Ignore Selfincludes
-
+                // Ignore Selfincludes
                 if(document.Equals(doc)) {
-                    //throw new DependencyTreeException(
-                    //    string.Format("Selfincldues won't work my dear!", doc.Name));
                     continue;
                 }
-
-                #endregion
 
                 SimpleTreeNode<ProjectItemCodeDocument> parent = parentNode;
                 while((parent = parent.Parent) != null) {

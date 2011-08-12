@@ -5,6 +5,7 @@ using System.Text;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.Model.Tokenizing;
 using System.Threading.Tasks;
+using SmartDevelop.Model.Errors;
 
 namespace SmartDevelop.Model.DOM
 {
@@ -131,7 +132,7 @@ namespace SmartDevelop.Model.DOM
         protected virtual void OnCodeDocumentTokenizerUpdated(object sender, EventArgs e) {
             if(_project.ASTManager.UpdateAtWill) {
                 var doc = sender as ProjectItemCodeDocument;
-                doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc);
+                doc.Project.Solution.ErrorService.ClearAllErrorsFrom(doc, ErrorSource.DirectiveParser);
                 UpdateDocumentIncludeFlow(doc);
                 UpdateDocumentOrder();
             }
@@ -177,9 +178,9 @@ namespace SmartDevelop.Model.DOM
             var err = new CodeError() { Description = errorDescription };
             if(segment != null) {
                 segment.ErrorContext = err;
-                errorService.Add(new Errors.ErrorItem(segment, codeitem));
+                errorService.Add(new Errors.ErrorItem(segment, codeitem, ErrorSource.DirectiveParser));
             } else {
-                errorService.Add(new Errors.ErrorItem(err, codeitem));
+                errorService.Add(new Errors.ErrorItem(err, codeitem, ErrorSource.DirectiveParser));
             }
         }
 

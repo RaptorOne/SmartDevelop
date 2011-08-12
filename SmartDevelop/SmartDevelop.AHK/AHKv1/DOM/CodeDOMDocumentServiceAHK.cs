@@ -332,7 +332,7 @@ namespace SmartDevelop.Model.DOM
 
                     #region Clean Up
 
-                    //_languageRoot.Members.Clear();
+                    _document.Project.Solution.ErrorService.ClearAllErrorsFrom(_document, Errors.ErrorSource.ASTParser);
                     _codeRangeManager.Clear();
 
                     #endregion

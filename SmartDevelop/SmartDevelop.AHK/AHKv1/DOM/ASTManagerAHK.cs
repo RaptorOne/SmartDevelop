@@ -136,6 +136,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
             }
             return null;
         }
+
         static string WORKINGDIR_VAR = "A_ScriptDir";
 
         IncludeDirective ParseIncludePath(ProjectItemCodeDocument codeDoc, CodeSegment segment) {

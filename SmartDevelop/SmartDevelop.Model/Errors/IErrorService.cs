@@ -24,6 +24,8 @@ namespace SmartDevelop.Model.Errors
         void Remove(ErrorItem error);
 
         void ClearAllErrorsFrom(SmartDevelop.Model.Projecting.ProjectItemCodeDocument codeDocument);
+        void ClearAllErrorsFrom(SmartDevelop.Model.Projecting.ProjectItemCodeDocument codeDocument, ErrorSource source);
+
 
         /// <summary>
         /// Clear all Errors which have the given Source
