@@ -149,6 +149,19 @@ namespace SmartDevelop.Model.Projecting
             }
         }
 
+
+        public ProjectItemCodeDocument FindCodeDocumentByPath(string filepath) {
+            var targetItems = from doc in this.Project.CodeDocuments
+                              where filepath.Equals(doc.FilePath, StringComparison.InvariantCultureIgnoreCase) ||
+                              filepath.Equals(doc.OverrideFilePath, StringComparison.InvariantCultureIgnoreCase)
+                              select doc;
+
+                if(targetItems.Any()){
+                    return targetItems.First();
+                }else
+                    return null;
+        }
+
         /// <summary>
         /// Gets/Sets the Displayname of the Project
         /// </summary>

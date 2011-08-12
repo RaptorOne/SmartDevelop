@@ -7,6 +7,8 @@ using SmartDevelop.Model.CodeLanguages;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
+using SmartDevelop.Model.Errors;
 
 namespace SmartDevelop.AHK.AHKv1.Projecting
 {
@@ -21,33 +23,33 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
                 _language = language as CodeLanguageAHKv1;
 
-                UpdateStdLib();
+                //UpdateStdLib();
 
                 _language.Settings.SettingsChanged += (s, e) => {
-                        UpdateStdLib();
+                        //UpdateStdLib();
                     };
         }
 
 
         void UpdateStdLib() {
 
-           // foreach(var item in this.StdLib.GetAllItems()){
-           //     item.Remove(item);
-           // }
+            foreach(var item in this.StdLib.GetAllItems()) {
+                item.Remove(item);
+            }
 
-           //var folder = Path.GetDirectoryName(_language.Settings.InterpreterPath);
-           //var dir = Path.Combine(folder, _language.Settings.StdLibName);
+            var folder = Path.GetDirectoryName(_language.Settings.InterpreterPath);
+            var dir = Path.Combine(folder, _language.Settings.StdLibName);
 
-           // if(Directory.Exists(dir)) {
-           //     foreach(var file in Directory.GetFiles(dir)) {
-           //         if(_language.Extensions.Contains(Path.GetExtension(file))) {
-           //             var codeItem = ProjectItemCodeDocument.FromFile(file, this);
-           //             if(codeItem != null)
-           //                 this.StdLib.Add(codeItem);
+            if(Directory.Exists(dir)) {
+                foreach(var file in Directory.GetFiles(dir)) {
+                    if(_language.Extensions.Contains(Path.GetExtension(file))) {
+                        var codeItem = ProjectItemCodeDocument.FromFile(file, this);
+                        if(codeItem != null)
+                            this.StdLib.Add(codeItem);
 
-           //         }
-           //     }
-           // }
+                    }
+                }
+            }
 
         }
 
@@ -57,6 +59,7 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
 
             QuickSaveAll();
 
+            Solution.ErrorService.ClearAllErrorsFrom(ErrorSource.External);
             Solution.ClearOutput();
             Solution.AddNewOutputLine("Running: " + this.StartUpCodeDocument.FilePath);
 
@@ -99,9 +102,49 @@ namespace SmartDevelop.AHK.AHKv1.Projecting
                 errOutput = p.StandardError.ReadToEnd();
                 p.WaitForExit();
             }
+            var error = ParseInterpreterOutput(errOutput);
+            if(error != null) {
+
+                var tokenLine = error.CodeItem.SegmentService.QueryCodeTokenLine(error.StartLine);
+                if(!tokenLine.IsEmpty){
+                    foreach(var t in tokenLine.CodeSegments)
+                        t.ErrorContext = error.Error;
+                }
+                Solution.ErrorService.Add(error);
+                error.BringIntoView();
+            }
 
             Solution.AddNewOutputLine(errOutput);
             return;
+        }
+
+        static Regex rx = new Regex(@"(.*) \((\d+)\) : ==> (.*)");
+        ErrorItem ParseInterpreterOutput(string errOutput) {
+
+            if(rx.IsMatch(errOutput)) {
+                var m = rx.Match(errOutput);
+                string filepath = m.Groups[1].Value;
+                int linenum = int.Parse(m.Groups[2].Value);
+                string description = m.Groups[3].Value + Environment.NewLine;
+
+                int i = 0;
+                foreach(var s in errOutput.Split('\n')) {
+                    if(i > 0)
+                        description += s.Trim() + Environment.NewLine;
+                        i++;
+                }
+
+                var targetItem = this.Project.FindCodeDocumentByPath(filepath);
+
+                if(targetItem != null) {
+                    var error = new ErrorItem(linenum, targetItem, description.Trim())
+                    {
+                        ErrorSource = ErrorSource.External
+                    };
+                    return error;
+                }
+            }
+            return null;
         }
 
         #region Specail Folders

@@ -98,9 +98,16 @@ namespace SmartDevelop.ViewModel.DocumentFiles
             //};
 
             _projectitem.AST.Updated += (s, e) => {
-                _workbenchservice.STADispatcher.Invoke(new Action(() => {
+                SyncInvoke(() =>{
                     _texteditor.TextArea.TextView.Redraw(DispatcherPriority.ContextIdle);
-                }));
+                });
+            };
+
+            _projectitem.Project.Solution.ErrorService.ErrorAdded += (s,e) => {
+                SyncInvoke(() => {
+                    int offset = e.Value.CodeItem.Document.GetOffset(e.Value.StartLine, 0);
+                    _texteditor.TextArea.TextView.Redraw(offset, 1, DispatcherPriority.ContextIdle);
+                });
             };
 
 

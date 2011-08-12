@@ -36,17 +36,14 @@ namespace SmartDevelop.ViewModel.Errors
 
         public int Line {
             get {
-                if(_errorItem.Segment != null)
-                    return _errorItem.Segment.LineNumber;
-                return 0;
+                return _errorItem.StartLine;
             }
         }
 
         public int Column {
             get {
-                if(_errorItem.Segment != null)
-                    return _errorItem.Segment.ColumnStart;
-                return 0;
+
+                return _errorItem.ColumnStart;
             }
         }
 

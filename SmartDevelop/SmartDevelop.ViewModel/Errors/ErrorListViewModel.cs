@@ -46,20 +46,11 @@ namespace SmartDevelop.ViewModel.Errors
 
         public ICommand JumpToSelectedErrorCommand {
             get {
-                return new RelayCommand(x => JumpToSelectedError());
-            }
-        }
-
-        void JumpToSelectedError() {
-            if(CurrentError != null) {
-
-                if(CurrentError.ErrorItem.Segment != null) {
-                    CurrentError.ErrorItem
-                        .Segment.BringIntoView();
-                } else {
-                    CurrentError.ErrorItem
-                        .CodeItem.ShowInWorkSpace();
-                }
+                return new RelayCommand(x => {
+                    if(CurrentError != null) {
+                        CurrentError.ErrorItem.BringIntoView();
+                    }
+                }, x => (CurrentError != null));
             }
         }
 

@@ -22,7 +22,7 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
         readonly TextEditor _editor;
 
         Pen _errorPen = new Pen(new SolidColorBrush(Colors.Red), 1);
-        Brush _errorBrush = new SolidColorBrush(Colors.Red);
+        Brush _errorBrush = new SolidColorBrush(Color.FromArgb(0x44, 0xFF, 0x00, 0x00));
         
 
         #endregion
@@ -47,10 +47,20 @@ namespace SmartDevelop.ViewModel.BackgroundRenderer
             var errorsToVisualize = _solution.ErrorService.GetErrorsFromDocument(_codeitem);
 
             foreach(var err in errorsToVisualize) {
-                if(err.Segment != null) {
-                    foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, err.Segment.Range)) {
+                if(err.Range != null) {
+                    foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, err.Range)) {
                         //drawingContext.DrawRectangle(null, _errorPen, r);
                         drawingContext.DrawLine(_errorPen, r.BottomLeft, r.BottomRight);
+                    }
+                } else {
+
+                    var line = _editor.Document.GetLineByNumber(err.StartLine);
+                    if(line != null) {
+                        var segment = new TextSegment { StartOffset = line.Offset, EndOffset = line.EndOffset };
+
+                        foreach(Rect r in BackgroundGeometryBuilder.GetRectsForSegment(textView, segment)) {
+                            drawingContext.DrawRectangle(_errorBrush, _errorPen, r);
+                        }
                     }
                 }
             }
