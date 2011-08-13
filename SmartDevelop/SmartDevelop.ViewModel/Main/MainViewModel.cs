@@ -20,6 +20,7 @@ using ICSharpCode.AvalonEdit;
 using System.Collections.ObjectModel;
 using SmartDevelop.ViewModel.FindAndReplace;
 using SmartDevelop.Model.Resources;
+using Archimedes.Services.WPF.FrameWorkDialogs;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -170,7 +171,7 @@ namespace SmartDevelop.ViewModel.Main
                             if(IDE.Instance.CurrentSolution != null) {
 
                                 if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
-                                    , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                                    , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == IDDialogResult.No) {
                                     return;
                                 }
 
@@ -213,17 +214,17 @@ namespace SmartDevelop.ViewModel.Main
                     _openFileCommand = new RelayCommand(x => {
 
                         string fileToOpen = null;
-                        // Displays an OpenFileDialog so the user can select a Cursor.
-                        using(var openFileDialog1 = new OpenFileDialog()) {
-                            openFileDialog1.Filter = "Code Files|*";
-                            openFileDialog1.Title = Strings.SelectAFile;
 
-                            if(openFileDialog1.ShowDialog() == DialogResult.OK) {
-                                fileToOpen = openFileDialog1.FileName;
-                            } else {
-                                return;
-                            }
+                        var openDlg = new OpenFileDialogViewModel();
+                        openDlg.Filter = "Code Files|*";
+                        openDlg.Title = Strings.SelectAFile;
+
+                        if(_workbenchService.ShowDialog(openDlg, this) == IDDialogResult.OK) {
+                            fileToOpen = openDlg.FileName;
+                        } else {
+                            return;
                         }
+
                         OpenFile(fileToOpen);
 
                     });
@@ -232,44 +233,28 @@ namespace SmartDevelop.ViewModel.Main
             }
         }
 
-
+        /// <summary>
+        /// Handles any given File Path
+        /// </summary>
+        /// <param name="fileToOpen"></param>
         protected void OpenFile(string fileToOpen) {
 
             if(_languageService.IsProjectFile(fileToOpen)) {
 
-                if(_ide.CurrentSolution != null) {
-
-                    if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
-                        , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
-                        return;
-                    }
-
-                    if(!_ide.CurrentSolution.Close()) {
-                        return;
-                    }
-                    _ide.CurrentSolution = null;
-                }
-
-                var loadedProject = _languageService.LoadProjectFromFile(fileToOpen);
-
-                _ide.CurrentSolution = new SmartSolution() { Name = "Solution" };
-                _ide.CurrentSolution.Add(loadedProject);
+                OpenProject(fileToOpen);
 
             } else {
                 if(_ide.CurrentSolution != null) {
-                    var currentProject = IDE.Instance.CurrentSolution.ActiveProject;
-                    if(currentProject.Language.Extensions.Contains(Path.GetExtension(fileToOpen))) {
-                        if(currentProject != null) {
-                            var file = ProjectItemCodeDocument.FromFile(fileToOpen, currentProject);
-                            if(file != null)
-                                currentProject.Add(file);
-                            file.ShowInWorkSpace();
-                        }
+
+                    var currentProject = _ide.CurrentSolution.ActiveProject;
+                    if(currentProject.CanAdd(fileToOpen)) {
+                        currentProject.Add(fileToOpen);
                     } else {
                         _workbenchService.MessageBox(
                             string.Format(Strings.NoPluginCanHandleExtension, Path.GetExtension(fileToOpen)),
                             Strings.FileOpenError, MessageBoxType.Error, MessageBoxWPFButton.OK);
                     }
+
                 } else {
 
                     var lang = _languageService.GetByExtension(Path.GetExtension(fileToOpen));
@@ -281,7 +266,7 @@ namespace SmartDevelop.ViewModel.Main
 
                     if(_workbenchService.MessageBox(
                         string.Format(Strings.NoActiveProjectCanHandleCreateANew, lang.Name), Strings.OpenAItem
-                        , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes) {
+                        , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == IDDialogResult.Yes) {
 
                         var name = Path.GetFileNameWithoutExtension(fileToOpen);
                         var project = lang.Create(name, name, Path.GetDirectoryName(fileToOpen));
@@ -299,8 +284,28 @@ namespace SmartDevelop.ViewModel.Main
                     }
                 }
             }
-
         }
+
+        void OpenProject(string fileToOpen) {
+            if(_ide.CurrentSolution != null) {
+
+                if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
+                    , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == IDDialogResult.No) {
+                    return;
+                }
+
+                if(!_ide.CurrentSolution.Close()) {
+                    return;
+                }
+                _ide.CurrentSolution = null;
+            }
+
+            var loadedProject = _languageService.LoadProjectFromFile(fileToOpen);
+
+            _ide.CurrentSolution = new SmartSolution() { Name = "Solution" };
+            _ide.CurrentSolution.Add(loadedProject);
+        }
+
 
         #endregion
 

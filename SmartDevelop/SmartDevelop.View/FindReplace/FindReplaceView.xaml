@@ -12,6 +12,7 @@
         <my:SearchScopeToInt x:Key="searchScopeToInt"/>
         <BooleanToVisibilityConverter x:Key="boolToVis" />
         <DataTemplate x:Key="FindPageTemplate">
+            <GroupBox>
             <StackPanel>
                 <TextBlock Margin="3" Text="{x:Static resx:Strings.TextToFind}"/>
                 <ContentPresenter Content="{Binding }" />
@@ -34,18 +35,22 @@
                     </Expander>
                 </StackPanel>
             </StackPanel>
+            </GroupBox>
         </DataTemplate>
         </UserControl.Resources>
 
     <Grid >
         <TabControl Name="tabMain" Height="Auto">
             <TabItem Header="{x:Static resx:Strings.Find}" Name="tabFind"  ContentTemplate="{StaticResource FindPageTemplate}">
-                <StackPanel>
-                    <TextBox Margin="3" Name="txtFind" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding TextToFind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Margin="3" IsDefault="True" HorizontalAlignment="Right" Command="{Binding FindNextCommand}" Content="{x:Static resx:Strings.FindNext}"/>
-                </StackPanel>
+       
+                    <StackPanel>
+                        <TextBox Margin="3" Name="txtFind" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding TextToFind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Margin="3" IsDefault="True" HorizontalAlignment="Right" Command="{Binding FindNextCommand}" Content="{x:Static resx:Strings.FindNext}"/>
+                    </StackPanel>
+              
             </TabItem>
             <TabItem Header="{x:Static resx:Strings.Replace}" Name="tabReplace"  ContentTemplate="{StaticResource FindPageTemplate}">
+              
                 <StackPanel>
                     <TextBox Margin="3" Name="txtFind2" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding TextToFind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Margin="3" Text="{x:Static resx:Strings.ReplaceWhit}"/>
@@ -57,6 +62,7 @@
                         <Button Margin="3" HorizontalAlignment="Right" Command="{Binding ReplaceAllCommand}" Content="{x:Static resx:Strings.ReplaceAll}"/>
                     </StackPanel>
                 </StackPanel>
+
             </TabItem>
         </TabControl>
     </Grid>

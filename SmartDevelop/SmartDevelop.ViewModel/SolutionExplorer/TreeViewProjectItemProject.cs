@@ -12,7 +12,10 @@ using Archimedes.Patterns.WPF.Commands;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
-    public class TreeViewProjectItemProject : TreeViewProjectItem
+    /// <summary>
+    /// Represents a code project
+    /// </summary>
+    public class TreeViewProjectItemProject : TreeViewProjectItemFolder //This behaves also similar to an folder, so we inherit form TreeViewProjectItemFolder
     {
         readonly SmartCodeProject _project;
         IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
@@ -42,42 +45,42 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         }
 
 
-        ICommand _addNewItemCommand;
+        //ICommand _addNewItemCommand;
 
-        public ICommand AddNewItemCommand {
-            get {
-                if(_addNewItemCommand == null) {
+        //public ICommand AddNewItemCommand {
+        //    get {
+        //        if(_addNewItemCommand == null) {
 
-                    _addNewItemCommand = new RelayCommand(x => {
-                        var vms = from item in _project.Project.Language.GetAvaiableItemsForNew(_project)
-                                  select new NewItemViewModel(item);
+        //            _addNewItemCommand = new RelayCommand(x => {
+        //                var vms = from item in _project.Project.Language.GetAvaiableItemsForNew(_project)
+        //                          select new NewItemViewModel(item);
 
-                        var vm = new AddItemViewModel(_project, vms)
-                            {
-                                DisplayName = "Add an new Item to this Project"
-                            };
+        //                var vm = new AddItemViewModel(_project, vms)
+        //                    {
+        //                        DisplayName = "Add an new Item to this Project"
+        //                    };
 
-                        _workbenchservice.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
-                    }, x => {
-                        return true;
-                    });
+        //                _workbenchservice.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
+        //            }, x => {
+        //                return true;
+        //            });
 
-                }
-                return _addNewItemCommand;
-            }
-        }
+        //        }
+        //        return _addNewItemCommand;
+        //    }
+        //}
 
-        public ICommand RemoveCommand {
-            get {
-                return WrapperCommand.Empty;
-            }
-        }
+        //public ICommand RemoveCommand {
+        //    get {
+        //        return WrapperCommand.Empty;
+        //    }
+        //}
 
-        public ICommand AddNewFolderCommand {
-            get {
-                return WrapperCommand.Empty;
-            }
-        }
+        //public ICommand AddNewFolderCommand {
+        //    get {
+        //        return WrapperCommand.Empty;
+        //    }
+        //}
 
 
     }

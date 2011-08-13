@@ -90,20 +90,8 @@ namespace SmartDevelop.Model.Projecting
             var language = ServiceLocator.Instance.Resolve<ICodeLanguageService>().GetByExtension(Path.GetExtension(filepath));
             ProjectItemCodeDocument newp = new ProjectItemCodeDocument(Path.GetFileName(filepath), language, parent);
             newp.OverrideFilePath = filepath;
-            try
-            {
-                using(StreamReader sr = new StreamReader(filepath))
-                {
-                    newp.Document.Text = sr.ReadToEnd();
-                }
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                // to do
-            }
-            newp.HasUnsavedChanges = false;
-            newp.Document.UndoStack.ClearAll();
+            newp.ReloadDocument();
+
             return newp;
         }
 
@@ -214,7 +202,8 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public virtual void ReloadDocument() {
             if(File.Exists(FilePath)) {
-                using(StreamReader sr = new StreamReader(FilePath)) {
+                using(StreamReader sr = new StreamReader(FilePath, true)) {
+                    this.Encoding = sr.CurrentEncoding;
                     _codedocument.Text = sr.ReadToEnd();
                 }
                 this.HasUnsavedChanges = false;

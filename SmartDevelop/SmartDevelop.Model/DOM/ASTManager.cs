@@ -36,7 +36,7 @@ namespace SmartDevelop.Model.DOM
             };
 
             _project.UpdateDone += (s, e) => {
-                UpdateFullASTAndRelseUpdateLock();
+                UpdateFullASTAndReleaseUpdateLock();
             };
         }
 
@@ -48,12 +48,22 @@ namespace SmartDevelop.Model.DOM
             if(!_codeDocuments.ContainsKey(document)) {
                 _codeDocuments.Add(document, new List<ProjectItemCodeDocument>());
                 OnCodeDocumentAdded(document);
+
+                if(UpdateAtWill && !_project.IsInUpdate) {
+                    UpdateAtWill = false;
+                    UpdateFullASTAndReleaseUpdateLock();
+                }
             } 
         }
 
         public void Remove(ProjectItemCodeDocument document) {
             _codeDocuments.Remove(document);
             OnCodeDocumentRemoved(document);
+
+            if(UpdateAtWill && !_project.IsInUpdate) {
+                UpdateAtWill = false;
+                UpdateFullASTAndReleaseUpdateLock();
+            }
         }
 
         #region Event Handlers
@@ -70,7 +80,7 @@ namespace SmartDevelop.Model.DOM
 
         #endregion
 
-        async void UpdateFullASTAndRelseUpdateLock() {
+        async void UpdateFullASTAndReleaseUpdateLock() {
             await UpdateFullAST();
             UpdateAtWill = true;
         }

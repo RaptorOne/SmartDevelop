@@ -33,6 +33,7 @@
                             <ContextMenu>
                                 <MenuItem Header="Add">
                                     <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                                    <MenuItem Header="Existing Item..." Command="{Binding AddExistingItemCommand}"/>
                                     <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
                                 </MenuItem>
                             <Separator/>
@@ -56,6 +57,7 @@
                         <ContextMenu>
                             <MenuItem Header="Add">
                                 <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                                <MenuItem Header="Existing Item..." Command="{Binding AddExistingItemCommand}"/>
                                 <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
                             </MenuItem>
                             <Separator/>

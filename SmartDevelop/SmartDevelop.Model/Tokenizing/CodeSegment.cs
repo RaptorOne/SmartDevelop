@@ -94,6 +94,17 @@ namespace SmartDevelop.Model.Tokenizing
                 return this.Previous.PreviousOmit(tokenstoignore);
         }
 
+        /// <summary>
+        /// Return this or the previous codesegment by ignoring all tokens in the ignorelist
+        /// </summary>
+        /// <param name="tokenstoignore"></param>
+        /// <returns></returns>
+        public CodeSegment ThisOrPreviousOmit(List<Token> tokenstoignore) {
+            if(!tokenstoignore.Contains(this.Token))
+                return this;
+            else
+                return PreviousOmit(tokenstoignore);            
+        }
 
         /// <summary>
         /// Return the this or one of the following token depending on the token ignore list

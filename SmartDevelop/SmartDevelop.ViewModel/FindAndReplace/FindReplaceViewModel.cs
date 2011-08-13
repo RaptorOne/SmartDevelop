@@ -220,7 +220,7 @@ namespace SmartDevelop.ViewModel.FindAndReplace
                 if(CE == null) return;
 
                 if(!AskBefore || _workbenchService.MessageBox(string.Format(Strings.ReallyReplaceAll, TextToFind, ReplacementText),
-                    Strings.ReplaceAll, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes ) {
+                    Strings.ReplaceAll, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == IDDialogResult.Yes ) {
                     object InitialEditor = CurrentEditor;
                     bool igonreCurrent = false;
                     // loop through all editors, until we are back at the starting editor                

@@ -8,13 +8,22 @@ using SmartDevelop.ViewModel.Projecting;
 using Archimedes.Services.WPF.WorkBenchServices;
 using Archimedes.Patterns.Services;
 using Archimedes.Patterns.WPF.Commands;
+using Archimedes.Services.WPF.FrameWorkDialogs;
+using SmartDevelop.Model.Resources;
+using System.IO;
+using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
     public class TreeViewProjectItemFolder : TreeViewProjectItem
     {
-        IWorkBenchService _workbenchservice = ServiceLocator.Instance.Resolve<IWorkBenchService>();
+        IWorkBenchService _workbenchService = ServiceLocator.Instance.Resolve<IWorkBenchService>();
         ProjectItemFolder _folder;
+
+
+        protected TreeViewProjectItemFolder(ProjectItem item, TreeViewProjectItem parent) 
+            : base(item, parent) { }
+
 
         public TreeViewProjectItemFolder(ProjectItemFolder folder, TreeViewProjectItem parent)
             : base(folder, parent) {
@@ -22,21 +31,24 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             ImageSource = @"../Images/folder.ico";
         }
 
-        ICommand _addNewItemCommand;
+        #region Commands
 
-        public ICommand AddNewItemCommand {
+        ICommand _addNewItemCommand;
+        ICommand _addExistingItemCommand;
+
+        public virtual ICommand AddNewItemCommand {
             get{
                 if(_addNewItemCommand == null){
                     _addNewItemCommand = new RelayCommand(x => {
-                            var vms = from item in _folder.Project.Language.GetAvaiableItemsForNew(_folder)
+                            var vms = from item in Item.Project.Language.GetAvaiableItemsForNew(Item)
                                       select new NewItemViewModel(item);
 
-                            var vm = new AddItemViewModel(_folder, vms)
+                            var vm = new AddItemViewModel(Item, vms)
                             {
-                                DisplayName = "Add an new Item to this Folder"
+                                DisplayName = string.Format("Add an new Item to {0}", this.DisplayName)
                             };
 
-                            _workbenchservice.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
+                            _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
                         }, x => {
                             return true;
                             });
@@ -45,18 +57,47 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             }
         }
 
-        public ICommand AddNewFolderCommand {
+       
+        public virtual ICommand AddExistingItemCommand {
             get {
-                return WrapperCommand.Empty;
+                if(_addExistingItemCommand == null) {
+                    _addExistingItemCommand = new RelayCommand(x => {
+                        // todo existing item
+                        var openDlg = new OpenFileDialogViewModel();
+                        if(_workbenchService.ShowDialog(openDlg, this) == IDDialogResult.OK) {
+
+                            if(Item.CanAdd(openDlg.FileName)) {
+                                Item.Add(openDlg.FileName);
+                            } else {
+                                _workbenchService.MessageBox(
+                                    string.Format(Strings.NoPluginCanHandleExtension, Path.GetExtension(openDlg.FileName)),
+                                    Strings.FileOpenError, MessageBoxType.Error, MessageBoxWPFButton.OK);
+                            }
+
+                        }
+
+                    });
+                }
+                return _addExistingItemCommand;
             }
         }
 
-        public ICommand RemoveCommand {
+        ICommand _addNewFolderCommand;
+
+        public virtual ICommand AddNewFolderCommand {
             get {
-                return WrapperCommand.Empty;
+
+                if(_addNewFolderCommand == null) {
+                    _addNewFolderCommand = new RelayCommand(x => {
+                        Item.Add(new ProjectItemFolder("New Folder", Item));
+                    });
+                }
+                return _addNewFolderCommand;
             }
         }
 
+
+        #endregion
 
     }
 }

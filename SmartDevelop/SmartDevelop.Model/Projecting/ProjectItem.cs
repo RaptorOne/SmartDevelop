@@ -43,6 +43,9 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public event EventHandler NameChanged;
 
+
+        public event EventHandler Removed;
+
         #endregion
 
         public ProjectItem(ProjectItem parent) {
@@ -117,7 +120,6 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
-
         /// <summary>
         /// Request that this item is shown in the workspace view
         /// </summary>
@@ -126,6 +128,39 @@ namespace SmartDevelop.Model.Projecting
         public virtual bool CanShow {
             get { return false; }
         }
+
+
+        public virtual void Remove() {
+            Parent.Remove(this);
+            OnRemoved();
+        }
+
+        public virtual bool CanRemove {
+            get {
+                return true;
+            }
+        }
+
+        #region ProjectItem Access Extended
+
+        /// <summary>
+        /// Add a file to the childs of this Item
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual bool Add(string file) {
+            return false;
+        }
+
+        /// <summary>
+        /// Can the given file be added to this Item?
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public virtual bool CanAdd(string file) {
+            return false;
+        }
+
+        #endregion
 
         #region ProjectItem Access
 
@@ -139,12 +174,12 @@ namespace SmartDevelop.Model.Projecting
         }
 
         /// <summary>
-        /// Remove an Item to the childs of this Item
+        /// Remove an Item from the childs of this Item
         /// </summary>
-        /// <param name="item"></param>
-        public void Remove(ProjectItem item) {
-            _children.Remove(item);
-            OnItemRemoved(item);
+        /// <param name="child"></param>
+        public void Remove(ProjectItem child) {
+            _children.Remove(child);
+            OnItemRemoved(child);
         }
 
         public IEnumerable<ProjectItem> GetAllItems() {
@@ -162,6 +197,10 @@ namespace SmartDevelop.Model.Projecting
 
         #region Event Handlers
 
+        protected virtual void OnRemoved() {
+            if(Removed != null)
+                Removed(this, EventArgs.Empty);
+        }
 
         protected virtual void OnNameChanged() {
             if(NameChanged != null)
@@ -188,6 +227,7 @@ namespace SmartDevelop.Model.Projecting
                 ItemAdded(this, new ProjectItemEventArgs(item));
             item.TokenizerUpdated += OnTokenizerUpdated;
             item.ItemAdded += OnChildItemAdded;
+            item.ItemRemoved += OnChildItemRemoved;
             OnChildItemAdded(this, new ProjectItemEventArgs(item));
 
             foreach(var newDoc in item.FindAllItemsRecursive<ProjectItemCodeDocument>()) {
@@ -204,6 +244,7 @@ namespace SmartDevelop.Model.Projecting
                 ItemRemoved(this, new ProjectItemEventArgs(item));
             item.TokenizerUpdated -= OnTokenizerUpdated;
             item.ItemAdded -= OnChildItemAdded;
+            item.ItemRemoved -= OnChildItemRemoved;
             OnChildItemRemoved(this, new ProjectItemEventArgs(item));
         }
 

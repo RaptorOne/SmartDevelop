@@ -426,11 +426,11 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                 this.ShowCommand.Execute(null);
                 var res = _workbenchservice.MessageBox("This File has unsaved changes. Do you want to Save them before closing?", "File Closing"
                     , MessageBoxType.Information, MessageBoxWPFButton.YesNoCancel);
-                if(res == DialogWPFResult.Yes) {
+                if(res == IDDialogResult.Yes) {
                     _projectitem.QuickSave();
-                } else if ( res == DialogWPFResult.No) {
+                } else if ( res == IDDialogResult.No) {
                     _projectitem.ReloadDocument();
-                } else if(res == DialogWPFResult.Abort || res == DialogWPFResult.Cancel) {
+                } else if(res == IDDialogResult.Abort || res == IDDialogResult.Cancel) {
                     e.Cancel = true;
                 }
             }

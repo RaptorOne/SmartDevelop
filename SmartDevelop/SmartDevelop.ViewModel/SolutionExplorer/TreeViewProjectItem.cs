@@ -8,6 +8,7 @@ using Archimedes.Patterns.Utils;
 using System.Windows.Input;
 using Archimedes.Patterns.WPF.Commands;
 using System.Windows;
+using System.IO;
 
 namespace SmartDevelop.ViewModel.SolutionExplorer
 {
@@ -157,10 +158,12 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         }
 
         protected virtual bool CanRemove {
-            get { return false; } 
+            get { return _item.CanRemove; } 
         }
 
-        protected virtual void Remove(object arg) { }
+        protected virtual void Remove(object arg) {
+            _item.Remove();
+        }
 
         #endregion
 
@@ -178,10 +181,20 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
         }
 
         protected virtual bool CanDelete {
-            get { return false; }
+            get { return _item.CanRemove; }
         }
 
-        protected virtual void Delete(object arg) { }
+        protected virtual void Delete(object arg) {
+            var path = _item.FilePath;
+            _item.Remove();
+
+            try {
+                File.Delete(path);
+            } catch {
+
+            }
+        
+        }
 
         #endregion
 

@@ -41,6 +41,9 @@ namespace SmartDevelop.AHK.AHKv1.DOM
 
             SimpleTreeNode<ProjectItemCodeDocument> currentNode;
 
+            if(!_codeDocuments.ContainsKey(document))
+                return hirarchy;
+
             // for each include in this document
             foreach(var doc in _codeDocuments[document]) {
 

@@ -288,6 +288,28 @@ namespace SmartDevelop.Model.Projecting
 
         #endregion
 
+        public override bool Add(string fileToOpen) {
+            string name = Path.GetFileName(fileToOpen);
+            string targetLocation = Path.Combine(_projectPath, name);
+
+            if(!targetLocation.Equals(fileToOpen, StringComparison.InvariantCultureIgnoreCase)) {
+                File.Copy(fileToOpen, targetLocation);
+            }
+
+            var file = new ProjectItemCodeDocument(name, this.Language, this);
+
+            if(file != null) {
+                this.Add(file);
+                file.ShowInWorkSpace();
+                return true;
+            } else
+                return false;
+        }
+
+        public override bool CanAdd(string file) {
+            return this.Language.Extensions.Contains(Path.GetExtension(file));
+        }
+
         #region Event Handlers
 
 

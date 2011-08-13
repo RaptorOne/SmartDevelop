@@ -196,7 +196,7 @@ namespace SmartDevelop.AHK.AHKv1.CodeCompletion
             } else if(whitespaces.Contains(currentChar)) {
 
                 if(segment != null) {
-                    var s = segment.PreviousOmit(TokenHelper.WhiteSpaces);
+                    var s = segment.ThisOrPreviousOmit(TokenHelper.WhiteSpacesNewLine);
                     Application.Current.Dispatcher.Invoke(new Action(() => {
                         if(s != null && s.Token == Token.KeyWord && (s.TokenString.Equals("new", StringComparison.CurrentCultureIgnoreCase)
                             || s.TokenString.Equals("extends", StringComparison.CurrentCultureIgnoreCase))) {
