@@ -19,6 +19,7 @@ using SmartDevelop.Model.CodeLanguages;
 using ICSharpCode.AvalonEdit;
 using System.Collections.ObjectModel;
 using SmartDevelop.ViewModel.FindAndReplace;
+using SmartDevelop.Model.Resources;
 
 namespace SmartDevelop.ViewModel.Main
 {
@@ -173,7 +174,7 @@ namespace SmartDevelop.ViewModel.Main
 
                             if(IDE.Instance.CurrentSolution != null) {
 
-                                if(_workbenchService.MessageBox("To create a new Project the current project must be closed. Do you wan't to continue?"
+                                if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
                                     , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
                                     return;
                                 }
@@ -243,7 +244,7 @@ namespace SmartDevelop.ViewModel.Main
 
                 if(_ide.CurrentSolution != null) {
 
-                    if(_workbenchService.MessageBox("To open a Project the current project must be closed. Do you wan't to continue?"
+                    if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
                         , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
                         return;
                     }
@@ -301,7 +302,6 @@ namespace SmartDevelop.ViewModel.Main
                         doc.ShowInWorkSpace();
                         project.SaveProject();
                     }
-
                 }
             }
 

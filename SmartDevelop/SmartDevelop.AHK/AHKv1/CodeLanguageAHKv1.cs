@@ -78,7 +78,7 @@ namespace SmartDevelop.AHK.AHKv1
                 _settings.Save();
             }
 
-            var viewmodelMapping = ServiceLocator.Instance.Resolve<IWindowViewModelMappings>();
+            var viewmodelMapping = ServiceLocator.Instance.Resolve<IWorkBenchService>().MappingService;
 
             viewmodelMapping.RegisterMapping(typeof(CodeLanguageSettingsViewModel), typeof(CodeLanguageSettingsView));
 

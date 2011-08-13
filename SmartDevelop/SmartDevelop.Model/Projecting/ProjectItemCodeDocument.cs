@@ -160,20 +160,28 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public override void ShowInWorkSpace() {
             var p = this.Project;
+            
             if(p == null)
                 throw new NotSupportedException("Must be atached to a project to use this Method");
             p.ShowDocument(this);
         }
 
+        /// <summary>
+        /// Determites if this CodeDocument currently can be shown
+        /// </summary>
         public override bool CanShow {
             get { return true; }
         }
 
-
+        /// <summary>
+        /// Set the Document position in the Editor and ensures it is visible
+        /// </summary>
+        /// <param name="offset">The desired position</param>
         public void SetDocumentPosition(int offset) {
             if(RequestTextPosition != null)
                 RequestTextPosition(this, new EventArgs<int>(offset));
         }
+
 
         /// <summary>
         /// This Method ensures that the Tokenizer has been updated with the current changes in this document.
@@ -201,6 +209,9 @@ namespace SmartDevelop.Model.Projecting
             return AST.WaitUntilUpdated(maxtimeout);
         }
 
+        /// <summary>
+        /// Reloads the document from the file.
+        /// </summary>
         public virtual void ReloadDocument() {
             if(File.Exists(FilePath)) {
                 using(StreamReader sr = new StreamReader(FilePath)) {

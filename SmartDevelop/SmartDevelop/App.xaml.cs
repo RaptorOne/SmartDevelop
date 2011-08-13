@@ -1,31 +1,27 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
-using System.Windows.Media;
-using System.Xml;
+using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
 using Archimedes.Patterns.Services;
+using Archimedes.Patterns.WPF.ViewModels;
 using Archimedes.Services.WPF.AvalonDockService;
 using Archimedes.Services.WPF.WindowViewModelMapping;
 using Archimedes.Services.WPF.WorkBenchServices;
-using ICSharpCode.AvalonEdit.Highlighting;
-using SmartDevelop.Model.Highlighning;
-using SmartDevelop.Model.Projecting;
-using SmartDevelop.View.DocumentFiles;
-using SmartDevelop.ViewModel.DocumentFiles;
-using SmartDevelop.ViewModel.Main;
-using Archimedes.Patterns.MVMV.ViewModels.PoolCache;
-using SmartDevelop.View.Main;
-using SmartDevelop.Model.CodeLanguages;
 using SmartDevelop.AHK.AHKv1;
 using SmartDevelop.AHK.AHKv1.Projecting;
-using SmartDevelop.ViewModel.Projecting;
-using SmartDevelop.View.Projecting;
-using SmartDevelop.View.About;
-using System.Linq;
 using SmartDevelop.Model;
-using Archimedes.Patterns.WPF.ViewModels;
-using SmartDevelop.ViewModel.FindAndReplace;
+using SmartDevelop.Model.CodeLanguages;
+using SmartDevelop.Model.Projecting;
+using SmartDevelop.View.About;
+using SmartDevelop.View.DocumentFiles;
 using SmartDevelop.View.FindReplace;
+using SmartDevelop.View.Main;
+using SmartDevelop.View.Projecting;
+using SmartDevelop.ViewModel.DocumentFiles;
+using SmartDevelop.ViewModel.FindAndReplace;
+using SmartDevelop.ViewModel.Main;
+using SmartDevelop.ViewModel.Projecting;
 
 namespace SmartDevelop
 {
@@ -85,7 +81,7 @@ namespace SmartDevelop
         #region Global Service Setup
 
         void RegisterServices() {
-            _serviceLocator.RegisterSingleton<IWindowViewModelMappings, WindowViewModelMappings>();
+
             _serviceLocator.RegisterSingleton<IWorkBenchService, AvalonWorkBenchService>();
             _serviceLocator.RegisterSingleton<IAvalonService, AvalonService>();
             _serviceLocator.RegisterSingleton<IViewModelPoolService, ViewModelPoolService>();
@@ -100,7 +96,7 @@ namespace SmartDevelop
         /// Setup the mappings for ViewModel <--> View
         /// </summary>
         void SetupViewModelViewMappings() {
-            var viewmodelMapping = _serviceLocator.Resolve<IWindowViewModelMappings>();
+            var viewmodelMapping = _serviceLocator.Resolve<IWorkBenchService>().MappingService;
 
             viewmodelMapping.RegisterMapping(typeof(CodeFileViewModel), typeof(CodeDocumentView));
             viewmodelMapping.RegisterMapping(typeof(AddItemViewModel), typeof(AddItemView));

@@ -67,7 +67,7 @@ namespace SmartDevelop.AHK.AHKv1.DOM
                 var startUpDoc = _codeDocuments.Keys.ToList().Find(x => x.IsStartUpDocument);
                 if(startUpDoc != null) {
                     try {
-                        _documentCompileOrder.AddRange(_includeTreeBuilder.BuildHirarchy(_codeDocuments, startUpDoc));
+                        _documentCompileOrder.AddRange(_includeTreeBuilder.BuildHirarchy(new Dictionary<ProjectItemCodeDocument, List<ProjectItemCodeDocument>>(_codeDocuments), startUpDoc));
                     } catch(DependencyTreeException e) {
                         RegisterError(e.Document, null, e.Message);
                     }

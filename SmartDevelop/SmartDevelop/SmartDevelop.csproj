@@ -110,20 +110,11 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -169,10 +160,6 @@
     <ProjectReference Include="..\Lib\AvalonEdit\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lib\WPFCommon\WPFCommon.csproj">
-      <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
-      <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\SmartDevelop.AHK\SmartDevelop.AHK.csproj">
       <Project>{B5F31A39-DAB3-42D6-8770-EC54F3958962}</Project>

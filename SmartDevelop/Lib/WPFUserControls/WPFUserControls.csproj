@@ -221,12 +221,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WPFCommon\WPFCommon.csproj">
-      <Project>{92687E6D-D903-4EFB-80B1-E38C1D07663E}</Project>
-      <Name>WPFCommon %28Lib\WPFCommon\WPFCommon%29</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
              xmlns:mainVM="clr-namespace:SmartDevelop.ViewModel.Main;assembly=SmartDevelop.ViewModel"
-            
+             xmlns:resx="clr-namespace:SmartDevelop.View.Resources"
              mc:Ignorable="d" 
              d:DesignHeight="399" d:DesignWidth="686">
     <UserControl.Resources>
@@ -73,7 +73,7 @@
                     <Hyperlink Foreground="LightBlue" NavigateUri="http://securityvision.ch" >
                         securityvision.ch
                     </Hyperlink>
-                    presents
+                    <TextBlock Text="{x:Static resx:Strings.Presents}"/>
                 </TextBlock>
                 <TextBlock  Height="57" HorizontalAlignment="Left" Margin="10" FontSize="20" VerticalAlignment="Top" Width="454"
                             Text="SmartDevelop IDE 2011"/>
@@ -82,12 +82,11 @@
                
         
         <Image HorizontalAlignment="Left" Margin="10" Stretch="Fill" Height="100" Width="100" Source="..\Images\SmartDevelop_LogoSmall.png" />
-
             <WrapPanel Orientation="Vertical" Grid.ColumnSpan="2" Grid.Row="1">
                 <Button Style="{StaticResource LinkButon}" Margin="10" 
-                        Command="{Binding AddNewProjectCommand, Source={x:Static localviewModel:Globals.MainVM}}">Create New Project</Button>
-                <Button Style="{StaticResource LinkButon}" Margin="10" 
-                        Command="{Binding AddNewProjectCommand, Source={x:Static localviewModel:Globals.MainVM}}">Create Demo Project</Button>
+                        Command="{Binding AddNewProjectCommand, Source={x:Static localviewModel:Globals.MainVM}}"
+                        Content="{x:Static resx:Strings.CreateNewProject}"
+                        />
             </WrapPanel>
         </Grid>
     </GroupBox>

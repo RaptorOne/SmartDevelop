@@ -95,6 +95,16 @@
     <Compile Include="DocumentCodeSegmentService.cs" />
     <Compile Include="IDE.cs" />
     <Compile Include="RecentList.cs" />
+    <Compile Include="Resources\Strings.de.Designer.cs">
+      <DependentUpon>Strings.de.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Resources\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Tokenizing\CodeError.cs" />
     <Compile Include="Tokenizing\CodeSegment.cs" />
     <Compile Include="Tokenizing\CodeSegmentRange.cs" />
@@ -124,7 +134,16 @@
   <ItemGroup>
     <Content Include="Tokenizing\Info\Info.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.de.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.de.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

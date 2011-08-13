@@ -6,6 +6,7 @@
              xmlns:projectingVM="clr-namespace:SmartDevelop.ViewModel.Projecting;assembly=SmartDevelop.ViewModel"
              mc:Ignorable="d" 
              MinHeight="440" MinWidth="620"
+             xmlns:resx="clr-namespace:SmartDevelop.View.Resources"
              d:DesignHeight="470" d:DesignWidth="620">
     
     <UserControl.Resources>
@@ -39,7 +40,7 @@
 
             <!-- Header -->
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,20,10,10" Text="Choose a Project Template" VerticalAlignment="Center" FontSize="20" />
+            <TextBlock HorizontalAlignment="Left" Margin="10,20,10,10" Text="{x:Static resx:Strings.ChooseProjectTemplate}" VerticalAlignment="Center" FontSize="20" />
 
             
             <!-- Project Template List -->
@@ -52,8 +53,8 @@
                     <ColumnDefinition Width="152*" />
                     <ColumnDefinition Width="462*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock HorizontalAlignment="Left" Margin="10,5,5,10" Text="Languages" VerticalAlignment="Center" FontSize="15"/>
-                <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="10,5,5,10" Text="Templates" VerticalAlignment="Center" FontSize="15"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,5,5,10" Text="{x:Static resx:Strings.Languages}" VerticalAlignment="Center" FontSize="15"/>
+                <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="10,5,5,10" Text="{x:Static resx:Strings.Templates}" VerticalAlignment="Center" FontSize="15"/>
             
                 <ListBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,4"
                          ItemsSource="{Binding AllTemplates}"
@@ -85,10 +86,10 @@
             </Grid>
 
 
-            <Button Grid.Row="3" Content="Add" HorizontalAlignment="Right"  VerticalAlignment="Center" Margin="7" Width="100"
+            <Button Grid.Row="3" Content="{x:Static resx:Strings.Add}" HorizontalAlignment="Right"  VerticalAlignment="Center" Margin="7" Width="100"
                     IsDefault="True"
                     Command="{Binding CreateSelectedProjectCommand}"/>
-            <Button Grid.Row="3" Content="Cancel" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="7" Width="100"
+            <Button Grid.Row="3" Content="{x:Static resx:Strings.Cancel}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="7" Width="100"
                     IsCancel="True"
                     Command="{Binding CloseCommand}"/>
            
