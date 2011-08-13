@@ -70,6 +70,15 @@ namespace SmartDevelop.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add an new Item to this Project.
+        /// </summary>
+        public static string AddNewItemToProject {
+            get {
+                return ResourceManager.GetString("AddNewItemToProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -97,6 +106,24 @@ namespace SmartDevelop.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Closing the Open Project.
+        /// </summary>
+        public static string CloseOpenProject {
+            get {
+                return ResourceManager.GetString("CloseOpenProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create a Project.
+        /// </summary>
+        public static string CreateAProject {
+            get {
+                return ResourceManager.GetString("CreateAProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create New Project.
         /// </summary>
         public static string CreateNewProject {
@@ -111,6 +138,15 @@ namespace SmartDevelop.Model.Resources {
         public static string DLG_OpenProjectMustBeClosedQuestion {
             get {
                 return ResourceManager.GetString("DLG_OpenProjectMustBeClosedQuestion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File open Error.
+        /// </summary>
+        public static string FileOpenError {
+            get {
+                return ResourceManager.GetString("FileOpenError", resourceCulture);
             }
         }
         
@@ -160,6 +196,42 @@ namespace SmartDevelop.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No active Project was found which can handle the file of type {0}. Do you wan&apos;t to create a new one and add this item to it?.
+        /// </summary>
+        public static string NoActiveProjectCanHandleCreateANew {
+            get {
+                return ResourceManager.GetString("NoActiveProjectCanHandleCreateANew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Plugin knows how to handle {0} Extensions in the current Project!.
+        /// </summary>
+        public static string NoPluginCanHandleExtension {
+            get {
+                return ResourceManager.GetString("NoPluginCanHandleExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Plugin knows how to handle your selected file..
+        /// </summary>
+        public static string NoPluginCanHandleSelectedFile {
+            get {
+                return ResourceManager.GetString("NoPluginCanHandleSelectedFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open an Item.
+        /// </summary>
+        public static string OpenAItem {
+            get {
+                return ResourceManager.GetString("OpenAItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options.
         /// </summary>
         public static string Options {
@@ -174,6 +246,15 @@ namespace SmartDevelop.Model.Resources {
         public static string Presents {
             get {
                 return ResourceManager.GetString("Presents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready....
+        /// </summary>
+        public static string Ready {
+            get {
+                return ResourceManager.GetString("Ready", resourceCulture);
             }
         }
         
@@ -259,6 +340,24 @@ namespace SmartDevelop.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select a file.
+        /// </summary>
+        public static string SelectAFile {
+            get {
+                return ResourceManager.GetString("SelectAFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select the project folder.
+        /// </summary>
+        public static string SelectProjectFolder {
+            get {
+                return ResourceManager.GetString("SelectProjectFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Templates.
         /// </summary>
         public static string Templates {
@@ -273,6 +372,15 @@ namespace SmartDevelop.Model.Resources {
         public static string TextToFind {
             get {
                 return ResourceManager.GetString("TextToFind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown Filetype.
+        /// </summary>
+        public static string UnknownFile {
+            get {
+                return ResourceManager.GetString("UnknownFile", resourceCulture);
             }
         }
         

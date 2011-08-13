@@ -180,7 +180,10 @@ namespace SmartDevelop.Model.Projecting
         /// </summary>
         public override string Name {
             get { return _name; }
-            set { _name = value; }
+            set { 
+                _name = value;
+                OnNameChanged();
+            }
         }
 
         public void SetProjectFolder(string newPath) {

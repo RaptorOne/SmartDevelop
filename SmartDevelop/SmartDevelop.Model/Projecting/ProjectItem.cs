@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Archimedes.Patterns;
+using System.IO;
 
 namespace SmartDevelop.Model.Projecting
 {
@@ -36,6 +37,11 @@ namespace SmartDevelop.Model.Projecting
         /// Child bubbling up event
         /// </summary>
         public event EventHandler<ProjectItemEventArgs> ChildItemRemoved;
+
+        /// <summary>
+        /// Raised when the Name of this item has changed
+        /// </summary>
+        public event EventHandler NameChanged;
 
         #endregion
 
@@ -156,6 +162,12 @@ namespace SmartDevelop.Model.Projecting
 
         #region Event Handlers
 
+
+        protected virtual void OnNameChanged() {
+            if(NameChanged != null)
+                NameChanged(this, EventArgs.Empty);
+        }
+
         /// <summary>
         /// Occurs when the file Tokenizer has updated a single file
         /// </summary>
@@ -221,6 +233,7 @@ namespace SmartDevelop.Model.Projecting
 
 
         #endregion
+
 
     }
 }

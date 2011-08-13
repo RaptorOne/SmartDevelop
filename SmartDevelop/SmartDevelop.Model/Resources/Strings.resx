@@ -120,6 +120,9 @@
   <data name="Add" xml:space="preserve">
     <value>Add</value>
   </data>
+  <data name="AddNewItemToProject" xml:space="preserve">
+    <value>Add an new Item to this Project</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -129,11 +132,20 @@
   <data name="ChooseProjectTemplate" xml:space="preserve">
     <value>Choose a Project Template</value>
   </data>
+  <data name="CloseOpenProject" xml:space="preserve">
+    <value>Closing the Open Project</value>
+  </data>
+  <data name="CreateAProject" xml:space="preserve">
+    <value>Create a Project</value>
+  </data>
   <data name="CreateNewProject" xml:space="preserve">
     <value>Create New Project</value>
   </data>
   <data name="DLG_OpenProjectMustBeClosedQuestion" xml:space="preserve">
     <value>To open a Project the current project must be closed. Do you wan't to continue?</value>
+  </data>
+  <data name="FileOpenError" xml:space="preserve">
+    <value>File open Error</value>
   </data>
   <data name="Find" xml:space="preserve">
     <value>Find</value>
@@ -150,11 +162,26 @@
   <data name="MatchWholeWord" xml:space="preserve">
     <value>Match whole Word</value>
   </data>
+  <data name="NoActiveProjectCanHandleCreateANew" xml:space="preserve">
+    <value>No active Project was found which can handle the file of type {0}. Do you wan't to create a new one and add this item to it?</value>
+  </data>
+  <data name="NoPluginCanHandleExtension" xml:space="preserve">
+    <value>No Plugin knows how to handle {0} Extensions in the current Project!</value>
+  </data>
+  <data name="NoPluginCanHandleSelectedFile" xml:space="preserve">
+    <value>No Plugin knows how to handle your selected file.</value>
+  </data>
+  <data name="OpenAItem" xml:space="preserve">
+    <value>Open an Item</value>
+  </data>
   <data name="Options" xml:space="preserve">
     <value>Options</value>
   </data>
   <data name="Presents" xml:space="preserve">
     <value>presents</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready...</value>
   </data>
   <data name="ReallyReplaceAll" xml:space="preserve">
     <value>Do you really want to replace all occurences of '{0}' with '{1}'?</value>
@@ -183,11 +210,20 @@
   <data name="SearchUp" xml:space="preserve">
     <value>Search up</value>
   </data>
+  <data name="SelectAFile" xml:space="preserve">
+    <value>Select a file</value>
+  </data>
+  <data name="SelectProjectFolder" xml:space="preserve">
+    <value>Select the project folder</value>
+  </data>
   <data name="Templates" xml:space="preserve">
     <value>Templates</value>
   </data>
   <data name="TextToFind" xml:space="preserve">
     <value>Text to Find:</value>
+  </data>
+  <data name="UnknownFile" xml:space="preserve">
+    <value>Unknown Filetype</value>
   </data>
   <data name="Wildcards" xml:space="preserve">
     <value>Wildcards</value>

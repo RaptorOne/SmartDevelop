@@ -28,13 +28,6 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
             Import();
         }
 
-        void Import() {
-            foreach(var p in _smartSolution.GetProjects()) {
-                AddProject(p);
-            }
-        }
-
-
 
         public TreeViewProjectItem SolutionRoot {
             get { return _solutionRoot; }
@@ -47,28 +40,38 @@ namespace SmartDevelop.ViewModel.SolutionExplorer
 
         #region Event Handlers
 
-        void OnProjectAdded(object sender, ProjectEventArgs e) {
+        protected virtual void OnProjectAdded(object sender, ProjectEventArgs e) {
             AddProject(e.Project);
         }
 
-        void OnProjectRemoved(object sender, ProjectEventArgs e) {
-
+        protected virtual void OnProjectRemoved(object sender, ProjectEventArgs e) {
+            RemoveProject(e.Project);
         }
-
-        void AddProject(SmartCodeProject p) {
-            _solutionRoot.Children.Add(LoadProject(p));
-        }
-
 
         #endregion
 
+        #region Helpers
 
-
-
-        TreeViewProjectItem LoadProject(SmartCodeProject p){
-            var projecttree = new TreeViewProjectItemProject(p, _solutionRoot);
-
-            return projecttree;
+        void Import() {
+            foreach(var p in _smartSolution.GetProjects()) {
+                AddProject(p);
+            }
         }
+
+        void AddProject(SmartCodeProject p) {
+            _solutionRoot.Children.Add(TreeViewProjectItem.Build(p, _solutionRoot));
+        }
+
+        void RemoveProject(SmartCodeProject p) {
+
+            var child = from c in _solutionRoot.Children
+                        where c.Item.Equals(p)
+                        select c;
+            if(child.Any()) {
+                _solutionRoot.Children.Remove(child.First());
+            }
+        }
+
+        #endregion
     }
 }

@@ -89,6 +89,8 @@ namespace SmartDevelop.ViewModel.DocumentFiles
                     this.CloseCommand.Execute(e);
                 };
 
+            _projectitem.NameChanged += (s, e) => OnPropertyChanged(() => DisplayName);
+
 
             //_projectitem.TokenizerUpdated += (s, e) => {
             //    _workbenchservice.STADispatcher.Invoke(new Action(() => {

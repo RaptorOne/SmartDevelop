@@ -307,10 +307,16 @@ namespace SmartDevelop.Model.Projecting
 
         #region Public Properties
 
+        /// <summary>
+        /// Gets the Tokenizer Dirty State. This will be true if the Tokenizer is not updated with the latest changes made to the documents
+        /// </summary>
         public bool IsTokenizerDirty {
             get { return _documentTokenizerDirty; }
         }
 
+        /// <summary>
+        /// Gets the AST Dirty State. This will be true if the AST is not updated with the latest changes made to the documents
+        /// </summary>
         public bool IsASTDirty {
             get { return _documentASTDirty; }
         }
@@ -357,7 +363,15 @@ namespace SmartDevelop.Model.Projecting
                     return Path.GetFileName(OverrideFilePath);
             }
             set {
+                var oldPath = FilePath;
                 _name = value;
+                //update filesystem
+                try {
+                    File.Move(oldPath, FilePath);
+                } catch(Exception e) {
+                    //todo: notify the user about fail
+                }
+                OnNameChanged();
             }
         }
 
@@ -436,7 +450,7 @@ namespace SmartDevelop.Model.Projecting
         #endregion
 
         /// <summary>
-        /// Marks the document as dirty sets appriorate flags
+        /// Marks the document as dirty sets all appriorate flags
         /// </summary>
         void Dirty() {
             _documentdirty = true;

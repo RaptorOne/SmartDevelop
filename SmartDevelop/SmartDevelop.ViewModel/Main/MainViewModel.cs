@@ -92,7 +92,7 @@ namespace SmartDevelop.ViewModel.Main
             get {
                 if(_solution != null)
                     return _solution.OutputData;
-                return "Ready...";
+                return Strings.Ready;
             }
         }
 
@@ -104,12 +104,6 @@ namespace SmartDevelop.ViewModel.Main
                     return null;
             }
         }
-
-        //public ObservableCollection<TextEditor> AllEditors {
-
-        //}
-
-
 
         #region Child VMs
 
@@ -136,6 +130,7 @@ namespace SmartDevelop.ViewModel.Main
         #region Commands
 
         #region New File Command
+
         ICommand _addNewItemCommand;
 
         public ICommand AddNewItemCommand {
@@ -148,7 +143,7 @@ namespace SmartDevelop.ViewModel.Main
 
                         var vm = new AddItemViewModel(_solution.ActiveProject, vms)
                         {
-                            DisplayName = "Add an new Item to this Project"
+                            DisplayName = Strings.AddNewItemToProject
                         };
 
                         _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
@@ -175,7 +170,7 @@ namespace SmartDevelop.ViewModel.Main
                             if(IDE.Instance.CurrentSolution != null) {
 
                                 if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
-                                    , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                                    , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
                                     return;
                                 }
 
@@ -188,7 +183,7 @@ namespace SmartDevelop.ViewModel.Main
 
                             var vm = new CreateNewProjectVM()
                             {
-                                DisplayName = "Create a Project"
+                                DisplayName = Strings.CreateAProject
                             };
                             _workbenchService.ShowDialog(vm, System.Windows.SizeToContent.WidthAndHeight);
 
@@ -221,7 +216,7 @@ namespace SmartDevelop.ViewModel.Main
                         // Displays an OpenFileDialog so the user can select a Cursor.
                         using(var openFileDialog1 = new OpenFileDialog()) {
                             openFileDialog1.Filter = "Code Files|*";
-                            openFileDialog1.Title = "Select a Script File";
+                            openFileDialog1.Title = Strings.SelectAFile;
 
                             if(openFileDialog1.ShowDialog() == DialogResult.OK) {
                                 fileToOpen = openFileDialog1.FileName;
@@ -245,7 +240,7 @@ namespace SmartDevelop.ViewModel.Main
                 if(_ide.CurrentSolution != null) {
 
                     if(_workbenchService.MessageBox(Strings.DLG_OpenProjectMustBeClosedQuestion
-                        , "Closing the Open Project", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
+                        , Strings.CloseOpenProject, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.No) {
                         return;
                     }
 
@@ -272,20 +267,20 @@ namespace SmartDevelop.ViewModel.Main
                         }
                     } else {
                         _workbenchService.MessageBox(
-                            string.Format("No Plugin knows how to handle {0} Extensions in the current Project!", Path.GetExtension(fileToOpen)),
-                            "File Open Error", MessageBoxType.Error, MessageBoxWPFButton.OK);
+                            string.Format(Strings.NoPluginCanHandleExtension, Path.GetExtension(fileToOpen)),
+                            Strings.FileOpenError, MessageBoxType.Error, MessageBoxWPFButton.OK);
                     }
                 } else {
 
                     var lang = _languageService.GetByExtension(Path.GetExtension(fileToOpen));
 
                     if(lang == null) {
-                        _workbenchService.MessageBox("No Plugin knows how to handle your selected file.", "Unknown Filetype.", MessageBoxType.Error);
+                        _workbenchService.MessageBox(Strings.NoPluginCanHandleSelectedFile, Strings.UnknownFile, MessageBoxType.Error);
                         return;
                     }
 
                     if(_workbenchService.MessageBox(
-                        string.Format("No active Project was found which can handle the file of type {0}. Do you wan't to create a new one and add this item to it?", lang.Name), "Open an Item"
+                        string.Format(Strings.NoActiveProjectCanHandleCreateANew, lang.Name), Strings.OpenAItem
                         , MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes) {
 
                         var name = Path.GetFileNameWithoutExtension(fileToOpen);
@@ -427,7 +422,6 @@ namespace SmartDevelop.ViewModel.Main
                             DisplayName = Strings.FindAndReplace,
                         };
                         vm.CurrentDocument = _solution.ActiveDocument;
-                        //vm.SetCurrentDocumentAsEditor();
                         _workbenchService.ShowFloating(vm, System.Windows.SizeToContent.WidthAndHeight);
                     }, x => {
                         return _solution != null;

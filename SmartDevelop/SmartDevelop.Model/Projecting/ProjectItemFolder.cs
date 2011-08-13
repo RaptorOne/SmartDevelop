@@ -20,6 +20,7 @@ namespace SmartDevelop.Model.Projecting
             }
             set {
                 _name = value;
+                OnNameChanged();
             }
         }
 

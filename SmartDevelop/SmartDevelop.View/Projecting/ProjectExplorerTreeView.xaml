@@ -21,25 +21,32 @@
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                         <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
-                        <TextBlock Text="{Binding DisplayName}" />
-                    </StackPanel>
+                        <TextBlock Text="{Binding DisplayName}" Visibility="{Binding NameVisibility}"/>
+                        <TextBox Text="{Binding DisplayName, Mode=TwoWay}" Visibility="{Binding EditableNameVisibility}"/>
+                </StackPanel>
                 </HierarchicalDataTemplate>
 
                 <!-- Project Node-->
                 <HierarchicalDataTemplate  DataType="{x:Type solex:TreeViewProjectItemProject}" ItemsSource="{Binding Children}" >
                     <StackPanel Orientation="Horizontal">
-                    <StackPanel.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Add">
-                                <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
-                                <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
-                            </MenuItem>
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add">
+                                    <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
+                                    <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
+                                </MenuItem>
+                            <Separator/>
                             <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
+                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="Rename" Command="{Binding StartRenameCommand}"/>
                         </ContextMenu>
-                    </StackPanel.ContextMenu>
-                    <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
-                        <TextBlock Text="{Binding DisplayName}" />
-                    </StackPanel>
+                        </StackPanel.ContextMenu>
+                        
+                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                        <TextBlock Text="{Binding DisplayName}" Visibility="{Binding NameVisibility}"/>
+                        <TextBox Text="{Binding DisplayName, Mode=TwoWay}" Visibility="{Binding EditableNameVisibility}"/>
+                </StackPanel>
                 </HierarchicalDataTemplate>
 
             <!-- Folder Node -->
@@ -51,11 +58,16 @@
                                 <MenuItem Header="New Item..." Command="{Binding AddNewItemCommand}"/>
                                 <MenuItem Header="New Folder" Command="{Binding AddNewFolderCommand}"/>
                             </MenuItem>
+                            <Separator/>
                             <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
+                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="Rename" Command="{Binding StartRenameCommand}"/>
                         </ContextMenu>
                     </StackPanel.ContextMenu>
                     <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
-                    <TextBlock Text="{Binding DisplayName}" />
+                    <TextBlock Text="{Binding DisplayName}" Visibility="{Binding NameVisibility}"/>
+                    <TextBox Text="{Binding DisplayName, Mode=TwoWay}" Visibility="{Binding EditableNameVisibility}"/>
                 </StackPanel>
             </HierarchicalDataTemplate>
 
@@ -68,13 +80,19 @@
                         <StackPanel.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="View Code" Command="{Binding ViewCodeCommand}"/>
-                                <MenuItem Header="Remove" Command="{Binding DeleteItemCommand}"/>
                                 <MenuItem Header="Set as Startup File" Command="{Binding SetAsStartUpDocumentCommand}"/>
+                                <Separator/>
+                                <MenuItem Header="Remove" Command="{Binding RemoveCommand}"/>
+                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
+                                
+                                <Separator/>
+                                <MenuItem Header="Rename" Command="{Binding StartRenameCommand}"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                    
-                    <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
-                        <TextBlock Text="{Binding DisplayName}" FontWeight="{Binding ItemFontWeight}" />
+                        <Image Width="16" Height="16" Margin="3,0" Source="{Binding ImageSource}" />
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="{Binding ItemFontWeight}" Visibility="{Binding NameVisibility}"/>
+                        <TextBox Text="{Binding DisplayName, Mode=TwoWay}" Visibility="{Binding EditableNameVisibility}"/>
                     </StackPanel>
                 </Grid>
             </HierarchicalDataTemplate>

@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using SmartDevelop.Model;
 using Archimedes.Services.WPF.WorkBenchServices;
 using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
+using SmartDevelop.Model.Resources;
 
 namespace SmartDevelop.ViewModel.Projecting
 {
@@ -121,7 +122,7 @@ namespace SmartDevelop.ViewModel.Projecting
                     _browseProjectFolderCommand = new RelayCommand(x => {
 
                         using(FolderBrowserDialog dlg = new FolderBrowserDialog()) {
-                            dlg.Description = "Select the project folder";
+                            dlg.Description = Strings.SelectProjectFolder;
                             if(dlg.ShowDialog() == DialogResult.OK) {
                                 this.Location = dlg.SelectedPath;
                             }
