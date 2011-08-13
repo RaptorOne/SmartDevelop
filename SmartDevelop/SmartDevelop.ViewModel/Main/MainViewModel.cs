@@ -424,11 +424,11 @@ namespace SmartDevelop.ViewModel.Main
                     _findAndReplaceCommand = new RelayCommand(x => {
                         var vm = new FindReplaceViewModel()
                         {
-                            DisplayName = "Search and Replace",
+                            DisplayName = Strings.FindAndReplace,
                         };
                         vm.CurrentDocument = _solution.ActiveDocument;
                         //vm.SetCurrentDocumentAsEditor();
-                        _workbenchService.ShowFloating(vm, System.Windows.SizeToContent.Manual);
+                        _workbenchService.ShowFloating(vm, System.Windows.SizeToContent.WidthAndHeight);
                     }, x => {
                         return _solution != null;
                     });

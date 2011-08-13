@@ -56,13 +56,11 @@
       <Word>do</Word>
       <Word>until</Word>
       
-      <Word>var</Word>
       <Word>this</Word>
       <Word>new</Word>
       <Word>extends</Word>
       <Word>class</Word>
       <Word>base</Word>
-
 
       <Word>exitapp</Word>
       <Word>exit</Word>

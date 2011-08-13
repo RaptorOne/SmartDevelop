@@ -4,57 +4,61 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:my="clr-namespace:SmartDevelop.ViewModel.FindAndReplace;assembly=SmartDevelop.ViewModel" 
+             xmlns:resx="clr-namespace:SmartDevelop.Model.Resources;assembly=SmartDevelop.Model"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             MinWidth="350"
+             d:DesignHeight="365" d:DesignWidth="349">
     <UserControl.Resources>
         <my:SearchScopeToInt x:Key="searchScopeToInt"/>
         <BooleanToVisibilityConverter x:Key="boolToVis" />
         <DataTemplate x:Key="FindPageTemplate">
             <StackPanel>
-                <TextBlock Margin="3">Text to Find:</TextBlock>
+                <TextBlock Margin="3" Text="{x:Static resx:Strings.TextToFind}"/>
                 <ContentPresenter Content="{Binding }" />
                 <StackPanel DataContext="{Binding DataContext}">
-                    <TextBlock Margin="3" Visibility="{Binding ShowSearchIn,Converter={StaticResource boolToVis}}">Search in:</TextBlock>
+                    <TextBlock Margin="3" Visibility="{Binding ShowSearchIn,Converter={StaticResource boolToVis}}" Text="{x:Static resx:Strings.SearchIn}"/>
                     <ComboBox 
                               ItemsSource="{Binding AllScopes}"
                               SelectedItem="{Binding SearchIn, Mode=TwoWay}"
                               Margin="0 0 0 3" 
                               Visibility="{Binding ShowSearchIn,Converter={StaticResource boolToVis}}"
                               HorizontalAlignment="Stretch"/>
-                    <Expander Header="Options" IsExpanded="False">
+                    <Expander Header="{x:Static resx:Strings.Options}" IsExpanded="False">
                         <StackPanel>
-                            <CheckBox Margin="1" Name="chkCaseSensitive" IsChecked="{Binding CaseSensitive, Mode=TwoWay}">Case Sensitive</CheckBox>
-                            <CheckBox Margin="1" Name="chkSearchUp" IsChecked="{Binding SearchUp, Mode=TwoWay}">Search up</CheckBox>
-                            <CheckBox Margin="1" Name="chkWholeWord" IsChecked="{Binding WholeWord, Mode=TwoWay}">Match whole Word</CheckBox>
-                            <CheckBox Margin="1" Name="chkRegex" IsChecked="{Binding UseRegEx, Mode=TwoWay}">Regular Expression</CheckBox>
-                            <CheckBox Margin="1" Name="chkWildcards" IsChecked="{Binding UseWildcards, Mode=TwoWay}">Wildcards</CheckBox>
+                            <CheckBox Margin="1" Name="chkCaseSensitive" IsChecked="{Binding CaseSensitive, Mode=TwoWay}" Content="{x:Static resx:Strings.CaseSensitive}"/>
+                            <CheckBox Margin="1" Name="chkSearchUp" IsChecked="{Binding SearchUp, Mode=TwoWay}" Content="{x:Static resx:Strings.SearchUp}"/>
+                            <CheckBox Margin="1" Name="chkWholeWord" IsChecked="{Binding WholeWord, Mode=TwoWay}" Content="{x:Static resx:Strings.MatchWholeWord}"/>
+                            <CheckBox Margin="1" Name="chkRegex" IsChecked="{Binding UseRegEx, Mode=TwoWay}" Content="{x:Static resx:Strings.RegularExpression}"/> 
+                            <CheckBox Margin="1" Name="chkWildcards" IsChecked="{Binding UseWildcards, Mode=TwoWay}" Content="{x:Static resx:Strings.Wildcards}"/>
                         </StackPanel>
                     </Expander>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
         </UserControl.Resources>
+
     <Grid >
         <TabControl Name="tabMain" Height="Auto">
-            <TabItem Header="Find" Name="tabFind"  ContentTemplate="{StaticResource FindPageTemplate}">
+            <TabItem Header="{x:Static resx:Strings.Find}" Name="tabFind"  ContentTemplate="{StaticResource FindPageTemplate}">
                 <StackPanel>
                     <TextBox Margin="3" Name="txtFind" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding TextToFind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Margin="3" IsDefault="True" HorizontalAlignment="Right" Width="65" Command="{Binding FindNextCommand}">Find Next</Button>
+                    <Button Margin="3" IsDefault="True" HorizontalAlignment="Right" Command="{Binding FindNextCommand}" Content="{x:Static resx:Strings.FindNext}"/>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Replace" Name="tabReplace"  ContentTemplate="{StaticResource FindPageTemplate}">
+            <TabItem Header="{x:Static resx:Strings.Replace}" Name="tabReplace"  ContentTemplate="{StaticResource FindPageTemplate}">
                 <StackPanel>
                     <TextBox Margin="3" Name="txtFind2" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding TextToFind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Margin="3">Replace with:</TextBlock>
-                    <TextBox Margin="3" Name="txtReplace" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding ReplacementText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBlock Margin="3" Text="{x:Static resx:Strings.ReplaceWhit}"/>
+                    <TextBox Margin="3" Name="txtReplace" AcceptsReturn="{Binding AcceptsReturn}" Text="{Binding ReplacementText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button IsDefault="True" Margin="3" HorizontalAlignment="Right" Width="65" Command="{Binding FindNextCommand}">Find Next</Button>
-                        <Button Margin="3" HorizontalAlignment="Right" Width="65" Command="{Binding ReplaceCommand}">Replace</Button>
-                        <Button Margin="3" HorizontalAlignment="Right" Width="65" Command="{Binding ReplaceAllCommand}">Replace all</Button>
+                        <Button IsDefault="True" Margin="3" HorizontalAlignment="Right" Command="{Binding FindNextCommand}" Content="{x:Static resx:Strings.FindNext}"/>
+                        <Button Margin="3" HorizontalAlignment="Right" Command="{Binding ReplaceCommand}" Content="{x:Static resx:Strings.Replace}" />
+                        <Button Margin="3" HorizontalAlignment="Right" Command="{Binding ReplaceAllCommand}" Content="{x:Static resx:Strings.ReplaceAll}"/>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
         </TabControl>
     </Grid>
+
 </UserControl>

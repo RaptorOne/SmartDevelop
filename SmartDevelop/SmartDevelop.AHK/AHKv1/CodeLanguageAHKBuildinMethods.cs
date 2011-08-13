@@ -700,19 +700,66 @@ namespace SmartDevelop.AHK.AHKv1
 
                 var commandName = SimpleTokinizerIA.ExtractWord(ref commandStr, (prop[0] == '*') ? 1 : 0, SpecailWordCharacters);
 
-                var propr = new CodeMemberMethodExAHK(true)
+                string description;
+                var paramis = ParseCommandParameter(commandStr, commandName.Length, out description);
+
+                var methodCommand = new CodeMemberMethodExAHK(true)
                 {
                     Name = commandName,
                     IsTraditionalCommand = true,
                     IsDefaultMethodInvoke = false,
                     IsFlowCommand = (prop[0] == '*')
                 };
-                members.Add(propr);
+                if(!string.IsNullOrEmpty(description))
+                    methodCommand.Comments.Add(new CodeCommentStatement(description, true));
+
+                foreach(var p in paramis) {
+                    methodCommand.Parameters.Add(p);
+                }
+
+                members.Add(methodCommand);
             }
 
             #endregion Generate build in Commands
 
             return members;
+        }
+
+
+        static IEnumerable<CodeParameterDeclarationExpressionEx> ParseCommandParameter(string commandstr, int start, out string commandDescription) {
+            List<CodeParameterDeclarationExpressionEx> _params = new List<CodeParameterDeclarationExpressionEx>();
+            commandDescription = "";
+            var toParse = commandstr.Substring(start);
+            StringBuilder sb = new StringBuilder();
+            bool isOptional = false;
+
+            for(int i=0; i < toParse.Length; i++){
+
+                char c = toParse[i];
+
+                if(c == ',') {
+                    if(!string.IsNullOrWhiteSpace(sb.ToString())) {
+                        _params.Add(new CodeParameterDeclarationExpressionEx(sb.ToString()) { IsOptional = isOptional });
+                    }
+                    sb = new StringBuilder();
+                } else if(c == '\\') {
+                    if(i + 1 < toParse.Length) {
+                        if(toParse[i + 1] == 'n') {
+                            commandDescription = toParse.Substring(i + 2);
+                            break;
+                        }
+                    }
+                } else if(c == '[') {
+                    isOptional = true;
+                } else if(c == ']') {
+                    isOptional = false;
+                } else
+                    sb.Append(c);
+            }
+            if(!string.IsNullOrWhiteSpace(sb.ToString())) {
+                _params.Add(new CodeParameterDeclarationExpressionEx(sb.ToString()) { IsOptional = isOptional });
+            }
+            return _params;
         }
 
 
@@ -881,10 +928,10 @@ A_Ptrsize";
         }
 
         static string[] BuildInCommands() {
-
             #region commands 
             string str =
 @"
+MsgBox [, Options, Title, Text, Timeout]\nDisplays the specified text in a small window containing one or more buttons  (such as Yes and No).
 ImageSearch , OutputVarX, OutputVarY, X1, Y1, X2, Y2, ImageFile
 IniDelete , Filename, Section [, Key]
 IniRead , OutputVar, Filename [, Section, Key, Default]\n(The Section and Key parameters are only optional on AutoHotkey_L)
@@ -901,7 +948,6 @@ MouseClick , WhichButton [, X, Y, ClickCount, Speed, D|U, R]
 MouseClickDrag , WhichButton, X1, Y1, X2, Y2 [, Speed, R]
 MouseGetPos [, OutputVarX, OutputVarY, OutputVarWin, OutputVarControl, 1|2|3]
 MouseMove , X, Y [, Speed, R]
-MsgBox [, Options, Title, Text, Timeout]\nDisplays the specified text in a small window containing one or more buttons  (such as Yes and No).
 OnExit [, Label]
 OutputDebug , Text
 Pause [, On|Off|Toggle, OperateOnUnderlyingThread?]

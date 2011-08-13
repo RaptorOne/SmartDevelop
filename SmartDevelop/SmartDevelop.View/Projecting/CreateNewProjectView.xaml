@@ -6,7 +6,7 @@
              xmlns:projectingVM="clr-namespace:SmartDevelop.ViewModel.Projecting;assembly=SmartDevelop.ViewModel"
              mc:Ignorable="d" 
              MinHeight="440" MinWidth="620"
-             xmlns:resx="clr-namespace:SmartDevelop.View.Resources"
+             xmlns:resx="clr-namespace:SmartDevelop.Model.Resources;assembly=SmartDevelop.Model"
              d:DesignHeight="470" d:DesignWidth="620">
     
     <UserControl.Resources>

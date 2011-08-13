@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localviewModel="clr-namespace:SmartDevelop.ViewModel;assembly=SmartDevelop.ViewModel"
              xmlns:mainVM="clr-namespace:SmartDevelop.ViewModel.Main;assembly=SmartDevelop.ViewModel"
-             xmlns:resx="clr-namespace:SmartDevelop.View.Resources"
+             xmlns:resx="clr-namespace:SmartDevelop.Model.Resources;assembly=SmartDevelop.Model"
              mc:Ignorable="d" 
              d:DesignHeight="399" d:DesignWidth="686">
     <UserControl.Resources>
@@ -60,7 +60,7 @@
                 <ColumnDefinition Width="224*" />
                 <ColumnDefinition Width="409*" />
             </Grid.ColumnDefinitions>
-            <GroupBox Header="Recent" HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Stretch">
+                <GroupBox Header="{x:Static resx:Strings.Recent}" HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Stretch">
                 <Grid>
                     <ListBox Height="Auto" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Width="Auto"
                              ItemsSource="{Binding AllRecentItems}"/>

@@ -26,17 +26,8 @@ namespace SmartDevelop.ViewModel.Errors
 
             ImportExisting();
 
-            _errorService.ErrorAdded += (s, e) => {
-
-                SyncInvoke(() => AddError(e.Value));
-                    
-                };
-
-            _errorService.ErrorRemoved += (s, e) => {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        RemoveError(e.Value);
-                    }), null);   
-                };
+            _errorService.ErrorAdded += (s, e) => SyncInvoke(() => AddError(e.Value));
+            _errorService.ErrorRemoved += (s, e) => SyncInvoke(() => RemoveError(e.Value));
         }
 
         public ErrorListItemVM CurrentError {

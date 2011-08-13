@@ -17,6 +17,7 @@ using Archimedes.Services.WPF.WorkBenchServices.MessageBox;
 using SmartDevelop.Model.Projecting;
 using SmartDevelop.ViewModel.DocumentFiles;
 using SmartDevelop.Model;
+using SmartDevelop.Model.Resources;
 
 namespace SmartDevelop.ViewModel.FindAndReplace
 {
@@ -218,8 +219,8 @@ namespace SmartDevelop.ViewModel.FindAndReplace
                 IEditor CE = GetCurrentEditor();
                 if(CE == null) return;
 
-                if(!AskBefore || _workbenchService.MessageBox("Do you really want to replace all occurences of '" + TextToFind + "' with '" + ReplacementText + "'?",
-                     "Replace all", MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes ) {
+                if(!AskBefore || _workbenchService.MessageBox(string.Format(Strings.ReallyReplaceAll, TextToFind, ReplacementText),
+                    Strings.ReplaceAll, MessageBoxType.Question, MessageBoxWPFButton.YesNo) == DialogWPFResult.Yes ) {
                     object InitialEditor = CurrentEditor;
                     bool igonreCurrent = false;
                     // loop through all editors, until we are back at the starting editor                

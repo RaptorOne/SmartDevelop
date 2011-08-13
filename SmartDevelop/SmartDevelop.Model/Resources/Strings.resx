@@ -117,7 +117,79 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CaseSensitive" xml:space="preserve">
+    <value>Case Sensitive</value>
+  </data>
+  <data name="ChooseProjectTemplate" xml:space="preserve">
+    <value>Choose a Project Template</value>
+  </data>
+  <data name="CreateNewProject" xml:space="preserve">
+    <value>Create New Project</value>
+  </data>
   <data name="DLG_OpenProjectMustBeClosedQuestion" xml:space="preserve">
     <value>To open a Project the current project must be closed. Do you wan't to continue?</value>
+  </data>
+  <data name="Find" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="FindAndReplace" xml:space="preserve">
+    <value>Search and Replace</value>
+  </data>
+  <data name="FindNext" xml:space="preserve">
+    <value>Find Next</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Languages</value>
+  </data>
+  <data name="MatchWholeWord" xml:space="preserve">
+    <value>Match whole Word</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="Presents" xml:space="preserve">
+    <value>presents</value>
+  </data>
+  <data name="ReallyReplaceAll" xml:space="preserve">
+    <value>Do you really want to replace all occurences of '{0}' with '{1}'?</value>
+  </data>
+  <data name="Recent" xml:space="preserve">
+    <value>Recent Files</value>
+  </data>
+  <data name="RegularExpression" xml:space="preserve">
+    <value>Regular Expression</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
+  <data name="ReplaceAll" xml:space="preserve">
+    <value>Replace All</value>
+  </data>
+  <data name="ReplaceWhit" xml:space="preserve">
+    <value>Replace with:</value>
+  </data>
+  <data name="SearchIn" xml:space="preserve">
+    <value>Search in:</value>
+  </data>
+  <data name="SearchUp" xml:space="preserve">
+    <value>Search up</value>
+  </data>
+  <data name="Templates" xml:space="preserve">
+    <value>Templates</value>
+  </data>
+  <data name="TextToFind" xml:space="preserve">
+    <value>Text to Find:</value>
+  </data>
+  <data name="Wildcards" xml:space="preserve">
+    <value>Wildcards</value>
   </data>
 </root>
