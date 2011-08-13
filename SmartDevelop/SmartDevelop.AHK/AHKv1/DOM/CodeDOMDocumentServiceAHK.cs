@@ -1102,6 +1102,11 @@ namespace SmartDevelop.Model.DOM
                 }
 
                 #endregion
+            } else if(tokenSegment.Token == Token.LiteralString) {
+
+                if(tokenSegment.TokenString[tokenSegment.TokenString.Length - 1] != '"') {
+                    RegisterError(_document, tokenSegment, "Missing string end Quote");
+                }
             }
 
             if(!(nextToParse != null && nextToParse.LineNumber == tokenSegment.LineNumber)) {
